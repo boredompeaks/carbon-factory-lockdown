@@ -133,6 +133,20 @@ def collect() -> dict[str, str]:
         if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
             add_file(rows, path, "fixture")
 
+    # 6C-4: MCP server + registry + controls + probe client. Bare paths
+    # (no label prefix) so INV-6 can assert exact files[] membership for
+    # the gate_impl_digest covers below.
+    _mcp_root = TOOLS / "mcp"
+    if _mcp_root.is_dir():
+        for path in sorted(_mcp_root.rglob("*")):
+            if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
+                _rel = path.resolve().relative_to(ROOT.resolve()).as_posix()
+                rows[_rel] = sha256_file(path)
+    _probe = ROOT / "files" / "docker" / "k1" / "probe_client.py"
+    if _probe.is_file():
+        _rel = _probe.resolve().relative_to(ROOT.resolve()).as_posix()
+        rows[_rel] = sha256_file(_probe)
+
     # Harness config.
     for rel in HARNESS_FILES:
         add_file(rows, ROOT / rel, "harness")
@@ -193,7 +207,7 @@ DEPENDENCIES = {
         ],
     },
     "gate_impl_digest": {
-        "covers": list(TOOL_BODIES) + list(HARNESS_FILES) + ["files/tools/fixtures/**", "files/tools/agt_parity.py", "files/tools/agt_audit.py"],
+        "covers": list(TOOL_BODIES) + list(HARNESS_FILES) + ["files/tools/fixtures/**", "files/tools/agt_parity.py", "files/tools/agt_audit.py", "files/tools/mcp/**", "files/tools/mcp/registry.json", "files/tools/mcp/core/server.py", "files/tools/mcp/controls.json", "files/docker/k1/probe_client.py"],
         "invalidates": [
             "gate-control.gate_impl_digest",
             "policy-manifest.digests.gate_impl_digest",
@@ -210,6 +224,11 @@ DEPENDENCIES = {
             ".opencode/skills/*/SKILL.md",
             ".agt/policy.json allowedTools",
             "opencode.json (no widening override)",
+            "files/tools/mcp/registry.json",
+            "files/tools/mcp/gen_perms.py",
+            "files/tools/mcp/controls.json",
+            "files/tools/mcp/core/server.py",
+            "files/docker/k1/probe_client.py",
         ],
         "invalidates": [
             "check_harness_config.py",

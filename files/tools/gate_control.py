@@ -80,6 +80,12 @@ def gate_impl_digest() -> str:
 
     Additional AGT check bodies and harness-level inputs are stored relative to
     the harness root (the parent of files/) with forward slashes.
+
+    6C-4 (F-77): the MCP server (files/tools/mcp/**: registry.json,
+    controls.json, core/server.py, family handlers, gen_perms.py) and the K1
+    probe client are sealed here. Harness files absent on disk are skipped
+    (opencode.json is gitignored after purge-prep 71d0137), matching
+    policy_manifest.collect() so the digest is reproducible from tracked files.
     """
     harness_files = (
         "files/tools/agt_parity.py",
@@ -92,6 +98,8 @@ def gate_impl_digest() -> str:
     files = []
     for rel in CHECK_BODY_FILES:
         path = ROOT / rel
+        if not path.is_file():
+            continue
         files.append(
             {
                 "path": rel,
@@ -117,6 +125,35 @@ def gate_impl_digest() -> str:
     harness_root = ROOT.parent
     for rel in harness_files:
         path = harness_root / rel
+        if not path.is_file():
+            continue
+        files.append(
+            {
+                "path": rel,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+        )
+    # 6C-4 MCP server seal: the whole files/tools/mcp tree plus the K1 probe
+    # client. Skips __pycache__/*.pyc like the fixtures walk above.
+    mcp_root = harness_root / "files" / "tools" / "mcp"
+    if mcp_root.is_dir():
+        for base, dirs, names in os.walk(mcp_root):
+            dirs[:] = sorted(name for name in dirs if name != "__pycache__")
+            for name in sorted(names):
+                if name.endswith(".pyc"):
+                    continue
+                path = Path(base) / name
+                rel = path.relative_to(harness_root).as_posix()
+                files.append(
+                    {
+                        "path": rel,
+                        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                    }
+                )
+    for rel in ("files/docker/k1/probe_client.py",):
+        path = harness_root / rel
+        if not path.is_file():
+            continue
         files.append(
             {
                 "path": rel,
@@ -211,8 +248,16 @@ def control_set_sha(manifest: dict) -> str:
 
 def gate_sha(repo: Path, gate: dict) -> str:
     paths = list(gate.get("gate_paths") or [])
+    # This harness nests the factory under files/ (gate_paths such as
+    # "tools/**" are files/-relative), while the default repo is the
+    # harness toplevel. When the repo root has no tools/ but repo/files/
+    # does, run git from files/ so the pathspecs resolve there. In the
+    # audited factory repo (tools/ at root) behavior is unchanged.
+    cwd = repo
+    if not (repo / "tools").is_dir() and (repo / "files" / "tools").is_dir():
+        cwd = repo / "files"
     process = subprocess.run(
-        ["git", "-C", str(repo), "log", "-1", "--format=%H", "--", *paths],
+        ["git", "-C", str(cwd), "log", "-1", "--format=%H", "--", *paths],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -284,14 +329,17 @@ def run_command(command: str) -> tuple[int, str, str]:
     except OSError as exc:
         return 2, "", f"ERROR: failed to start command: {exc}"
     try:
-        stdout, stderr = process.communicate(timeout=30)
+        # 6C-4: semgrep --control runs the binary plus AST/regex
+        # fallbacks and takes ~60s on this host; 180 keeps the bound
+        # finite without changing any control semantics or outcomes.
+        stdout, stderr = process.communicate(timeout=180)
     except subprocess.TimeoutExpired:
         process.kill()
         try:
             stdout, stderr = process.communicate(timeout=5)
         except subprocess.TimeoutExpired:
             stdout, stderr = "", ""
-        message = "ERROR: command timed out after 30s"
+        message = "ERROR: command timed out after 180s"
         return 2, stdout or "", (stderr or "") + ("\n" if stderr else "") + message
     return process.returncode, stdout or "", stderr or ""
 

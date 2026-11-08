@@ -860,7 +860,8 @@
             "policy_digest",
             "gate_impl",
             "drain",
-            "manifest"
+            "manifest",
+            "mcp"
           ]
         },
         "mode": {
