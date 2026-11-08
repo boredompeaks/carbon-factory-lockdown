@@ -1,0 +1,6 @@
+{
+  "check_id": "ORACLE_PROVENANCE",
+  "expected_outcome": "PASS",
+  "weak_oracles": [],
+  "findings": []
+}

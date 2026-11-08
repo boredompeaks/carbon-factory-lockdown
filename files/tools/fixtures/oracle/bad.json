@@ -1,0 +1,17 @@
+{
+  "check_id": "ORACLE_PROVENANCE",
+  "expected_outcome": "FAIL",
+  "weak_oracles": [
+    {
+      "kind": "SELF_COMPARE",
+      "path": "backend/orders/tests/test_refund.py"
+    },
+    {
+      "kind": "MOCK_ECHO",
+      "path": "backend/orders/tests/test_refund.py"
+    }
+  ],
+  "findings": [
+    "WEAK_ORACLE"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "check_id": "GUARD_DELTA",
+  "expected_outcome": "FAIL",
+  "removed_guards": [
+    {
+      "path": "backend/orders/refunds.py",
+      "line": 39,
+      "covered_by": null
+    }
+  ],
+  "findings": [
+    "GUARD_REMOVED"
+  ]
+}

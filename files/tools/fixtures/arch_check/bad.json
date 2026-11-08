@@ -1,0 +1,17 @@
+{
+  "check_id": "ARCH",
+  "expected_outcome": "FAIL",
+  "added_edges": [
+    {
+      "from": "backend/orders/refunds.py",
+      "to": "shipping.models",
+      "allowed": false
+    }
+  ],
+  "unowned_modules": [
+    "backend/newapp/x.py"
+  ],
+  "findings": [
+    "ARCH_VIOLATION"
+  ]
+}

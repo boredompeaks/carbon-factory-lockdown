@@ -1,0 +1,8 @@
+{
+  "check_id": "GATE_CONTROLS",
+  "expected_outcome": "PASS",
+  "controls_total": 2,
+  "controls_rejected": 2,
+  "all_rejected": true,
+  "findings": []
+}

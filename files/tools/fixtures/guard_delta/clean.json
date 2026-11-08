@@ -1,0 +1,12 @@
+{
+  "check_id": "GUARD_DELTA",
+  "expected_outcome": "PASS",
+  "removed_guards": [
+    {
+      "path": "backend/orders/refunds.py",
+      "line": 39,
+      "covered_by": "backend.orders.tests.test_refund_rejects_non_positive_remaining"
+    }
+  ],
+  "findings": []
+}

@@ -1,0 +1,13 @@
+{
+  "check_id": "ARCH",
+  "expected_outcome": "PASS",
+  "added_edges": [
+    {
+      "from": "backend/orders/refunds.py",
+      "to": "common.money",
+      "allowed": true
+    }
+  ],
+  "unowned_modules": [],
+  "findings": []
+}

@@ -1,0 +1,7 @@
+{
+  "check_id": "SEMGREP",
+  "expected_outcome": "PASS",
+  "engine": "semgrep",
+  "scope": "anchored-excludes",
+  "findings": []
+}

@@ -1,0 +1,11 @@
+{
+  "check_id": "GATE_CONTROLS",
+  "expected_outcome": "FAIL",
+  "controls_total": 1,
+  "controls_rejected": 1,
+  "all_rejected": true,
+  "declared_total": 2,
+  "findings": [
+    "CONTROL_UNDERCOUNT"
+  ]
+}

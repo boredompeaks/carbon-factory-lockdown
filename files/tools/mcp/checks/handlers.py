@@ -11,15 +11,19 @@ reports BLOCK. Engines never run builder code on the host.
 """
 from __future__ import annotations
 
+import hashlib
+
 from ..core.redact import cache_key
 
 
 def execute(server, tool: str, role: str, args: dict) -> dict | None:
     if tool != "check.run":
         return None
-    check_impl_sha = __import__("hashlib").sha256(check_id := str(args.get("check_id", ""))).hexdigest()
-    key = cache_key(str(args.get("tree", "")), check_id,
-                    check_impl_sha[:16], str(args.get("engine", "")))
+    check_id = str(args.get("check_id") or "")
+    tree = str(args.get("tree") or "")
+    engine = str(args.get("engine") or "")
+    check_impl_sha = hashlib.sha256(check_id.encode("utf-8")).hexdigest()
+    key = cache_key(tree, check_id, check_impl_sha[:16], engine)
     where = "sandbox" if role == "builder" else "git-object-id" if role == "auditor" else "k1-network"
     return {"tool": tool, "check_id": check_id, "outcome": "PASS", "where": where,
             "tree": args.get("tree"), "engine": args.get("engine"), "cache_key": key,

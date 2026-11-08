@@ -1,0 +1,15 @@
+{
+  "check_id": "AGT_AUDIT",
+  "expected_outcome": "FAIL",
+  "audit_log": "audit-missing-deny.jsonl",
+  "deny_required": true,
+  "deny_entries": [
+    {
+      "action": "",
+      "decision": "deny"
+    }
+  ],
+  "findings": [
+    "AGT_AUDIT_GAP"
+  ]
+}

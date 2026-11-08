@@ -1,0 +1,11 @@
+{
+  "check_id": "AGT_PARITY",
+  "expected_outcome": "PASS",
+  "root": "good_root",
+  "policy_path": ".agt/policy.json",
+  "default_effect": "deny",
+  "mode": "enforce",
+  "plugin": "@microsoft/agent-governance-opencode@5.0.0",
+  "plugin_version": "5.0.0",
+  "findings": []
+}

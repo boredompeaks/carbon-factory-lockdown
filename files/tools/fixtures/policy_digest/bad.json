@@ -1,0 +1,9 @@
+{
+  "check_id": "POLICY_DIGEST",
+  "expected_outcome": "FAIL",
+  "policy_digest": "differs-from-record",
+  "drift": true,
+  "findings": [
+    "POLICY_DRIFT"
+  ]
+}

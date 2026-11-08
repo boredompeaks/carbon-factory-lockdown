@@ -1,0 +1,17 @@
+{
+  "check_id": "SMELL",
+  "expected_outcome": "FAIL",
+  "added_smells": [
+    {
+      "kind": "BARE_EXCEPT",
+      "path": "backend/orders/tests/test_refund.py"
+    },
+    {
+      "kind": "SLEEP_IN_TEST",
+      "path": "backend/orders/tests/test_refund.py"
+    }
+  ],
+  "findings": [
+    "CODE_SMELL"
+  ]
+}

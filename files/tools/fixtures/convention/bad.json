@@ -1,0 +1,16 @@
+{
+  "check_id": "CONVENTION",
+  "expected_outcome": "FAIL",
+  "engine": "ruff",
+  "scope": "added-lines",
+  "violations": [
+    {
+      "rule": "unused-import",
+      "path": "backend/orders/views/refund.py",
+      "line": 1
+    }
+  ],
+  "findings": [
+    "CONVENTION_VIOLATION"
+  ]
+}

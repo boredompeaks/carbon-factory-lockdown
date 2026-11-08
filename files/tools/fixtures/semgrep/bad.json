@@ -1,0 +1,16 @@
+{
+  "check_id": "SEMGREP",
+  "expected_outcome": "FAIL",
+  "engine": "semgrep",
+  "scope": "anchored-excludes",
+  "findings": [
+    {
+      "class_tag": "BARE_EXCEPT",
+      "path": "backend/orders/views/refund.py"
+    },
+    {
+      "class_tag": "GATEWAY_IN_ATOMIC",
+      "path": "backend/orders/views/refund.py"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "check_id": "CONVENTION",
+  "expected_outcome": "PASS",
+  "engine": "ruff",
+  "scope": "added-lines",
+  "violations": [],
+  "findings": []
+}

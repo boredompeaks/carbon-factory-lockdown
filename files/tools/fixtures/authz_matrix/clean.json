@@ -1,0 +1,19 @@
+{
+  "check_id": "AUTHZ_MATRIX",
+  "expected_outcome": "PASS",
+  "routes": [
+    {
+      "route": "/decorated/",
+      "method": "get",
+      "derivation": "STAFF",
+      "matrix_row": true
+    },
+    {
+      "route": "/gated/",
+      "method": "get",
+      "derivation": "PUBLIC",
+      "matrix_row": true
+    }
+  ],
+  "findings": []
+}

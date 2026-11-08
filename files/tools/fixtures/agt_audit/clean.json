@@ -1,0 +1,13 @@
+{
+  "check_id": "AGT_AUDIT",
+  "expected_outcome": "PASS",
+  "audit_log": "audit-complete.jsonl",
+  "deny_required": true,
+  "deny_entries": [
+    {
+      "action": "tool.shell",
+      "decision": "deny"
+    }
+  ],
+  "findings": []
+}

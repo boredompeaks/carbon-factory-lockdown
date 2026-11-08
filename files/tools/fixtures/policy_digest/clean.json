@@ -1,0 +1,7 @@
+{
+  "check_id": "POLICY_DIGEST",
+  "expected_outcome": "PASS",
+  "policy_digest": "matches-record",
+  "drift": false,
+  "findings": []
+}
