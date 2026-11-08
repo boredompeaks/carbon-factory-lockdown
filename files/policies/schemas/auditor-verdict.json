@@ -52,7 +52,8 @@
     },
     "capability_id": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Must match capability.json capability_id (cap_ prefix). Cross-schema propagation from capability."
     },
     "verdict": {
       "type": [
@@ -93,7 +94,24 @@
         "string",
         "null"
       ],
-      "minLength": 1
+      "enum": [
+        "TOOL_TIMEOUT",
+        "TOOL_CRASH",
+        "TOOL_UNAVAILABLE",
+        "SANDBOX_ERROR",
+        "ENGINE_UNAVAILABLE",
+        "DB_CONNECTION_FAILED",
+        "FIXTURE_MISSING",
+        "CACHE_CORRUPT",
+        "SIGNATURE_VERIFY_ERROR",
+        "LEDGER_IO_ERROR",
+        "OOM_KILLED",
+        "NETWORK_BLOCKED",
+        "UNSUPPORTED_ENGINE",
+        "INTERRUPTED",
+        null
+      ],
+      "description": "Must be a key in fault-codes.json codes (or null). Free-text fault codes are rejected."
     },
     "head": {
       "$ref": "#/$defs/git_sha"
@@ -111,6 +129,7 @@
     },
     "checks": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/check"
       }
@@ -172,6 +191,172 @@
       "pattern": "^[a-f0-9]{64}$"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "properties": {
+          "result_type": {
+            "const": "VERDICT"
+          },
+          "inconclusive_cause": {
+            "type": "null"
+          },
+          "fault_code": {
+            "type": "null"
+          },
+          "refusal_code": {
+            "type": "null"
+          }
+        },
+        "description": "PASS is contradictory with REFUSED / TOOL_FAULT: a PASS verdict cannot be a refusal and cannot be inconclusive on a tool fault."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "BLOCK"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "properties": {
+          "result_type": {
+            "const": "VERDICT"
+          },
+          "inconclusive_cause": {
+            "type": "null"
+          },
+          "fault_code": {
+            "type": "null"
+          },
+          "refusal_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "REFUSED"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verdict": {
+            "type": "null"
+          },
+          "inconclusive_cause": {
+            "type": "null"
+          },
+          "fault_code": {
+            "type": "null"
+          },
+          "refusal_code": {
+            "enum": [
+              "CAPABILITY_INVALID",
+              "STATE_MOVED"
+            ]
+          }
+        },
+        "description": "REFUSED must have verdict null, inconclusive_cause null, fault_code null, and a non-null refusal_code. REFUSED + TOOL_FAULT is contradictory."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "INCONCLUSIVE"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "properties": {
+          "result_type": {
+            "const": "VERDICT"
+          },
+          "refusal_code": {
+            "type": "null"
+          },
+          "inconclusive_cause": {
+            "enum": [
+              "TOOL_FAULT",
+              "BUDGET_EXHAUSTED"
+            ]
+          }
+        },
+        "description": "INCONCLUSIVE must be result_type VERDICT with a non-null inconclusive_cause and refusal_code null."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "inconclusive_cause": {
+            "const": "TOOL_FAULT"
+          }
+        },
+        "required": [
+          "inconclusive_cause"
+        ]
+      },
+      "then": {
+        "properties": {
+          "fault_code": {
+            "type": "string"
+          }
+        },
+        "description": "TOOL_FAULT inconclusive requires a non-null fault_code from fault-codes.json."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "fault_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fault_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verdict": {
+            "const": "INCONCLUSIVE"
+          },
+          "inconclusive_cause": {
+            "const": "TOOL_FAULT"
+          },
+          "result_type": {
+            "const": "VERDICT"
+          }
+        },
+        "description": "A non-null fault_code implies verdict INCONCLUSIVE on TOOL_FAULT (result_type VERDICT). PASS/BLOCK/REFUSED with a fault_code is contradictory."
+      }
+    }
+  ],
   "$defs": {
     "git_sha": {
       "type": "string",

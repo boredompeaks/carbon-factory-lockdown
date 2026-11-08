@@ -45,7 +45,8 @@
     },
     "capability_id": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Must match capability.json capability_id (cap_ prefix). Cross-schema propagation from capability."
     },
     "outcome": {
       "type": [
@@ -79,14 +80,18 @@
     },
     "pr_number": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 1,
+      "maximum": 999999,
+      "description": "GitHub PR numbers are >=1 (matches registry pr.* minimum 1). Zero is invalid."
     },
     "head": {
       "type": "string",
       "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
     },
     "merge_sha": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "Merge commit SHA, exactly 40 lowercase hex (git commit hash). 64-hex, short, or non-hex are rejected."
     },
     "merged_tree": {
       "type": "string"
@@ -116,6 +121,66 @@
       "pattern": "^[a-f0-9]{64}$"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "REFUSED"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "type": "null"
+          },
+          "refusal_code": {
+            "enum": [
+              "SIG_INVALID",
+              "POLICY_DRIFT",
+              "VERDICT_NOT_PASS",
+              "STATE_MISMATCH",
+              "DIRTY_TREE",
+              "BASE_MOVED",
+              "PROTECTION_UNVERIFIED",
+              "GUARD_REMOVED",
+              "CHECKS_FAILED",
+              "CHECKS_TIMEOUT",
+              "MERGE_REJECTED"
+            ]
+          }
+        },
+        "description": "REFUSED requires outcome null (REFUSED != MERGED) and a non-null refusal_code."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "RESULT"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "const": "MERGED"
+          },
+          "refusal_code": {
+            "type": "null"
+          }
+        },
+        "description": "RESULT requires outcome MERGED and refusal_code null. RESULT without MERGED is invalid."
+      }
+    }
+  ],
   "$defs": {
     "guard_ref": {
       "description": "Permanent guard reference: capability.guard_ref for DRAIN, null otherwise. Node id plus SHA-256 of the guard node.",
@@ -155,7 +220,18 @@
         },
         "conclusion": {
           "type": "string",
-          "minLength": 1
+          "enum": [
+            "SUCCESS",
+            "FAILURE",
+            "NEUTRAL",
+            "CANCELLED",
+            "SKIPPED",
+            "TIMED_OUT",
+            "ACTION_REQUIRED",
+            "STALE",
+            "STARTUP_FAILURE"
+          ],
+          "description": "GitHub Check Run conclusion (uppercased). Free text such as pass/pending is rejected."
         },
         "head_sha": {
           "type": "string",

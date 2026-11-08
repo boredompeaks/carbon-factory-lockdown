@@ -113,7 +113,9 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Null before R4 (or until capability is issued); when a string, must match capability.json capability_id (cap_ prefix). Pattern is ignored for null."
     },
     "verdict_ref": {
       "type": [
@@ -144,7 +146,8 @@
     },
     "prev_hash": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "64-hex SHA-256 of the previous drain record (zero hash for R1 genesis: 64 zeros). Free-text hashes are rejected."
     },
     "record_hash": {
       "type": "string",
@@ -210,7 +213,7 @@
         "properties": {
           "capability_id": {
             "type": "string",
-            "minLength": 1
+            "pattern": "^cap_[A-Za-z0-9_-]{8,64}$"
           },
           "guard_ref": {
             "type": "object",
@@ -253,7 +256,7 @@
         "properties": {
           "capability_id": {
             "type": "string",
-            "minLength": 1
+            "pattern": "^cap_[A-Za-z0-9_-]{8,64}$"
           },
           "guard_ref": {
             "type": "object",
@@ -321,6 +324,140 @@
             "minLength": 1
           }
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R1"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "OPEN",
+              "UNREPRODUCIBLE"
+            ]
+          },
+          "next_stage": {
+            "const": "R2"
+          }
+        },
+        "description": "Stage/state order: R1 (CONFIRM) is OPEN or UNREPRODUCIBLE, next R2. Late states (REPAIRED/VERIFIED/CLOSED) at R1 are invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R2"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "REPRODUCED",
+              "UNREPRODUCIBLE",
+              "CLUSTERED"
+            ]
+          },
+          "next_stage": {
+            "const": "R3"
+          }
+        },
+        "description": "Stage/state order: R2 (EXPLOIT_SPEC) is REPRODUCED/UNREPRODUCIBLE/CLUSTERED, next R3. Early OPEN and late REPAIRED/VERIFIED/CLOSED at R2 are invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R3"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "REPRODUCED",
+              "CLUSTERED",
+              "UNREPRODUCIBLE"
+            ]
+          },
+          "next_stage": {
+            "const": "R4"
+          }
+        },
+        "description": "Stage/state order: R3 (ACCEPTANCE_RED) is REPRODUCED/CLUSTERED/UNREPRODUCIBLE, next R4. OPEN and late REPAIRED/VERIFIED/CLOSED at R3 are invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R4"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "CLUSTERED",
+              "REPAIRED",
+              "VERIFIED"
+            ]
+          },
+          "next_stage": {
+            "const": "R5"
+          }
+        },
+        "description": "Stage/state order: R4 (BUILD_AUDIT_RELEASE) is CLUSTERED/REPAIRED/VERIFIED, next R5. OPEN/REPRODUCED/UNREPRODUCIBLE/CLOSED at R4 are invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R5"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "REPAIRED",
+              "VERIFIED",
+              "CLOSED"
+            ]
+          },
+          "next_stage": {
+            "type": "null"
+          }
+        },
+        "description": "Stage/state order: R5 (PERMANENT_GUARD) is REPAIRED/VERIFIED/CLOSED, next_stage null (terminal). Early states at R5 are invalid."
       }
     }
   ],

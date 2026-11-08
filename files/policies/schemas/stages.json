@@ -3,6 +3,7 @@
   "$id": "stages.json",
   "title": "stages",
   "version": 1,
+  "description": "Pipeline stages linkage: this enum lists the ordered workflow stages. It must exactly match policies/schemas/orchestrator-decision.json properties.step enum (preflight, resolve, classify, capability, prebuild, build, audit, route, release, postmerge, lesson, drain). Orchestrator decisions dispatch one target per stage; drain stages R1-R5 (policies/drain.json stage_order, drain-record.json stage) are sub-steps of the drain stage, not top-level stages here. Adding or renaming a stage requires updating both files together.",
   "type": "string",
   "enum": [
     "preflight",

@@ -54,7 +54,8 @@
     },
     "capability_id": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Must match capability.json capability_id (cap_ prefix). Cross-schema propagation from capability."
     },
     "blocked_code": {
       "type": [
@@ -182,6 +183,89 @@
       "pattern": "^[a-f0-9]{64}$"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "RESULT"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_code": {
+            "type": "null"
+          },
+          "refusal_code": {
+            "type": "null"
+          }
+        },
+        "description": "result_type is exclusive: RESULT requires blocked_code null and refusal_code null. RESULT + BLOCKED/REFUSED codes together is invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_code": {
+            "enum": [
+              "SPLIT_REQUIRED",
+              "SCOPE_INSUFFICIENT",
+              "ACCEPTANCE_NOT_RED",
+              "ADDED_TEST_NOT_RED",
+              "PRECHECK_UNRESOLVED",
+              "WEAK_ORACLE",
+              "GUARD_UNCOVERED",
+              "ARCH_VIOLATION"
+            ]
+          },
+          "refusal_code": {
+            "type": "null"
+          }
+        },
+        "description": "BLOCKED requires a non-null blocked_code and refusal_code null. BLOCKED + REFUSED together is invalid."
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_type": {
+            "const": "REFUSED"
+          }
+        },
+        "required": [
+          "result_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "refusal_code": {
+            "enum": [
+              "CAPABILITY_INVALID",
+              "STATE_MOVED"
+            ]
+          },
+          "blocked_code": {
+            "type": "null"
+          }
+        },
+        "description": "REFUSED requires a non-null refusal_code and blocked_code null. REFUSED + BLOCKED together is invalid."
+      }
+    }
+  ],
   "$defs": {
     "git_sha": {
       "type": "string",
@@ -274,7 +358,8 @@
           ]
         },
         "covered_by": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -379,9 +464,9 @@
           "type": "string",
           "enum": [
             "FAIL_ASSERTION",
-            "FAIL_OTHER",
-            "PASS"
-          ]
+            "FAIL_OTHER"
+          ],
+          "description": "Acceptance must be RED on base: PASS is rejected (a test green on base proves no fix). Only FAIL_ASSERTION/FAIL_OTHER allowed."
         },
         "head_outcome": {
           "type": "string",

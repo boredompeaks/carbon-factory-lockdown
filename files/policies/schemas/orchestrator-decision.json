@@ -150,7 +150,8 @@
     },
     "capability_id": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Must match capability.json capability_id (cap_ prefix). Cross-schema propagation from capability."
     },
     "drain_stage": {
       "type": [

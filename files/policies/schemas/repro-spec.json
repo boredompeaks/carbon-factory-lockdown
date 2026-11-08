@@ -75,16 +75,54 @@
           "enum": [
             "REPRODUCED",
             "NOT_REPRODUCED"
-          ]
+          ],
+          "description": "Head outcome. For a fix, head is NOT_REPRODUCED (bug absent after patch); for a regression, head is REPRODUCED."
         },
         "base": {
           "type": "string",
           "enum": [
             "REPRODUCED",
             "NOT_REPRODUCED"
-          ]
+          ],
+          "description": "Base outcome. For a fix, base is REPRODUCED (bug present before patch); for a regression, base is NOT_REPRODUCED."
         }
-      }
+      },
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "head",
+              "base"
+            ],
+            "properties": {
+              "head": {
+                "const": "REPRODUCED"
+              },
+              "base": {
+                "const": "REPRODUCED"
+              }
+            }
+          },
+          "description": "Meaningful combos only: head REPRODUCED + base REPRODUCED (uninformative, bug present both sides) is rejected."
+        },
+        {
+          "not": {
+            "required": [
+              "head",
+              "base"
+            ],
+            "properties": {
+              "head": {
+                "const": "NOT_REPRODUCED"
+              },
+              "base": {
+                "const": "NOT_REPRODUCED"
+              }
+            }
+          },
+          "description": "Meaningful combos only: head NOT_REPRODUCED + base NOT_REPRODUCED (uninformative, bug absent both sides) is rejected. Only differing combos (fix: base REPRODUCED/head NOT_REPRODUCED; regression: base NOT_REPRODUCED/head REPRODUCED) are meaningful."
+        }
+      ]
     },
     "schedule": {
       "type": "array",
