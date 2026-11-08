@@ -56,6 +56,10 @@ auditor,auditor.md,115,shell,git show*,allow,content read by rev+path with path 
 auditor,auditor.md,116,shell,Get-FileHash*,allow,content hash of evidence files,TOOL:evidence.hash
 auditor,auditor.md,122,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
 auditor,auditor.md,123,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,215,write,audit-scratch/**,allow,"auditor scratch write; namespaced by role+capability, size/extension caps",TOOL:scratch.write
+auditor,auditor.md,352,write,audit-scratch/**,allow,deterministic repro-spec to test file materialization (content-hashed); drain R3 acceptance test (F-76),TOOL:acceptance.materialize
+auditor,auditor.md,354,shell,python files/tools/validatedrain.py*,allow,drain validation (read-only),TOOL:drain.validate
+auditor,auditor.md,430,edit,quality/ledger/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records (verdict, finding, attack-log, gate-control)",TOOL:ledger.append
 builder,builder.md,29,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 builder,builder.md,30,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 builder,builder.md,31,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
@@ -103,8 +107,8 @@ builder,builder.md,94,shell,git rev-parse*,allow,repo state (head/tree/branch/cl
 builder,builder.md,95,shell,python -m ruff*,allow,ruff convention check on added lines,TOOL:check.run
 builder,builder.md,96,shell,ruff*,allow,ruff convention check on added lines,TOOL:check.run
 builder,builder.md,97,shell,Get-FileHash*,allow,content hash of evidence files,TOOL:evidence.hash
-builder,builder.md,98,shell,python manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write)",TOOL:k1.exec
-builder,builder.md,99,shell,manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write)",TOOL:k1.exec
+builder,builder.md,98,shell,python manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write); DELETE per registry wins (see CF-F24 (registry-wins pattern) / CTRL-k1.exec-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:k1.exec to builder but registry roles are [auditor]; disposition flipped TOOL:k1.exec -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
+builder,builder.md,99,shell,manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write); DELETE per registry wins (see CF-F24 (registry-wins pattern) / CTRL-k1.exec-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:k1.exec to builder but registry roles are [auditor]; disposition flipped TOOL:k1.exec -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
 builder,builder.md,106,shell,*docker pull*,ask,shell/read *docker pull* gated by human ask; no typed equivalent (arbitrary command),DELETE
 builder,builder.md,107,shell,*docker build*,ask,shell/read *docker build* gated by human ask; no typed equivalent (arbitrary command),DELETE
 builder,builder.md,108,shell,*docker run*,ask,shell/read *docker run* gated by human ask; no typed equivalent (arbitrary command),DELETE
@@ -124,7 +128,7 @@ compliance,compliance.md,17,external_directory,C:/Users/Admin/AppData/Local/Temp
 compliance,compliance.md,18,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 compliance,compliance.md,19,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
 compliance,compliance.md,20,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
-compliance,compliance.md,21,skill,compliance,allow,skill compliance wraps typed tool check.run,TOOL:check.run
+compliance,compliance.md,21,skill,compliance,allow,"skill compliance wraps typed tool check.run; DELETE per registry wins (see CF-F24 / CTRL-check.run-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:check.run to compliance but registry roles are [auditor, builder, hacker]; disposition flipped TOOL:check.run -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
 compliance,compliance.md,24,write,backend/docs/compliance/*,allow,compliance section doc write (single scoped exception),TOOL:code.write
 compliance,compliance.md,25,edit,backend/docs/compliance/*,allow,compliance section doc write (single scoped exception),TOOL:code.write
 compliance,compliance.md,27,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
@@ -145,6 +149,7 @@ crouton,crouton-alpha.md,23,write,**/policy-manifest.json,deny,deny guard for wr
 crouton,crouton-alpha.md,24,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
 crouton,crouton-alpha.md,36,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
 crouton,crouton-alpha.md,37,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,38,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
 hacker,hacker.md,34,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 hacker,hacker.md,35,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
 hacker,hacker.md,36,skill,hacker-exploit,allow,skill hacker-exploit wraps typed tool hacker.probe,TOOL:hacker.probe
@@ -167,6 +172,8 @@ hacker,hacker.md,68,shell,sh hacker-scratch/*,allow,execute own scratch reproduc
 hacker,hacker.md,69,shell,powershell -File hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
 hacker,hacker.md,75,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
 hacker,hacker.md,76,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,140,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
+hacker,hacker.md,200,shell,static-scan*,allow,"read-only static match for PROMPT-INJECTION (file_comment, test_name, commit_message, doc_string, fixture_data)",TOOL:static.scan
 orchestrator,orchestrator.md,36,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 orchestrator,orchestrator.md,37,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
 orchestrator,orchestrator.md,38,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
@@ -181,10 +188,10 @@ orchestrator,orchestrator.md,46,subagent,compliance,allow,subagent dispatch stay
 orchestrator,orchestrator.md,47,question,*,allow,human question channel (R3 data becomes prompt channel; harness-level),KEEP-READ
 orchestrator,orchestrator.md,63,edit,quality/ledger/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records",TOOL:ledger.append
 orchestrator,orchestrator.md,64,edit,quality/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records",TOOL:ledger.append
-orchestrator,orchestrator.md,65,shell,gate-run*,allow,run gate in sandbox,TOOL:check.run
-orchestrator,orchestrator.md,66,shell,secret-scan*,allow,secret scan on added lines,TOOL:check.run
-orchestrator,orchestrator.md,67,shell,mutate-run*,allow,mutation adequacy run,TOOL:check.run
-orchestrator,orchestrator.md,68,shell,repro-run*,allow,repro execution at git object id,TOOL:repro.run
+orchestrator,orchestrator.md,65,shell,gate-run*,allow,"run gate in sandbox; DELETE per registry wins (see CF-F24 / CTRL-check.run-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:check.run to orchestrator but registry roles are [auditor, builder, hacker]; disposition flipped TOOL:check.run -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
+orchestrator,orchestrator.md,66,shell,secret-scan*,allow,"secret scan on added lines; DELETE per registry wins (see CF-F24 / CTRL-check.run-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:check.run to orchestrator but registry roles are [auditor, builder, hacker]; disposition flipped TOOL:check.run -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
+orchestrator,orchestrator.md,67,shell,mutate-run*,allow,"mutation adequacy run; DELETE per registry wins (see CF-F24 / CTRL-check.run-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:check.run to orchestrator but registry roles are [auditor, builder, hacker]; disposition flipped TOOL:check.run -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
+orchestrator,orchestrator.md,68,shell,repro-run*,allow,"repro execution at git object id; DELETE per registry wins (see CF-F24 (registry-wins pattern) / CTRL-repro.run-1 (REJECT_ROLE), CF-F24): matrix over-granted TOOL:repro.run to orchestrator but registry roles are [auditor, builder, hacker]; disposition flipped TOOL:repro.run -> DELETE so Gate (a) per-role listing == matrix. Original purpose preserved before note.",DELETE
 orchestrator,orchestrator.md,70,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
 orchestrator,orchestrator.md,71,shell,git status*,allow,worktree status at checked ref,TOOL:git.status
 orchestrator,orchestrator.md,72,shell,git diff*,allow,diff between validated refs,TOOL:git.diff
@@ -233,3 +240,5 @@ release-engineer,release-engineer.md,85,shell,git merge-base*,allow,merge-base q
 release-engineer,release-engineer.md,86,shell,git worktree list*,allow,worktree listing,TOOL:worktrees.list
 release-engineer,release-engineer.md,92,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
 release-engineer,release-engineer.md,93,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,179,shell,python files/tools/validatedrain.py*,allow,drain validation (read-only),TOOL:drain.validate
+release-engineer,release-engineer.md,213,edit,quality/ledger/release/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records (release)",TOOL:ledger.append
