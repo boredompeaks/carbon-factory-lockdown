@@ -3,8 +3,8 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-08T07:11:22Z",
-  "file_count": 257,
+  "created_at": "2026-11-08T09:58:28Z",
+  "file_count": 258,
   "files": [
     {
       "path": "agent:files/CHANGELOG-PHASE1-PHASE2-2026-11-07.md",
@@ -28,7 +28,11 @@
     },
     {
       "path": "agent:files/compliance.md",
-      "sha256": "5fa5a9ba8ecbeaf88f55f3cfdae1161103af30c5b20181aab8823034ba1bcd3c"
+      "sha256": "04742a80cdffa13c0162805afd17e7fcf37e9deecb93da5f2258c524968f335a"
+    },
+    {
+      "path": "agent:files/crouton-alpha.md",
+      "sha256": "66674bf238de117a8c4aa7752583b373717ff8428cca3604f9701f7f76a5d5db"
     },
     {
       "path": "agent:files/hacker.md",
@@ -36,11 +40,11 @@
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "4711c7f4e216dbe8b8208d80ec69c24c6725db456575cff49e83eef1a6c38f40"
+      "sha256": "9e061ee3b01286f45011d628bdafd780e5fbf10035edeff0464cc7c5dd9c07d2"
     },
     {
       "path": "agent:files/release-engineer.md",
-      "sha256": "a642ad7576ce4ce824f8b447ab2856f3212fd9b06df62503d8aaec91f2919721"
+      "sha256": "6983ac61d33a5decd8d30898a10cf664b8088221ab40f056ab0610c7bae0ddc1"
     },
     {
       "path": "docker:files/docker/k1/Dockerfile",
@@ -648,7 +652,7 @@
     },
     {
       "path": "installed_agent:.opencode/agents/crouton-alpha.md",
-      "sha256": "6c0e9ebe8b080aec60a7c3dd2666b79d1b45fe8dcebd07c1bb20cbb6e2373436"
+      "sha256": "66674bf238de117a8c4aa7752583b373717ff8428cca3604f9701f7f76a5d5db"
     },
     {
       "path": "installed_agent:.opencode/agents/hacker.md",
@@ -908,11 +912,11 @@
     },
     {
       "path": "skill:.opencode/skills/compliance/SKILL.md",
-      "sha256": "3ec40272d9a11659a429dece74ded947e79577afa9e9aee2fee480e8290e89ae"
+      "sha256": "6c0343059a6c13e65f7055239633e1f6507468f19fb9b50989e5e66bfaab0c6a"
     },
     {
       "path": "skill:.opencode/skills/dispatch/SKILL.md",
-      "sha256": "d53696360daf36b640eae8a4ca223385158ed3ff82442b010245d506395ef87e"
+      "sha256": "82df7c6cb0d8ba7299cc05eb8eb21388d6e5a1f8b75e34c56a8540aa152f2d0f"
     },
     {
       "path": "skill:.opencode/skills/django-test/SKILL.md",
@@ -1141,5 +1145,5 @@
       ]
     }
   },
-  "manifest_sha": "955997703b8b7d1b932cf4d801e46ed33bcdf47c7cba29e7a77ed6a013bc8108"
+  "manifest_sha": "13982963bd6e5013b1f7ab1ad577ef06576bb98f13c384be58c20b7f810c5c5a"
 }

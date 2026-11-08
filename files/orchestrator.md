@@ -8,8 +8,9 @@ model: opencode-go/deepseek-v4.1-flash#max
 #     last matching rule wins. Every role starts from a blanket deny and adds
 #     narrow allows and later denies. Verify at load with a negative-control
 #     call to a denied resource and a positive-control read of policies/.
-#  H2 The orchestrator dispatches builder, auditor, hacker, release-engineer,
-#     and compliance; the auditor may additionally dispatch the hacker. Builder
+#  H2 The orchestrator dispatches builder, auditor, hacker (including the
+#     hacker-high and hacker-max variants), design-research,
+#     release-engineer, compliance, and crouton-alpha; the auditor may additionally dispatch the hacker. Builder
 #     dispatches on the lane path are one per permanent lane and may run in
 #     parallel. Any other subagent allow is absent (deny precedes every allow).
 #     Delegation grants a delegate no permission its own file lacks.
@@ -27,101 +28,81 @@ model: opencode-go/deepseek-v4.1-flash#max
 #  H6 Evaluation of this role is computed externally from independent
 #     re-audits of sampled PASS tasks and of sampled BLOCK tasks. No score or
 #     metric is shown to this role.
-#  H7 Shell arguments --output, -o, and --output-directory are rejected.
+#  H7 Tool arguments --output, -o, and --output-directory are rejected.
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
-  # R05-09: external roots the factory owns (worktrees + shared git store).
-  # Contract-only: manifest-tracked, not a gate digest, so no re-seal.
-  - { action: external_directory, resource: "C:/Users/Admin/AppData/Local/Temp/opencode/**", effect: allow }
-  - { action: external_directory, resource: "C:/Users/Admin/Downloads/backend/**", effect: allow }
-  - { action: skill, resource: "*", effect: deny }
-  - { action: skill, resource: "hacker-*", effect: deny }
-  - { action: skill, resource: "dispatch", effect: allow }
   - { action: subagent, resource: "*", effect: deny }
   - { action: subagent, resource: "builder", effect: allow }
   - { action: subagent, resource: "auditor", effect: allow }
   - { action: subagent, resource: "hacker", effect: allow }
+  - { action: subagent, resource: "hacker-high", effect: allow }
+  - { action: subagent, resource: "hacker-max", effect: allow }
+  - { action: subagent, resource: "design-research", effect: allow }
   - { action: subagent, resource: "release-engineer", effect: allow }
   - { action: subagent, resource: "compliance", effect: allow }
+  - { action: subagent, resource: "crouton-alpha", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "hacker-*", effect: deny }
+  - { action: skill, resource: "dispatch", effect: allow }
   - { action: question, resource: "*", effect: allow }
-  - { action: tool, resource: "agt_policy_status", effect: allow }
-  - { action: tool, resource: "agt_policy_check_text", effect: allow }
-  - { action: tool, resource: "skill", effect: allow }
-  - { action: tool, resource: "subagent", effect: allow }
-  - { action: read, resource: "**/skills/hacker.md", effect: deny }
-  - { action: read, resource: "policies", effect: allow }
-  - { action: read, resource: "policies/**", effect: allow }
-  - { action: read, resource: "quality", effect: allow }
-  - { action: read, resource: "quality/ledger", effect: allow }
-  - { action: read, resource: "quality/ledger/**", effect: allow }
+  - { action: tool, resource: "drain.validate", effect: allow }
+  - { action: tool, resource: "gate.control", effect: allow }
+  - { action: tool, resource: "git.diff", effect: allow }
+  - { action: tool, resource: "git.log", effect: allow }
+  - { action: tool, resource: "git.state", effect: allow }
+  - { action: tool, resource: "git.status", effect: allow }
+  - { action: tool, resource: "harness.verify", effect: allow }
+  - { action: tool, resource: "ledger.append", effect: allow }
+  - { action: tool, resource: "worktrees.list", effect: allow }
   - { action: read, resource: "**", effect: allow }
-  # R05-10: task decomposition needs repo-wide search. The .opencode, hacker,
-  # and secret walls are re-asserted after this allow.
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }
-  - { action: edit, resource: "quality/ledger/**", effect: allow }
-  - { action: edit, resource: "quality/**", effect: allow }
-  - { action: shell, resource: "gate-run*", effect: allow }
-  - { action: shell, resource: "secret-scan*", effect: allow }
-  - { action: shell, resource: "mutate-run*", effect: allow }
-  - { action: shell, resource: "repro-run*", effect: allow }
-  # R05-09: read-only git state for preflight (P-CLEAN/P-WT/P-HEAD).
-  - { action: shell, resource: "git rev-parse*", effect: allow }
-  - { action: shell, resource: "git status*", effect: allow }
-  - { action: shell, resource: "git diff*", effect: allow }
-  - { action: shell, resource: "git log*", effect: allow }
-  - { action: shell, resource: "git merge-base*", effect: allow }
-  - { action: shell, resource: "git worktree list*", effect: allow }
-  - { action: shell, resource: "git branch*", effect: allow }
-  - { action: shell, resource: "git push*", effect: deny }
   - { action: read, resource: "**/policy-manifest.json", effect: deny }
-  - { action: edit, resource: "**/policy-manifest.json", effect: deny }
-  - { action: write, resource: "**/policy-manifest.json", effect: deny }
-  - { action: shell, resource: "*policy-manifest.json*", effect: deny }
   - { action: grep, resource: "**/policy-manifest.json", effect: deny }
   - { action: glob, resource: "**/policy-manifest.json", effect: deny }
-  - { action: read, resource: "**/skills/hacker*", effect: deny }
-  - { action: read, resource: "**/skills/hacker-exploit/**", effect: deny }
-  - { action: read, resource: "hacker-scratch/**", effect: deny }
-  - { action: read, resource: ".env*", effect: deny }
-  - { action: read, resource: "*.pem", effect: deny }
-  - { action: read, resource: "*.key", effect: deny }
-  - { action: read, resource: "secrets/**", effect: deny }
-  - { action: shell, resource: "python scripts/check_harness_config.py*", effect: allow }
-  - { action: shell, resource: "python scripts/policy_manifest.py --verify", effect: allow }
-  - { action: shell, resource: "python files/tools/validatedrain.py*", effect: allow }
-  - { action: shell, resource: "python files/tools/gate_control.py --verify*", effect: allow }
-  # R05-10: no role may inspect or mutate the OpenCode control tree.
   - { action: read, resource: "**/.opencode", effect: deny }
+  - { action: grep, resource: "**/.opencode", effect: deny }
+  - { action: glob, resource: "**/.opencode", effect: deny }
   - { action: read, resource: "**/.opencode/**", effect: deny }
   - { action: grep, resource: "**/.opencode/**", effect: deny }
   - { action: glob, resource: "**/.opencode/**", effect: deny }
-  - { action: edit, resource: "**/.opencode/**", effect: deny }
-  - { action: write, resource: "**/.opencode/**", effect: deny }
-  - { action: read, resource: "C:/Users/Admin/.config/opencode/**", effect: deny }
-  - { action: read, resource: "C:/Users/Admin/.local/share/opencode/**", effect: deny }
-  - { action: read, resource: "C:/Users/Admin/.opencode/**", effect: deny }
-  # R05-10: walls that must survive the broad decomposition grep/glob.
-  - { action: grep, resource: "**/skills/hacker*", effect: deny }
-  - { action: glob, resource: "**/skills/hacker*", effect: deny }
-  - { action: grep, resource: "hacker-scratch/**", effect: deny }
-  - { action: glob, resource: "hacker-scratch/**", effect: deny }
+  - { action: read, resource: ".opencode", effect: deny }
+  - { action: grep, resource: ".opencode", effect: deny }
+  - { action: glob, resource: ".opencode", effect: deny }
+  - { action: read, resource: ".opencode/**", effect: deny }
+  - { action: grep, resource: ".opencode/**", effect: deny }
+  - { action: glob, resource: ".opencode/**", effect: deny }
+  - { action: read, resource: "**/.env*", effect: deny }
   - { action: grep, resource: "**/.env*", effect: deny }
   - { action: glob, resource: "**/.env*", effect: deny }
+  - { action: read, resource: "**/*.pem", effect: deny }
   - { action: grep, resource: "**/*.pem", effect: deny }
   - { action: glob, resource: "**/*.pem", effect: deny }
+  - { action: read, resource: "**/*.key", effect: deny }
   - { action: grep, resource: "**/*.key", effect: deny }
   - { action: glob, resource: "**/*.key", effect: deny }
+  - { action: read, resource: "**/secrets/**", effect: deny }
   - { action: grep, resource: "**/secrets/**", effect: deny }
   - { action: glob, resource: "**/secrets/**", effect: deny }
-  # R05-10: the local tree is matched root-relative by the runtime.
-  - { action: read, resource: ".opencode", effect: deny }
-  - { action: read, resource: ".opencode/**", effect: deny }
-  - { action: grep, resource: ".opencode", effect: deny }
-  - { action: grep, resource: ".opencode/**", effect: deny }
-  - { action: glob, resource: ".opencode", effect: deny }
-  - { action: glob, resource: ".opencode/**", effect: deny }
+  - { action: read, resource: ".env*", effect: deny }
+  - { action: grep, resource: ".env*", effect: deny }
+  - { action: glob, resource: ".env*", effect: deny }
+  - { action: read, resource: "*.pem", effect: deny }
+  - { action: grep, resource: "*.pem", effect: deny }
+  - { action: glob, resource: "*.pem", effect: deny }
+  - { action: read, resource: "*.key", effect: deny }
+  - { action: grep, resource: "*.key", effect: deny }
+  - { action: glob, resource: "*.key", effect: deny }
+  - { action: read, resource: "secrets/**", effect: deny }
+  - { action: grep, resource: "secrets/**", effect: deny }
+  - { action: glob, resource: "secrets/**", effect: deny }
+  - { action: read, resource: "hacker-scratch/**", effect: deny }
+  - { action: grep, resource: "hacker-scratch/**", effect: deny }
+  - { action: glob, resource: "hacker-scratch/**", effect: deny }
+  - { action: read, resource: "**/hacker-scratch/**", effect: deny }
+  - { action: grep, resource: "**/hacker-scratch/**", effect: deny }
+  - { action: glob, resource: "**/hacker-scratch/**", effect: deny }
 ---
 # Role
 
@@ -201,7 +182,8 @@ R6. Retries and re-submissions carry lineage_id. Counters are derived from
            record_hash that recomputes over the record minus record_hash, and a
            prev_hash equal to the previous record's record_hash (all-zero for
            the first). Its gate_sha equals
-           `git log -1 --format=%H -- <gate paths in policies/gate.json>`, its
+           the head ref of the latest git.log result over the gate paths in
+           policies/gate.json, its
            gate_impl_digest equals the live sha256 over tools/**, its
            control_set_sha equals the sha of the resolved control manifest in
            policies/negative-controls.json, and its policy_digest equals the
@@ -214,13 +196,14 @@ R6. Retries and re-submissions carry lineage_id. Counters are derived from
            (policies/tiers.json.shadow_policy), a digest mismatch is recorded as
            POLICY_DRIFT_SHADOW and does not halt; the sealed control record is
            still required. From the second cycle the mismatch halts.
-- P-CLEAN  `git status --porcelain` is empty.
-- P-WT     Every path in `git worktree list --porcelain` is in the lineage's
+- P-CLEAN  git.status at the capability head reports a clean worktree
+           (empty porcelain-equivalent result).
+- P-WT     Every path in the worktrees.list result is in the lineage's
            expected worktree set: <worktree>, <lane-a-worktree>, wt-async for the
            active lane pair, unless the capability declares a different set.
-- P-HEAD   `git rev-parse HEAD` and `git rev-parse HEAD^{tree}` equal the head and
+- P-HEAD   git.state head and tree equal the head and
            tree in the capability being dispatched against.
-- P-SCOPE  Every path in `git diff --name-only <base>..<head>` matches a glob in
+- P-SCOPE  Every path in the git.diff result (base..head) matches a glob in
            capability.scope.
 - P-TIER   capability.tier >= max(tier_of(path) for path in diff paths ∪ declared
            scope), using policies/risk-map.json. Unlisted paths map to the
@@ -254,16 +237,20 @@ HALT with the matching reason_code. A pending predicate yields HOLD only where
 stated.
 
 1. Preflight. Evaluate P-CTRL.
-2. Resolve state. Read `git rev-parse HEAD`, `git rev-parse HEAD^{tree}`,
-   `git worktree list --porcelain`, `git status --porcelain`. Evaluate P-CLEAN
-   and P-WT.
+2. Resolve state. Read git.state (head, tree, branch, clean), the
+   worktrees.list result, and git.status at the checked ref. Evaluate
+   P-CLEAN and P-WT.
 3. Classify. tier = max(tier_of(path)) over declared scope and over any path
    or keyword matches in the task text per policies/risk-map.json. Mixed
    scope takes the highest tier. variant = max(
    policies/tiers.json[tier].hacker_variant, max(variant_of(path))); the
    factory paths `.opencode/**` and `policies/**` map to tier max and variant
    max and may not be lowered. Budget and max_cycles come from the tier entry.
-4. Capability. Write capability.json to quality/ledger/dispatch/<task_id>/.
+4. Capability. Append the capability record via ledger.append
+   (record_type capability, expected_prev_hash required) to
+   quality/ledger/dispatch/<task_id>/. Direct capability.json file writes
+   do not exist; only ledger.append (dispatch, capability) is permitted
+   to this role, sealed by the harness (F-09).
    Fields: capability_id, parent_capability_id, lineage_id, base, head, tree,
    scope, tier, hacker_variant, budget, acceptance_test_refs,
    acceptance_author_family, characterization_tests, allowed_test_removals,

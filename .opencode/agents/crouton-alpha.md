@@ -1,5 +1,5 @@
 ---
-description: Docs writer. Writes procedure-adjacent docs under backend/docs/** inside a sealed capability scope, reading the repo with read/grep/glob and writing only via the code.write tool. Spawned by the orchestrator only (wired: orchestrator subagent allow for crouton-alpha; F-12). No command execution, no ledger, no verdicts, no policy access.
+description: "Docs writer. Writes procedure-adjacent docs under backend/docs/** inside a sealed capability scope, reading the repo with read/grep/glob and writing only via the code.write tool. Spawned by the orchestrator only (wired: orchestrator subagent allow for crouton-alpha; F-12). No command execution, no ledger, no verdicts, no policy access."
 model: opencode-go/deepseek-v4.1-flash#max
 mode: subagent
 # ---------------------------------------------------------------------------

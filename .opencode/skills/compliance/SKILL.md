@@ -13,7 +13,7 @@ drain.validate({ stage: "R1"|"R2"|"R3"|"R4"|"R5", record_hash: "<64-hex>?" })
 gate.control({ target: "gate"|"impl"|"policy_digest"|"gate_impl"|"drain"|"manifest", mode: "run"|"verify" })
 check.run({ check_id: "POLICY_DIGEST", tree: "<40-hex-sha>", engine: "sqlite"|"postgres"|"none" })
 ```
-`serves:` compliance review (the read-only evidence sweep run for the auditor/compliance pass; it backs `GATE_CONTROLS`, `POLICY_DIGEST` and the drain-lineage verdict rather than a single check id). Compliance writes its evidence via `code.write` (`backend/docs/compliance/*`).
+`serves:` read-only evidence review (the harness-config, drain, gate-control and policy-digest pass; it backs `GATE_CONTROLS`, `POLICY_DIGEST` and the drain-lineage verdict rather than a single check id). Compliance writes its evidence via `code.write` (`backend/docs/compliance/*`).
 
 `args:`
 - `harness.verify`: `{ scope }` (`harness_config`|`policy_manifest`). Orchestrator only.

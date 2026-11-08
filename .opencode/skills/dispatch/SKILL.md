@@ -21,7 +21,7 @@ ledger.append({ record_type: "dispatch"|"capability", record: { /* typed dispatc
 - `subagent.prompt` (required) — the complete child task; the child starts with fresh context and cannot see your transcript.
 - `subagent.background` (optional, default false) — `true` returns immediately and notifies the parent when the child finishes.
 - `subagent.sessionID` (optional) — continue an existing child instead of starting a new one.
-- `subagent.model` (optional, provider/model or provider/model#variant) — dispatch-time override; the high tier uses `nous-direct/minimax/minimax-m3.1-flash#high` with fallback `opencode-go/minimax-m3.1-flash`. `openai/gpt-6-luna#max` is not configured in `opencode.json` (unresolvable) and must not be passed.
+- `subagent.model` (optional, provider/model or provider/model#variant) — dispatch-time override; the high tier uses `nous-direct/minimax/minimax-m3.1-flash#high` (primary); the fallback provider is `opencode-go` (see `policies/models.json` `fallback_provider`). `openai/gpt-6-luna#max` is not configured in `opencode.json` (unresolvable) and must not be passed.
 - `ledger.append`: `{ record_type, record, expected_prev_hash }` (`record_type` `dispatch`|`capability`|`verdict`|`finding`|`attack-log`|`gate-control`|`release`; `expected_prev_hash` ^[a-f0-9]{64}$; per-role record types enforced server-side — orchestrator: `dispatch`, `capability`).
 
 `output schema:` `{ sessionID: string, state: "completed" | "error", message/final text: string }`. Foreground calls return the child's final text; background calls return the sessionID and notify later. `ledger.append` returns the new record hash.
