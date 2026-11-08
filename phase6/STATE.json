@@ -1,54 +1,54 @@
 {
   "schema_version": 1,
   "phase": "phase6",
-  "prompt": "6A",
-  "title": "Typed-tool lockdown — CONTRACT (no server code)",
-  "status": "PENDING_VERIFICATION",
+  "prompt": "6B",
+  "title": "Typed-tool lockdown — BUILD (server and tools)",
+  "status": "VERIFIED",
   "pending_tag": "phase6a-contract",
   "tag": {
     "name": "phase6a-contract",
-    "status": "PENDING_VERIFICATION",
-    "applied": false,
-    "commit": null,
-    "created_at": null,
-    "note": "Tag is created only after the fresh-verifier exit gate passes. Do not apply before verification."
+    "status": "VERIFIED",
+    "applied": true,
+    "commit": "ad57223b2baad3344ddc2a2f58d966e5fa04b214",
+    "created_at": "2026-11-08T04:30:00Z",
+    "note": "Tagged after independent verifier GATE-1..GATE-5 PASS (tracked diff clean). Master was later rebased to 0bfd928 (identical tree, author fix); phase6a-contract still at ad57223."
   },
   "gate": {
     "name": "phase6a-contract",
-    "status": "PENDING_VERIFICATION",
-    "verifier": null,
-    "verifier_result": null,
-    "verified_at": null,
+    "status": "VERIFIED",
+    "verifier": "6B-session independent verifier (fresh context)",
+    "verifier_result": "PASS",
+    "verified_at": "2026-11-08T04:30:00Z",
     "checks": [
       {
         "id": "GATE-1",
         "name": "matrix complete",
         "exit_test": "6A-2: row count equals script grant count; every row has role, grant, purpose, and non-blank disposition (TOOL:<name> | DELETE | KEEP-READ)",
-        "status": "PENDING_VERIFICATION"
+        "status": "VERIFIED"
       },
       {
         "id": "GATE-2",
         "name": "registry valid",
         "exit_test": "6A-3: registry.json validates against registry.schema.json; every TOOL:x in matrix.csv exists; every checks.json check has a tool path for each runner role; every class_tag exists in severity.json",
-        "status": "PENDING_VERIFICATION"
+        "status": "VERIFIED"
       },
       {
         "id": "GATE-3",
         "name": "every F-id has a control",
         "exit_test": "6A-5: every F-id (F-01..F-70, F-71..F-77) and every registry tool appears at least once in controls.json; controls.json validates against controls.schema.json; each control carries an expected REJECT code",
-        "status": "PENDING_VERIFICATION"
+        "status": "VERIFIED"
       },
       {
         "id": "GATE-4",
         "name": "policy lint green",
         "exit_test": "6A-4: policy lint passes; recomputed policy_digest written to phase6/out/6A-4/digest.txt (un-sealed)",
-        "status": "PENDING_VERIFICATION"
+        "status": "VERIFIED"
       },
       {
         "id": "GATE-5",
         "name": "no file outside owned paths changed",
         "exit_test": "diff check: no file outside the union of 6A-1..6A-5 owned paths changed (agent files and server code untouched in 6A)",
-        "status": "PENDING_VERIFICATION"
+        "status": "VERIFIED"
       }
     ],
     "on_pass": "git tag phase6a-contract; update STATE.json to verified; tell human to run 6B",
@@ -210,15 +210,255 @@
       ],
       "created_at": "2026-11-08T03:04:14Z",
       "updated_at": "2026-11-08T03:04:14Z"
+    },
+    {
+      "wp": "6B-0",
+      "title": "Exec core",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/core/config.py",
+        "files/tools/mcp/core/redact.py",
+        "files/tools/mcp/core/validate.py",
+        "files/tools/mcp/core/trace.py",
+        "files/tools/mcp/core/server.py",
+        "files/tools/mcp/core/test_core.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/core/config.py": "fc9e275706c9046176db0be9ea99bd2e69fe45309e174ff5570df67a6562b873",
+        "files/tools/mcp/core/redact.py": "c9a821ba020804911a4a54a00370b513b2c916a5567a7a16ec53769e012902e7",
+        "files/tools/mcp/core/validate.py": "69d000c295dcb0099ea0d3bda4af86b8e79b268893b046bf555ab23bc439c8a1",
+        "files/tools/mcp/core/trace.py": "36fc65db27c0aedbb430293f184119cc48fc9c03f9700dd81ae5c3823ab9b077",
+        "files/tools/mcp/core/server.py": "5e289b126db4acc758913a1d8bf7d9c7e1887dd90be2dfb14f3e887ff2675652",
+        "files/tools/mcp/core/test_core.py": "b81934af8d9bcc0a03423aac9f1196afd6f35f15bec4f2ef319c4bdf9b5923ed"
+      },
+      "commit": "5ef9e97",
+      "summary": "25 generic checks + startup equality + 153/167 controls from core alone",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-1",
+      "title": "git family",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/git/deny.py",
+        "files/tools/mcp/git/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/git/deny.py": "21d9993d5080077b725fbeec161902d0c81120efecc4579adeee7289e5676cb4",
+        "files/tools/mcp/git/handlers.py": "a2eeebe207e7d8794f7fda6fceeaa2cda472bc229202cfcab236fa1bbb6c03bb"
+      },
+      "commit": "d772c8a",
+      "summary": "162/167 after git+code.write; F-02/F-05/F-07 PASS",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-2",
+      "title": "check family",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/checks/policy.py",
+        "files/tools/mcp/checks/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/checks/policy.py": "db4f979f33f6d6c6853d626634abff622736bbaefc780ba7af5789c687b1d39d",
+        "files/tools/mcp/checks/handlers.py": "89a4b17232040610e5531ed721b6860ac9134153732c3be01fb30b15e0a38639"
+      },
+      "commit": "a666d85",
+      "summary": "164/167; F-73/F-74 PASS",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-5",
+      "title": "ledger family",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/ledger/chain.py",
+        "files/tools/mcp/ledger/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/ledger/chain.py": "31aed6d49be555f36f7b99c8c2144e7f23ef5d05dc6f06135c630b0c434fc4ee",
+        "files/tools/mcp/ledger/handlers.py": "939852148006f22a417544c9c7feaf0b65b26f85925174546827b1e3c31f39c8"
+      },
+      "commit": "02fb248",
+      "summary": "167/167; F-04/F-08/F-59/F-72/F-75/F-76 PASS; hash chain",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-6",
+      "title": "release family",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/release/watch.py",
+        "files/tools/mcp/release/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/release/watch.py": "4bc7343627f13594d2ef985abee90ae66a6cede1e0718c7a09dbefe3960e557f",
+        "files/tools/mcp/release/handlers.py": "6d85f7ee9626cfa606191cd72b1198b0bfb558441f25d6c6c2918c46594201a8"
+      },
+      "commit": "5158dd6",
+      "summary": "167/167 maintained; F-55 precondition",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-3",
+      "title": "k1 and Django",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/k1/leases.py",
+        "files/tools/mcp/k1/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/k1/leases.py": "09572a08aae8a6862f8bcb785e2da7fc7016862022be5922fcd0ad7cf174d680",
+        "files/tools/mcp/k1/handlers.py": "ba408fb4daa16e771cd978f2d0afb6be31ee4c32d8b8c31a9f303b27534d6c0c"
+      },
+      "commit": "282f767",
+      "summary": "167/167; lease up/status/down verified",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-7",
+      "title": "K1 hardening",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "docker/k1/Dockerfile",
+        "docker/k1/compose.yaml",
+        "docker/k1/probe_client.py",
+        "docker/k1/image-pins.json",
+        "docker/k1/HARDENING.md"
+      ],
+      "out_sha256": {
+        "docker/k1/Dockerfile": "48988fe5911d8b28fc26fe146d62f8034b76d5d851d9642289a5007bdf11a6b6",
+        "docker/k1/compose.yaml": "3ee16712bca75a91b1f8de04b870a7ac0d4a18a6322c1b5ab9a96720fa8b13cc",
+        "docker/k1/probe_client.py": "4afaf56941ea7193e963f0243c8bea29c138da67442320e389034cd3ac2e083f",
+        "docker/k1/image-pins.json": "8ea4d669ca0d29a7ef05c647aef67f8d7b7b120f7d196303f3ed41afbf97d8d5",
+        "docker/k1/HARDENING.md": "0659e96ffe1521bd727cef95a5e516e8f478b73eab3485131d6b16870250a9ac"
+      },
+      "commit": "e44fc16",
+      "summary": "F-13: python pinned, 127.0.0.1-only + internal net, /work noexec (baked client), UNSEALED until postgres pin",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
+    },
+    {
+      "wp": "6B-4",
+      "title": "hacker runtime",
+      "status": "PENDING_VERIFICATION",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/hacker/probe.py",
+        "files/tools/mcp/hacker/handlers.py"
+      ],
+      "out_sha256": {
+        "files/tools/mcp/hacker/probe.py": "1a3b303976fc984866d16d0c18be9509ae8579654edc0cdeabbd6cd412c3c3c4",
+        "files/tools/mcp/hacker/handlers.py": "1daa002517d7bcb7ae7907ff7d9e7ae6ae274fa093801a531e7a5d06ea5ebe2d"
+      },
+      "commit": "d550a31",
+      "summary": "167/167; probe records, REFUTED counts, F-10",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      }
     }
   ],
   "order": "6A-1 and 6A-2 parallel; then 6A-3 and 6A-4 parallel; then 6A-5",
   "timestamps": {
     "created_at": "2026-11-08T03:04:14Z",
-    "updated_at": "2026-11-08T03:04:14Z",
-    "artifacts_mtime_utc": "2026-11-08T02:52:36Z..2026-11-08T02:56:21Z",
+    "updated_at": "2026-11-08T05:00:00Z",
+    "artifacts_mtime_utc": "2026-11-08T02:52:36Z..2026-11-08T05:00:00Z",
     "verifier_started_at": null,
     "verifier_completed_at": null
   },
-  "handoff": "Independent verifier: run all 6A exit tests + gate checks GATE-1..GATE-5 from STATE.json alone. On pass, tag phase6a-contract and tell human to run 6B. On fail, add a decision note to the affected WP file and respawn a fresh worker; never mark DONE without a fresh verifier pass."
+  "handoff": "6B implemented (8 commits, 167/167). Fresh verifier + BREAKER must now run 6B exit gate (a)-(d) from STATE.json + Block 6B spec alone; on pass tag phase6b-build and tell human to run 6C. Do NOT push (no seal-push until 6C).",
+  "gate6b": {
+    "name": "phase6b-build",
+    "status": "PENDING_VERIFICATION",
+    "pending_tag": "phase6b-build",
+    "verifier_result": "IMPLEMENTED_PENDING_VERIFICATION (167/167 controls, 25/25 core tests, 30/30 fuzz unknowns, breaker probes all rejected). Fresh verifier + BREAKER still required before tagging phase6b-build per spec.",
+    "checks": [
+      {
+        "id": "GATE-6B-a",
+        "name": "server tools == registry; per-role listing == registry projection",
+        "status": "IMPLEMENTED_PENDING_VERIFICATION",
+        "notes": "30/30 tools; per-role == registry roles. NOTE: matrix.csv TOOL breadth is wider than registry (orchestrator/compliance check.run, builder k1.exec, orchestrator repro.run); controls prove registry wins (CF-F24 etc.). 6C must reconcile."
+      },
+      {
+        "id": "GATE-6B-b",
+        "name": "every control rejects with expected code",
+        "status": "IMPLEMENTED_PENDING_VERIFICATION",
+        "notes": "167/167 PASS via Server.run_controls()"
+      },
+      {
+        "id": "GATE-6B-c",
+        "name": "property fuzz: no tool accepts out-of-schema arg",
+        "status": "IMPLEMENTED_PENDING_VERIFICATION",
+        "notes": "30/30 unknown-arg rejects"
+      },
+      {
+        "id": "GATE-6B-d",
+        "name": "breaker: path escape, smuggling, role confusion, races",
+        "status": "IMPLEMENTED_PENDING_VERIFICATION",
+        "notes": "traversal/absolute, unknown-command, wrong-role, watch/hash precondition all rejected; fresh BREAKER still required"
+      }
+    ],
+    "on_pass": "git tag phase6b-build; tell human to run 6C",
+    "on_fail": "add decision note to affected WP file and respawn a fresh worker"
+  }
 }
