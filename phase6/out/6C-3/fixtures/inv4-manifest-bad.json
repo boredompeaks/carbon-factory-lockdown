@@ -1,0 +1,1562 @@
+{
+  "agents": {
+    "auditor": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "acceptance.materialize"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "check.run"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "docker.ensure"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "drain.validate"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "evidence.hash"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "gate.control"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.diff"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.log"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.push_ref"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.read_file"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.status"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "k1.down"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "k1.exec"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "k1.status"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "k1.up"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "ledger.append"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "repro.run"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "scratch.write"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "subagent",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "hacker"
+        }
+      ]
+    },
+    "builder": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "check.run"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "code.write"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "docker.ensure"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "evidence.hash"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.commit"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.diff"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.log"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.status"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "repro.run"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        }
+      ]
+    },
+    "compliance": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "code.write"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "edit",
+          "effect": "allow",
+          "resource": "backend/docs/compliance/*"
+        },
+        {
+          "action": "write",
+          "effect": "allow",
+          "resource": "backend/docs/compliance/*"
+        }
+      ]
+    },
+    "crouton": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "code.write"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        }
+      ]
+    },
+    "hacker": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "check.run"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "hacker.probe"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "repro.run"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "scratch.write"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "static.scan"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        }
+      ]
+    },
+    "orchestrator": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "drain.validate"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "gate.control"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.diff"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.log"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.status"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "harness.verify"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "ledger.append"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "worktrees.list"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "subagent",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "builder"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "auditor"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "hacker"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "hacker-high"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "hacker-max"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "design-research"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "release-engineer"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "compliance"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "crouton-alpha"
+        }
+      ]
+    },
+    "release-engineer": {
+      "permissions": [
+        {
+          "action": "*",
+          "effect": "deny",
+          "resource": "*"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "drain.validate"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.diff"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.log"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.push_ref"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.state"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "git.status"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "ledger.append"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "pr.merge"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "pr.open"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "pr.watch"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "worktrees.list"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "worktrees.reconcile"
+        },
+        {
+          "action": "tool",
+          "effect": "allow",
+          "resource": "worktrees.sync"
+        },
+        {
+          "action": "read",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "grep",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "glob",
+          "effect": "allow",
+          "resource": "**"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "**/policy-manifest.json"
+        },
+        {
+          "action": "read",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "grep",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        },
+        {
+          "action": "glob",
+          "effect": "deny",
+          "resource": "hacker-scratch/**"
+        }
+      ]
+    }
+  },
+  "description": "Known-bad INV-4: hacker lacks grep deny for **/policy-manifest.json.",
+  "dispatch": {
+    "rules": [
+      {
+        "dispatch_first": [
+          "compliance"
+        ],
+        "require_before": "builder"
+      },
+      {
+        "dispatch_first": [
+          "compliance"
+        ],
+        "require_before": "builder"
+      },
+      {
+        "dispatch_first": [
+          "compliance"
+        ],
+        "require_before": "builder"
+      },
+      {
+        "dispatch_first": [
+          "compliance"
+        ],
+        "require_before": "builder"
+      },
+      {
+        "dispatch_first": [
+          "compliance"
+        ],
+        "require_before": "builder"
+      },
+      {
+        "dispatch_first": [
+          "design-research"
+        ],
+        "require_before": "builder"
+      }
+    ]
+  },
+  "expect_fails": [
+    "INV-4"
+  ],
+  "manifest": {
+    "covers": [
+      "files/tools/mcp/registry.json",
+      "files/tools/mcp/core/server.py",
+      "files/tools/mcp/controls.json",
+      "files/docker/k1/probe_client.py"
+    ],
+    "files": [
+      {
+        "path": "files/tools/mcp/registry.json",
+        "sha256": "a02c06310bef877cbe2a4aefa99a07e26b2cc2f0e7be9e3366ad5cf7c5178710"
+      },
+      {
+        "path": "files/tools/mcp/core/server.py",
+        "sha256": "1e96820fa2e58d9596d273bafd120ed6ca1c2da45f4ff05e32f367904e23d21f"
+      },
+      {
+        "path": "files/tools/mcp/controls.json",
+        "sha256": "cb5866ec3b1a3acf53f830289191804aeb91ac75fc528195151ee7ab58aa5830"
+      },
+      {
+        "path": "files/docker/k1/probe_client.py",
+        "sha256": "4afaf56941ea7193e963f0243c8bea29c138da67442320e389034cd3ac2e083f"
+      }
+    ],
+    "hashes": {
+      "files/docker/k1/probe_client.py": "4afaf56941ea7193e963f0243c8bea29c138da67442320e389034cd3ac2e083f",
+      "files/tools/mcp/controls.json": "cb5866ec3b1a3acf53f830289191804aeb91ac75fc528195151ee7ab58aa5830",
+      "files/tools/mcp/core/server.py": "1e96820fa2e58d9596d273bafd120ed6ca1c2da45f4ff05e32f367904e23d21f",
+      "files/tools/mcp/registry.json": "a02c06310bef877cbe2a4aefa99a07e26b2cc2f0e7be9e3366ad5cf7c5178710"
+    }
+  },
+  "matrix_rows": [
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:gate.control",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.push_ref",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:docker.ensure",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:k1.status",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.push_ref",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:gate.control",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:k1.exec",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:docker.ensure",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:k1.up",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:k1.exec",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:k1.down",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.status",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.log",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.diff",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.read_file",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:git.read_file",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:evidence.hash",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:scratch.write",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:acceptance.materialize",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:drain.validate",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:ledger.append",
+      "role": "auditor"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:docker.ensure",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:docker.ensure",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.status",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.commit",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.commit",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.log",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.diff",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:evidence.hash",
+      "role": "builder"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "compliance"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "compliance"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "crouton"
+    },
+    {
+      "disposition": "TOOL:code.write",
+      "role": "crouton"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "crouton"
+    },
+    {
+      "disposition": "TOOL:hacker.probe",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:scratch.write",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:scratch.write",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:check.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:scratch.write",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:scratch.write",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:repro.run",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:static.scan",
+      "role": "hacker"
+    },
+    {
+      "disposition": "TOOL:ledger.append",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:ledger.append",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.status",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.diff",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.log",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:worktrees.list",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:harness.verify",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:harness.verify",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:drain.validate",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:gate.control",
+      "role": "orchestrator"
+    },
+    {
+      "disposition": "TOOL:git.push_ref",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:worktrees.reconcile",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.open",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.watch",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.merge",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:worktrees.sync",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.push_ref",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:worktrees.reconcile",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.open",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.watch",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:pr.merge",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:worktrees.sync",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.status",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.log",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.diff",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:git.state",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:worktrees.list",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:drain.validate",
+      "role": "release-engineer"
+    },
+    {
+      "disposition": "TOOL:ledger.append",
+      "role": "release-engineer"
+    }
+  ],
+  "name": "inv4-manifest-bad",
+  "orchestrator_targets": [
+    "builder",
+    "auditor",
+    "release-engineer",
+    "compliance",
+    "design-research",
+    "hacker-high",
+    "hacker-max"
+  ],
+  "registry": {
+    "tools": [
+      {
+        "name": "git.state",
+        "roles": [
+          "auditor",
+          "builder",
+          "orchestrator",
+          "hacker",
+          "crouton",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "git.status",
+        "roles": [
+          "auditor",
+          "builder",
+          "orchestrator",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "git.log",
+        "roles": [
+          "auditor",
+          "builder",
+          "orchestrator",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "git.diff",
+        "roles": [
+          "auditor",
+          "builder",
+          "orchestrator",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "git.read_file",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "git.commit",
+        "roles": [
+          "builder"
+        ]
+      },
+      {
+        "name": "git.push_ref",
+        "roles": [
+          "auditor",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "worktrees.list",
+        "roles": [
+          "orchestrator",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "worktrees.sync",
+        "roles": [
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "worktrees.reconcile",
+        "roles": [
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "check.run",
+        "roles": [
+          "auditor",
+          "builder",
+          "hacker"
+        ]
+      },
+      {
+        "name": "gate.control",
+        "roles": [
+          "auditor",
+          "orchestrator"
+        ]
+      },
+      {
+        "name": "k1.up",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "k1.down",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "k1.exec",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "k1.status",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "hacker.probe",
+        "roles": [
+          "hacker"
+        ]
+      },
+      {
+        "name": "repro.run",
+        "roles": [
+          "auditor",
+          "hacker",
+          "builder"
+        ]
+      },
+      {
+        "name": "static.scan",
+        "roles": [
+          "hacker"
+        ]
+      },
+      {
+        "name": "scratch.write",
+        "roles": [
+          "hacker",
+          "auditor"
+        ]
+      },
+      {
+        "name": "ledger.append",
+        "roles": [
+          "orchestrator",
+          "auditor",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "acceptance.materialize",
+        "roles": [
+          "auditor"
+        ]
+      },
+      {
+        "name": "drain.validate",
+        "roles": [
+          "auditor",
+          "orchestrator",
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "evidence.hash",
+        "roles": [
+          "builder",
+          "auditor"
+        ]
+      },
+      {
+        "name": "harness.verify",
+        "roles": [
+          "orchestrator"
+        ]
+      },
+      {
+        "name": "pr.open",
+        "roles": [
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "pr.watch",
+        "roles": [
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "pr.merge",
+        "roles": [
+          "release-engineer"
+        ]
+      },
+      {
+        "name": "docker.ensure",
+        "roles": [
+          "builder",
+          "auditor"
+        ]
+      },
+      {
+        "name": "code.write",
+        "roles": [
+          "builder",
+          "compliance",
+          "crouton"
+        ]
+      }
+    ]
+  }
+}

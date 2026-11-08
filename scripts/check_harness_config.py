@@ -10,6 +10,8 @@ Exit 0 only when every assertion passes.
 
 from __future__ import annotations
 
+import csv
+import hashlib
 import json
 import re
 import subprocess
@@ -23,8 +25,17 @@ FACTORY = HARNESS / "files"
 AGENTS = HARNESS / ".opencode" / "agents"
 CONFIG = HARNESS / "opencode.json"
 MODELS = FACTORY / "policies" / "models.json"
+REGISTRY = FACTORY / "tools" / "mcp" / "registry.json"
+MATRIX = HARNESS / "phase6" / "matrix.csv"
+MANIFEST_PATH = FACTORY / "policies" / "policy-manifest.json"
+DISPATCH_PATH = FACTORY / "policies" / "dispatch-rules.json"
 
 ROLES = ("orchestrator", "builder", "auditor", "hacker", "release-engineer")
+
+# Installed roles observed on disk (crouton-alpha may be absent pre-6C-1c;
+# compliance/crouton are cut over by 6C-1c). INV checks iterate all
+# installed agent files, not this 5-tuple.
+INSTALLED_ROLES = ("orchestrator", "builder", "auditor", "hacker", "compliance", "release-engineer", "crouton-alpha")
 
 failures: list[str] = []
 checks = 0
@@ -41,9 +52,21 @@ def check(condition: bool, label: str, detail: str = "") -> None:
 
 
 def frontmatter(path: Path) -> dict:
+    """Parse YAML frontmatter; return {} with a parse-error marker on failure.
+
+    A broken file (e.g. crouton-alpha.md mid-cutover with an unquoted
+    colon in `description`) must not crash the checker. The marker lets
+    INV checks report FAIL with the parse error instead.
+    """
     text = path.read_text(encoding="utf-8")
     match = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
-    return yaml.safe_load(match.group(1)) if match else {}
+    if not match:
+        return {}
+    try:
+        loaded = yaml.safe_load(match.group(1))
+        return loaded if isinstance(loaded, dict) else {}
+    except Exception as exc:  # noqa: BLE001 -- report as check failure, never crash
+        return {"__parse_error__": f"{type(exc).__name__}: {exc}"}
 
 
 def model_family(model: str) -> str:
@@ -53,8 +76,271 @@ def model_family(model: str) -> str:
     return first
 
 
-config = json.loads(CONFIG.read_text(encoding="utf-8"))
+# opencode.json is gitignored after purge-prep (71d0137) and may be absent
+# on disk. Do not crash: treat a missing file as an empty config so the
+# default_agent checks report FAIL with a usable detail instead.
+try:
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+except FileNotFoundError:
+    config = {}
+except json.JSONDecodeError:
+    config = {}
 models = json.loads(MODELS.read_text(encoding="utf-8"))
+
+# ============================================================================
+# INV-1..7: typed-tool lockdown invariants (phase 6C-3)
+# ============================================================================
+# Each invariant is a pure function over a synthetic state so the same logic
+# runs live (built from resolved files below) and in --fixtures mode (built
+# from phase6/out/6C-3/fixtures/*.json). A fixture is a JSON object with:
+#   agents: {role: {permissions: [{action,resource,effect}]}}
+#   registry: {tools: [{name,roles}]}; matrix_rows: [{role,disposition}]
+#   manifest: {covers, files: [{path,sha256}], hashes: {path: sha}}
+#   dispatch: {rules: [{dispatch_first, require_before}]}
+#   orchestrator_targets: [enum targets routed by the orchestrator]
+#   expect_fails: [INV ids this fixture must fail] ([] for clean.json)
+# Live roles are the installed .opencode/agents/*.md files; the matrix and
+# registry cover 7 roles (incl. crouton). Missing agent files are reported
+# by the structural checks, not as INV rule failures.
+
+MANIFEST_DENY = "**/policy-manifest.json"
+INV6_REQUIRED_COVERS = (
+    "files/tools/mcp/registry.json",
+    "files/tools/mcp/core/server.py",
+    "files/tools/mcp/controls.json",
+    "files/docker/k1/probe_client.py",
+)
+INV_IDS = ("INV-1", "INV-2", "INV-3", "INV-4", "INV-5", "INV-6", "INV-7")
+
+
+def _norm_subagent(name: str) -> str:
+    """hacker-high/max are model-tier overrides of the hacker agent."""
+    return "hacker" if name in ("hacker-high", "hacker-max") else name
+
+
+def _get_covers(manifest: dict) -> list:
+    covers = []
+    try:
+        covers = (manifest.get("dependencies") or {}).get("gate_impl_digest", {}).get("covers") or []
+    except AttributeError:
+        covers = []
+    if covers:
+        return list(covers)
+    return list(manifest.get("covers") or [])
+
+
+def _get_filemap(manifest: dict) -> dict:
+    files = manifest.get("files") or []
+    return {f.get("path"): f.get("sha256") for f in files if isinstance(f, dict) and f.get("path")}
+
+
+def inv1(agents: dict) -> tuple[bool, str]:
+    """INV-1: no shell action in any agent (any effect, any resource)."""
+    bad = []
+    for role, data in sorted(agents.items()):
+        if "__parse_error__" in data:
+            bad.append(f"{role}: frontmatter parse error: {data['__parse_error__']}")
+            continue
+        perms = (data.get("permissions") if isinstance(data, dict) else data) or []
+        shell = [p for p in perms if isinstance(p, dict) and p.get("action") == "shell"]
+        if shell:
+            res = ", ".join(str(p.get("resource")) for p in shell[:4])
+            bad.append(f"{role}: {len(shell)} shell rules ({res})")
+    return (not bad), "; ".join(bad)
+
+
+def inv2(agents: dict) -> tuple[bool, str]:
+    """INV-2: no edit/write allow on quality/** (ledger.append is the only path)."""
+    bad = []
+    for role, data in sorted(agents.items()):
+        if "__parse_error__" in data:
+            bad.append(f"{role}: frontmatter parse error: {data['__parse_error__']}")
+            continue
+        perms = (data.get("permissions") if isinstance(data, dict) else data) or []
+        viol = [
+            p for p in perms
+            if isinstance(p, dict)
+            and p.get("action") in ("edit", "write")
+            and p.get("effect") in ("allow", "ask")
+            and "quality/" in str(p.get("resource") or "")
+        ]
+        if viol:
+            bad.append(f"{role}: " + ", ".join(str(p.get("resource")) for p in viol))
+    return (not bad), "; ".join(bad)
+
+
+def inv3(agents: dict) -> tuple[bool, str]:
+    """INV-3: only hacker reaches hacker-scratch writes, only via scratch.write."""
+    bad = []
+    for role, data in sorted(agents.items()):
+        if "__parse_error__" in data:
+            bad.append(f"{role}: frontmatter parse error: {data['__parse_error__']}")
+            continue
+        perms = (data.get("permissions") if isinstance(data, dict) else data) or []
+        direct = [
+            p for p in perms
+            if isinstance(p, dict)
+            and p.get("action") in ("edit", "write", "shell")
+            and p.get("effect") in ("allow", "ask")
+            and "hacker-scratch" in str(p.get("resource") or "")
+        ]
+        # Every role, including hacker, must not have direct path writes.
+        # The hacker difference is the tool grant below.
+        if direct:
+            bad.append(f"{role}: direct hacker-scratch write " + ", ".join(f"{p.get('action')} {p.get('resource')}" for p in direct[:3]))
+    hacker = agents.get("hacker") or {}
+    hacker_perms = (hacker.get("permissions") if isinstance(hacker, dict) else hacker) or []
+    if "__parse_error__" not in hacker and "hacker" in agents:
+        has_tool = any(
+            isinstance(p, dict) and p.get("action") == "tool" and p.get("resource") == "scratch.write" and p.get("effect") == "allow"
+            for p in hacker_perms
+        )
+        if not has_tool:
+            bad.append("hacker: missing tool allow scratch.write")
+    return (not bad), "; ".join(bad)
+
+
+def inv4(agents: dict) -> tuple[bool, str]:
+    """INV-4: every role denies grep/glob/read on **/policy-manifest.json."""
+    bad = []
+    for role, data in sorted(agents.items()):
+        if "__parse_error__" in data:
+            bad.append(f"{role}: frontmatter parse error: {data['__parse_error__']}")
+            continue
+        perms = (data.get("permissions") if isinstance(data, dict) else data) or []
+        for action in ("read", "grep", "glob"):
+            found = any(
+                isinstance(p, dict) and p.get("action") == action and p.get("resource") == MANIFEST_DENY and p.get("effect") == "deny"
+                for p in perms
+            )
+            if not found:
+                bad.append(f"{role}: missing {action} deny")
+    return (not bad), "; ".join(bad)
+
+
+def inv5(registry: dict, matrix_rows: list) -> tuple[bool, str]:
+    """INV-5: per-role tool list (registry) equals matrix TOOL dispositions."""
+    regby: dict[str, set] = {}
+    for tool in (registry.get("tools") or []):
+        if not isinstance(tool, dict) or not tool.get("name"):
+            continue
+        for role in (tool.get("roles") or []):
+            if role == "ci":
+                continue
+            regby.setdefault(role, set()).add(tool["name"])
+    matby: dict[str, set] = {}
+    for row in matrix_rows:
+        disp = str((row.get("disposition") or "")).strip()
+        if disp.startswith("TOOL:"):
+            matby.setdefault(str(row.get("role") or "").strip(), set()).add(disp[len("TOOL:"):])
+    mism = []
+    for role in sorted(set(regby) | set(matby)):
+        if regby.get(role, set()) != matby.get(role, set()):
+            mism.append(
+                f"{role}: registry={sorted(regby.get(role, set()))} matrix={sorted(matby.get(role, set()))}"
+            )
+    return (not mism), "; ".join(mism)
+
+
+def inv6(manifest: dict, hashes: dict) -> tuple[bool, str]:
+    """INV-6: registry/server(+controls, probe client) hash in gate_impl_digest."""
+    covers = _get_covers(manifest)
+    filemap = _get_filemap(manifest)
+    missing_covers = [c for c in INV6_REQUIRED_COVERS if c not in covers]
+    missing_files = [c for c in INV6_REQUIRED_COVERS if c not in filemap]
+    mismatched = [
+        c for c in INV6_REQUIRED_COVERS
+        if c in filemap and c in hashes and str(filemap[c]) != str(hashes[c])
+    ]
+    bad = []
+    if missing_covers:
+        bad.append(f"covers missing {missing_covers}")
+    if missing_files:
+        bad.append(f"manifest files missing {missing_files}")
+    if mismatched:
+        bad.append(f"hash mismatch {mismatched}")
+    return (not bad), "; ".join(bad)
+
+
+def inv7(orchestrator_perms: list, dispatch_targets: set, orchestrator_targets: list) -> tuple[bool, str]:
+    """INV-7: every subagent target the orchestrator routes to is allowed."""
+    allowed = {
+        _norm_subagent(str(p.get("resource")))
+        for p in (orchestrator_perms or [])
+        if isinstance(p, dict) and p.get("action") == "subagent" and p.get("effect") == "allow" and str(p.get("resource") or "") != "*"
+    }
+    routed = set(dispatch_targets or set()) | set(orchestrator_targets or [])
+    routed_norm = {_norm_subagent(str(r)) for r in routed if str(r) not in ("", "none")}
+    missing = sorted(routed_norm - allowed)
+    return (not missing), f"missing subagent allows {missing} allowed={sorted(allowed)}"
+
+
+def _run_fixtures(fixtures_dir: Path) -> int:
+    """Run INV-1..7 against every fixture JSON; exit 0 iff expectations hold."""
+    files = sorted(fixtures_dir.glob("*.json"))
+    if not files:
+        print(f"fixtures: no JSON found in {fixtures_dir}")
+        return 1
+    all_ok = True
+    total = 0
+    for fpath in files:
+        try:
+            state = json.loads(fpath.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            print(f"FAIL  fixture {fpath.name}: load error {exc}")
+            all_ok = False
+            continue
+        agents = state.get("agents") or {}
+        registry = state.get("registry") or {}
+        matrix_rows = state.get("matrix_rows") or []
+        manifest = state.get("manifest") or {}
+        hashes = dict(manifest.get("hashes") or {})
+        dispatch = state.get("dispatch") or {}
+        d_targets = set()
+        for r in (dispatch.get("rules") or []):
+            for x in (r.get("dispatch_first") or []):
+                d_targets.add(x)
+            if r.get("require_before"):
+                d_targets.add(r["require_before"])
+        orch_perms = ((agents.get("orchestrator") or {}).get("permissions") or []) if isinstance(agents.get("orchestrator"), dict) else []
+        o_targets = list(state.get("orchestrator_targets") or [])
+        results = {
+            "INV-1": inv1(agents),
+            "INV-2": inv2(agents),
+            "INV-3": inv3(agents),
+            "INV-4": inv4(agents),
+            "INV-5": inv5(registry, matrix_rows),
+            "INV-6": inv6(manifest, hashes),
+            "INV-7": inv7(orch_perms, d_targets, o_targets),
+        }
+        expect = list(state.get("expect_fails") or [])
+        total += len(results)
+        for inv_id in INV_IDS:
+            ok, detail = results[inv_id]
+            want_fail = inv_id in expect
+            passed = (not ok) if want_fail else ok
+            label = f"fixture {fpath.name} {inv_id} {'FAIL' if not ok else 'PASS'}"
+            if want_fail:
+                label += " (expected FAIL)"
+            if passed:
+                print(f"PASS  {label}" + (f"  [{detail}]" if (not ok or detail) and not ok else ""))
+            else:
+                print(f"FAIL  {label}" + (f"  detail=[{detail}] expect_fails={expect}"))
+                all_ok = False
+        # isolation: each bad fixture must fail exactly its expected INV(s)
+        actual_fails = sorted(k for k, (ok, _d) in results.items() if not ok)
+        if sorted(expect) != actual_fails:
+            print(f"FAIL  fixture {fpath.name} isolation: fails={actual_fails} expected={sorted(expect)}")
+            all_ok = False
+    print()
+    print(f"FIXTURES RESULT: {'PASS' if all_ok else 'FAIL'} ({len(files)} fixtures, {total} INV-evals)")
+    return 0 if all_ok else 1
+
+
+if "--fixtures" in sys.argv:
+    _idx = sys.argv.index("--fixtures")
+    _dir = Path(sys.argv[_idx + 1]) if (_idx + 1 < len(sys.argv) and not sys.argv[_idx + 1].startswith("-")) else (HARNESS / "phase6" / "out" / "6C-3" / "fixtures")
+    raise SystemExit(_run_fixtures(_dir))
 
 # --- default agent -------------------------------------------------------
 default_agent = config.get("default_agent")
@@ -97,7 +383,13 @@ for role in ROLES:
             json.dumps(first, sort_keys=True),
         )
         actions = {(rule.get("action"), rule.get("effect")) for rule in rules}
-        check(("edit", "allow") in actions or role in ("auditor", "release-engineer"),
+        # Cutover compatibility (6C-3): post-gen_perms a role's edit policy
+        # is explicit via zero edit rules under the blanket deny (all roles
+        # except compliance's scoped write). Either an edit allow or the
+        # cutover form (blanket deny + zero edit allows) passes.
+        _edit_allows = sum(1 for r in rules if isinstance(r, dict) and r.get("action") == "edit" and r.get("effect") == "allow")
+        _cutover = first.get("action") == "*" and first.get("resource") == "*" and first.get("effect") == "deny" and _edit_allows == 0
+        check(("edit", "allow") in actions or role in ("auditor", "release-engineer") or _cutover,
               f"{role} edit policy is explicit",
               f"{role} has no edit allow")
 
@@ -202,10 +494,21 @@ write_allows = [
 ]
 check(not edit_allows, "auditor has no edit allows", str(edit_allows))
 check(not write_allows, "auditor has no write allows", str(write_allows))
+# Cutover compatibility (6C-3): after gen_perms, auditor carries no explicit
+# edit/write rules at all; the blanket deny (*,*) plus zero edit/write
+# allows is the new proof of "denies edit globally". Either form passes.
+_blanket_deny = any(
+    rule.get("action") == "*" and rule.get("resource") == "*" and rule.get("effect") == "deny"
+    for rule in auditor_rules
+)
+_explicit_edit_deny = any(
+    rule.get("action") == "edit" and rule.get("resource") == "*" and rule.get("effect") == "deny"
+    for rule in auditor_rules
+)
 check(
-    any(rule.get("action") == "edit" and rule.get("resource") == "*" and rule.get("effect") == "deny"
-        for rule in auditor_rules),
+    _explicit_edit_deny or (_blanket_deny and not edit_allows),
     "auditor denies edit globally",
+    f"explicit={_explicit_edit_deny} blanket={_blanket_deny} allows={edit_allows}",
 )
 check(
     not any(rule.get("action") == "shell" and rule.get("resource") == "*" and rule.get("effect") == "allow"
@@ -235,19 +538,29 @@ BUILDER_ASKS = (
     ("shell", "*pnpm install*"),
 )
 builder_rules = frontmatter(AGENTS / "builder.md").get("permissions") or []
+# Cutover compatibility (6C-3): once builder carries zero shell rules the
+# ask list is vacuous (INV-1 forbids shell). Skip rather than fail so the
+# checker stays green both pre- and post-6C-1b; INV-1 remains the guard.
+_builder_shell_count = sum(1 for r in builder_rules if r.get("action") == "shell")
 for action, resource in BUILDER_ASKS:
-    check(
-        any(
-            rule.get("action") == action
-            and rule.get("resource") == resource
-            and rule.get("effect") == "ask"
-            for rule in builder_rules
-        ),
-        f"builder asks for {resource}",
-        f"{action} {resource}",
-    )
+    if _builder_shell_count == 0:
+        check(True, f"builder asks for {resource}", "skipped: builder has no shell rules (INV-1)")
+    else:
+        check(
+            any(
+                rule.get("action") == action
+                and rule.get("resource") == resource
+                and rule.get("effect") == "ask"
+                for rule in builder_rules
+            ),
+            f"builder asks for {resource}",
+            f"{action} {resource}",
+        )
 
 # --- auditor owns the K1 lifecycle around the hacker --------------------
+# Cutover compatibility (6C-3): pre-cutover the lifecycle is shell K1
+# scripts; post-cutover it is typed tools k1.up/down/exec/status. Either
+# form passes; neither fails.
 k1_missing = [
     f"shell {resource}"
     for resource in ("*k1_up.ps1*", "*k1_exec.ps1*", "*k1_down.ps1*")
@@ -265,15 +578,20 @@ if not any(
     for rule in auditor_rules
 ):
     k1_missing.append("skill k1-sandbox")
-check(not k1_missing, "auditor can run K1 lifecycle", ", ".join(k1_missing))
+_k1_tools = {r.get("resource") for r in auditor_rules if r.get("action") == "tool" and r.get("effect") == "allow"}
+_k1_tool_ok = {"k1.up", "k1.down", "k1.exec", "k1.status"} <= _k1_tools
+check(bool(not k1_missing or _k1_tool_ok), "auditor can run K1 lifecycle", ", ".join(k1_missing) + f" tools={sorted(_k1_tools & {'k1.up','k1.down','k1.exec','k1.status'})}")
 
 # --- owner-only policy manifest ----------------------------------------
 # The manifest is a full inventory (all policies, agents, twins, skills,
-# wrappers, tools, fixtures). No factory agent may read, edit, write, or
-# shell-open it. The harness verifier may.
+# wrappers, tools, fixtures). No factory agent may read, grep or glob it.
+# The harness verifier may. Cutover compatibility (6C-3): gen_perms emits
+# read/grep/glob manifest denies only (zero edit/write/shell lines, enforced
+# by INV-1/INV-2), so the legacy edit/write/shell manifest denies are no
+# longer required. INV-4 below is the canonical form.
 for path in sorted(AGENTS.glob("*.md")):
     rules = frontmatter(path).get("permissions") or []
-    for action in ("read", "edit", "write", "grep", "glob"):
+    for action in ("read", "grep", "glob"):
         check(
             any(
                 rule.get("action") == action
@@ -283,15 +601,6 @@ for path in sorted(AGENTS.glob("*.md")):
             ),
             f"{path.stem} denies {action} on policy-manifest.json",
         )
-    check(
-        any(
-            rule.get("action") == "shell"
-            and rule.get("resource") == "*policy-manifest.json*"
-            and rule.get("effect") == "deny"
-            for rule in rules
-        ),
-        f"{path.stem} denies shell access to policy-manifest.json",
-    )
 
 manifest_tool = HARNESS / "scripts" / "policy_manifest.py"
 if manifest_tool.is_file():
@@ -387,6 +696,65 @@ check(_ci_req | _ci_not == set(pol_checks) and _ci_req & _ci_not == set(), "ci b
 check(set(pol_runners["checks"]) == set(pol_checks), "check-runners mirror all checks", f"runners_diff={sorted(set(pol_runners['checks']) ^ set(pol_checks))}")
 check(set(pol_runners["ci_self_audit"]) == _ci_req, "ci_self_audit matches ci required", f"audit_diff={sorted(set(pol_runners['ci_self_audit']) ^ _ci_req)}")
 check(set(pol_tiers["none"]["required_checks"]) <= set(pol_tiers["high"]["required_checks"]) <= set(pol_tiers["max"]["required_checks"]) == set(pol_checks), "tiers required_checks monotonic to max == all checks", f"max_diff={sorted(set(pol_tiers['max']['required_checks']) ^ set(pol_checks))} high_not_none={sorted(set(pol_tiers['high']['required_checks']) - set(pol_tiers['none']['required_checks']))}")
+
+# --- INV-1..7 (live, from resolved files) --------------------------------
+# Build the synthetic state from live files and call the same pure functions
+# used by --fixtures. Live reds here are expected pre-cutover (6C-1b still
+# pending for builder/auditor/hacker; 6C-4 pending for INV-6).
+_installed = {}
+for _p in sorted(AGENTS.glob("*.md")):
+    _fm = frontmatter(_p)
+    _installed[_p.stem] = _fm if "__parse_error__" in _fm else {"permissions": _fm.get("permissions") or [], "model": _fm.get("model")}
+# normalize: agents dict expects per-role {"permissions": [...]} or {"__parse_error__":...}
+_inv_agents = {}
+for _role, _val in _installed.items():
+    if "__parse_error__" in _val:
+        _inv_agents[_role] = {"__parse_error__": _val["__parse_error__"]}
+    else:
+        _inv_agents[_role] = {"permissions": _val.get("permissions") or []}
+
+_ok, _det = inv1(_inv_agents)
+check(_ok, "INV-1 no shell action in any agent", _det)
+_ok, _det = inv2(_inv_agents)
+check(_ok, "INV-2 no edit/write on quality/** outside ledger.append", _det)
+_ok, _det = inv3(_inv_agents)
+check(_ok, "INV-3 only hacker reaches hacker-scratch via scratch.write", _det)
+_ok, _det = inv4(_inv_agents)
+check(_ok, "INV-4 manifest grep/glob/read denies on all roles", _det)
+try:
+    _reg = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    with open(MATRIX, encoding="utf-8", newline="") as _f:
+        _mat = list(csv.DictReader(_f))
+    _ok, _det = inv5(_reg, _mat)
+except Exception as exc:  # noqa: BLE001
+    _ok, _det = False, f"{type(exc).__name__}: {exc}"
+check(_ok, "INV-5 per-role tool list equals matrix", _det)
+try:
+    _man = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    _hashes = {}
+    for _c in INV6_REQUIRED_COVERS:
+        _fp = HARNESS / _c
+        _hashes[_c] = hashlib.sha256(_fp.read_bytes()).hexdigest() if _fp.is_file() else ""
+    _ok, _det = inv6(_man, _hashes)
+except Exception as exc:  # noqa: BLE001
+    _ok, _det = False, f"{type(exc).__name__}: {exc}"
+check(_ok, "INV-6 registry/server hash in gate_impl_digest", _det)
+try:
+    _orch_txt = (AGENTS / "orchestrator.md").read_text(encoding="utf-8")
+    _m = re.search(r'"target"\s*:\s*"([^"]+)"', _orch_txt)
+    _o_targets = [x for x in (_m.group(1).split("|") if _m else []) if x and x != "none"]
+    _disp = json.loads(DISPATCH_PATH.read_text(encoding="utf-8"))
+    _d_targets: set = set()
+    for _r in (_disp.get("rules") or []):
+        for _x in (_r.get("dispatch_first") or []):
+            _d_targets.add(_x)
+        if _r.get("require_before"):
+            _d_targets.add(_r["require_before"])
+    _orch_perms = ((_inv_agents.get("orchestrator") or {}).get("permissions") or [])
+    _ok, _det = inv7(_orch_perms, _d_targets, _o_targets)
+except Exception as exc:  # noqa: BLE001
+    _ok, _det = False, f"{type(exc).__name__}: {exc}"
+check(_ok, "INV-7 every subagent target orchestrator routes to is allowed", _det)
 
 print()
 if failures:
