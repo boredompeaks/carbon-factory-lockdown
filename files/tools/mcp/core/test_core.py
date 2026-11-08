@@ -15,10 +15,19 @@ from files.tools.mcp.core.redact import redact_text, UnredactableSecret, cache_k
 PASS = 0
 
 
+def _per_role(server: Server, role: str) -> Server:
+    # Per-role instance (dispatch no longer takes role=); share registry/config/trace.
+    # Note: Server.__init__ uses `trace or TraceLog()`, and an empty TraceLog is
+    # falsy (defines __len__), so force-share by direct assignment.
+    srv = Server(role, registry=server.registry, config=server.config, trace=server.trace)
+    srv.trace = server.trace
+    return srv
+
+
 def expect_reject(server: Server, tool: str, args: dict, code: str, role: str, label: str) -> None:
     global PASS
     try:
-        server.dispatch(tool, dict(args), role=role)
+        _per_role(server, role).dispatch(tool, dict(args))
     except Reject as r:
         assert r.code == code, f"{label}: expected {code}, got {r.code} ({r.detail})"
         PASS += 1
@@ -28,7 +37,7 @@ def expect_reject(server: Server, tool: str, args: dict, code: str, role: str, l
 
 def expect_ok(server: Server, tool: str, args: dict, role: str, label: str) -> None:
     global PASS
-    out = server.dispatch(tool, dict(args), role=role)
+    out = _per_role(server, role).dispatch(tool, dict(args))
     assert out.get("ok") is True, f"{label}: not ok"
     PASS += 1
 
