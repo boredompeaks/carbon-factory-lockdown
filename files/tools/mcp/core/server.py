@@ -92,6 +92,10 @@ class Server:
         (per-role instance); callers cannot override it.
         """
         effective_role = self.role
+        # Non-object args must fail as REJECT_ARG before any args.get
+        # access (cache-key computation) would raise AttributeError.
+        if not isinstance(args, dict):
+            raise Reject("REJECT_ARG", "args must be an object")
         # Caller-supplied role smuggling is an unknown-arg reject, but the
         # role gate runs first so a wrong-role caller still sees ROLE.
         if tool not in self.tools:
