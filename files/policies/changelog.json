@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "file": "CHANGELOG.md",
+  "format": "markdown_table",
+  "required_columns": [
+    "task_id",
+    "date",
+    "paths",
+    "invariant",
+    "attack_class",
+    "tier"
+  ],
+  "row_schema": {
+    "task_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "paths": {
+      "type": "array",
+      "min_items": 1,
+      "items": "glob_or_path"
+    },
+    "invariant": {
+      "type": "string",
+      "min_length": 20,
+      "sentence_count": 1
+    },
+    "attack_class": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "none",
+        "high",
+        "max"
+      ]
+    }
+  },
+  "attack_class_source": "policies/severity.json",
+  "tier_source": "capability.tier",
+  "coverage_rule": "union(added_row_paths) == diff_paths - exempt_paths",
+  "path_match": "glob",
+  "exempt_paths": [
+    "CHANGELOG.md",
+    "docs/**",
+    "quality/**",
+    "**/*.lock",
+    "**/*.png",
+    "**/*.svg",
+    "**/*.ico"
+  ],
+  "max_rows_per_change": 10,
+  "require_row_for_each_non_exempt_path": true,
+  "entries": [
+    {
+      "task_id": "phase-4-reconciliation",
+      "date": "2026-11-08",
+      "paths": [
+        "files/orchestrator.md",
+        "files/builder.md",
+        ".opencode/agents/orchestrator.md",
+        ".opencode/agents/builder.md",
+        "files/policies/changelog.json"
+      ],
+      "invariant": "Installed agent copies match factory sources byte-for-byte while Phase 4 reconciliations are recorded without re-sealing the manifest.",
+      "attack_class": "POLICY_DRIFT",
+      "tier": "none",
+      "phase": "Phase 4 P0/P1/P2 + reconciliation",
+      "items": [
+        "capabilities guard_ref",
+        "validatedrain R4/R5",
+        "probes[]",
+        "ARCH align",
+        "dispatch all-match"
+      ],
+      "sync": {
+        "files/orchestrator.md": "34FA1229BF44E9CD571FA92A1C10D8EC7487EE40CA4E9B27EE29C430921FE4EA",
+        ".opencode/agents/orchestrator.md": "34FA1229BF44E9CD571FA92A1C10D8EC7487EE40CA4E9B27EE29C430921FE4EA",
+        "files/builder.md": "D1ADD62BF6361D9757690941C790CAD956212746895DF4FF70627C9F88D3CA4B",
+        ".opencode/agents/builder.md": "D1ADD62BF6361D9757690941C790CAD956212746895DF4FF70627C9F88D3CA4B"
+      },
+      "seal": "skipped — RE-SEAL: SKIPPED, document-only, no manifest --write"
+    },
+    {
+      "task_id": "phase-5-tools",
+      "date": "2026-11-08",
+      "paths": [
+        "files/tools/gate_control.py",
+        "files/tools/policy_digest.py",
+        "files/tools/gate_run.py",
+        "files/tools/semgrep_runner.py",
+        "files/tools/validatedrain.py",
+        "files/policies/negative-controls.json",
+        "files/policies/changelog.json"
+      ],
+      "invariant": "Phase 5 gate tools enforce deterministic digests and PATH-only execution while re-seal is skipped for this document-only record.",
+      "attack_class": "POLICY_DRIFT",
+      "tier": "none",
+      "phase": "Phase 5 P0/P1/P2 tools",
+      "items": [
+        "gate_control ERROR",
+        "dynamic digest",
+        "gate_run PATH-only+SHA",
+        "repo defaults",
+        "semgrep probes+exit2",
+        "validatedrain R4/R5+tree+jsonschema exit2",
+        "controls widening",
+        "docs re-pin",
+        "per-stage metrics",
+        "seal skipped"
+      ],
+      "seal": "skipped — RE-SEAL: SKIPPED, document-only, no manifest --write"
+    }
+  ]
+}

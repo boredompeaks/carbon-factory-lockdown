@@ -1,0 +1,239 @@
+{
+  "version": 1,
+  "reason_codes": {
+    "OK": {
+      "owner": "none",
+      "channel": "none",
+      "sla_minutes": 0,
+      "escalate": false
+    },
+    "TIER_RAISED": {
+      "owner": "orchestrator",
+      "channel": "none",
+      "sla_minutes": 0,
+      "escalate": false
+    },
+    "DIRTY_TREE": {
+      "owner": "workspace-owner",
+      "channel": "#eng-help",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "HEAD_MOVED": {
+      "owner": "workspace-owner",
+      "channel": "#eng-help",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "UNKNOWN_WORKTREE": {
+      "owner": "workspace-owner",
+      "channel": "#eng-help",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "SCOPE_VIOLATION": {
+      "owner": "engineering-manager",
+      "channel": "#eng-leads",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "SIG_INVALID": {
+      "owner": "agent-platform",
+      "channel": "#agent-platform",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "SCHEMA_INVALID": {
+      "owner": "agent-platform",
+      "channel": "#agent-platform",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "CTRL_MISSING": {
+      "owner": "policy-steward",
+      "channel": "#policy-gate",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "CTRL_FAILED": {
+      "owner": "policy-steward",
+      "channel": "#policy-gate",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "NO_ACCEPTANCE_REF": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "BUDGET_EXCEEDED": {
+      "owner": "engineering-manager",
+      "channel": "#eng-leads",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "CYCLES_EXHAUSTED": {
+      "owner": "engineering-manager",
+      "channel": "#eng-leads",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "RISK_RECORD_MISSING": {
+      "owner": "security-lead",
+      "channel": "#security",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "VERDICT_STALE": {
+      "owner": "release-manager",
+      "channel": "#release",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "CHECKS_INCOMPLETE": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "TREE_MISMATCH": {
+      "owner": "release-manager",
+      "channel": "#release",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "CI_FAILED": {
+      "owner": "release-engineering",
+      "channel": "#ci",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "CI_TIMEOUT": {
+      "owner": "release-engineering",
+      "channel": "#ci",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "CI_PENDING": {
+      "owner": "release-engineering",
+      "channel": "#ci",
+      "sla_minutes": 60,
+      "escalate": false
+    },
+    "SUBAGENT_TIMEOUT": {
+      "owner": "agent-platform",
+      "channel": "#agent-platform",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "LEDGER_CONFLICT": {
+      "owner": "agent-platform",
+      "channel": "#agent-platform",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "BUILDER_BLOCKED": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "RELEASE_REFUSED": {
+      "owner": "release-manager",
+      "channel": "#release",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "POLICY_DRIFT": {
+      "owner": "policy-steward",
+      "channel": "#policy-gate",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "ADDED_TEST_NOT_RED": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "NON_FALSIFIABLE": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "WEAK_ORACLE": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "GUARD_REMOVED": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 120,
+      "escalate": true
+    },
+    "ARCH_VIOLATION": {
+      "owner": "architecture-owner",
+      "channel": "#architecture",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "AUTHZ_MATRIX_GAP": {
+      "owner": "security-lead",
+      "channel": "#security",
+      "sla_minutes": 60,
+      "escalate": true
+    },
+    "BUDGET_ZERO_PROGRESS": {
+      "owner": "engineering-manager",
+      "channel": "#eng-leads",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "DRAIN_UNREPRODUCIBLE": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "DRAIN_STAGE_MISSING": {
+      "owner": "quality-lead",
+      "channel": "#quality",
+      "sla_minutes": 240,
+      "escalate": true
+    },
+    "SECRET_LEAK": {
+      "owner": "security-lead",
+      "channel": "#security",
+      "sla_minutes": 15,
+      "escalate": true
+    },
+    "GATE_CONTROL_FAILURE": {
+      "owner": "policy-steward",
+      "channel": "#policy-gate",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "CONTROL_UNDERCOUNT": {
+      "owner": "policy-steward",
+      "channel": "#policy-gate",
+      "sla_minutes": 30,
+      "escalate": true
+    },
+    "SUITE_FAILURE": {
+      "owner": "release-engineering",
+      "channel": "#ci",
+      "sla_minutes": 30,
+      "escalate": true
+    }
+  },
+  "default": {
+    "owner": "engineering-manager",
+    "channel": "#eng-leads",
+    "sla_minutes": 240,
+    "escalate": true
+  }
+}

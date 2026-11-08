@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "drain-record.json",
+  "title": "drain-record",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "record_id",
+    "task_id",
+    "lineage_id",
+    "stage",
+    "cluster_id",
+    "class",
+    "tree_sha",
+    "state",
+    "attempt_log_ref",
+    "attempts",
+    "defect_ids",
+    "repro_ref",
+    "row_count",
+    "capability_id",
+    "verdict_ref",
+    "next_stage",
+    "created_at",
+    "prev_hash",
+    "record_hash",
+    "deleted",
+    "policy_digest",
+    "sig_status"
+  ],
+  "properties": {
+    "schema": {
+      "const": "drain-record/1"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ]
+    },
+    "cluster_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "class": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "tree_sha": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "REPRODUCED",
+        "UNREPRODUCIBLE",
+        "CLUSTERED",
+        "REPAIRED",
+        "VERIFIED",
+        "CLOSED"
+      ]
+    },
+    "attempt_log_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "defect_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "repro_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "row_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "capability_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "verdict_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "guard_ref": {
+      "$ref": "#/$defs/guard_ref"
+    },
+    "next_stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        null
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "prev_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "deleted": {
+      "const": false
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "UNREPRODUCIBLE"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "attempt_log_ref",
+          "attempts",
+          "tree_sha"
+        ],
+        "properties": {
+          "attempt_log_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 3
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R4"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "required": [
+          "capability_id",
+          "guard_ref"
+        ],
+        "properties": {
+          "capability_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "guard_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "sha256"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {
+            "const": "R5"
+          }
+        },
+        "required": [
+          "stage"
+        ]
+      },
+      "then": {
+        "required": [
+          "capability_id",
+          "guard_ref",
+          "verdict_ref"
+        ],
+        "properties": {
+          "capability_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "guard_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "sha256"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "verdict_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "REPRODUCED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "repro_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "VERIFIED",
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verdict_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "guard_ref": {
+      "description": "Permanent guard reference: acceptance node id plus the SHA-256 of the guard node. Null before R4; an object at R4/R5 (Q-GUARD, then post-merge permanence).",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "sha256"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

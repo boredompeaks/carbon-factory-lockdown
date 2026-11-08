@@ -1,0 +1,102 @@
+# Auditor SOP — extracted from the GLM R4 / R4.1 / R4.2 audit (2026-11-06)
+
+The auditor receives the artifact and the requirements, never the builder's
+reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
+`$H` = the harness root (`C:\Users\Admin\Documents\umairnlp`).
+
+1. **Pin the tree.** `git -C $REPO rev-parse HEAD`; `git -C $REPO branch --show-current`;
+   `git -C $REPO status --porcelain`.
+   Expected: the exact audited SHA, the branch, and only known WIP paths.
+   Parse: 40-char SHA + branch. Stop if the SHA differs from the dispatch record.
+
+1a. **Docker preflight (before DAST/THREAD_RACE).**
+   `powershell -NoProfile -File $H\scripts\ensure_docker.ps1 -Containers pg2a,pg2b`
+   Expected: `docker engine: ready <version>`, `container pg2a: running`,
+   `container pg2b: running`; exit 0. Parse: the engine version and each
+   container line. Failure: exit 2 → BLOCKED, not PASS; do not pull, build,
+   create, or run a container. This wrapper is the only Docker action granted
+   to this role.
+
+1b. **K1 lifecycle (mandatory around the hacker).**
+    Before `hacker_dispatch`, run
+    `powershell -NoProfile -File $H\scripts\k1_up.ps1 -RunId <task_id>-<cycle> -Base <capability.base> -Head <capability.head>`.
+    Expected: exit 0 and the `k1-<id>-app`/`k1-<id>-pg` containers on the
+    internal network. Parse: the run id and both container names.
+    Failure: exit non-zero → record BLOCKED `K1_UP_FAILED` and dispatch nothing.
+    After the hacker returns, times out, or errors, run
+    `powershell -NoProfile -File $H\scripts\k1_down.ps1 -RunId <id>` in a
+    `finally` block. Expected: exit 0 with both containers and the network
+    removed. Parse: the removed container/network names. `k1_down` removes only
+    that run's `k1-<id>-app`/`k1-<id>-pg` pair and its network; it never stops
+    Docker, never touches `pg2a`/`pg2b`, and never prunes images or volumes.
+    Never run `docker system prune`, `docker volume prune`, `docker stop`, or
+    any Docker-down command. A failed `k1_down` is recorded, not retried with a
+    pruner.
+
+2. **Read the requirement, not the implementation narrative.**
+   Commands: `read` the capability/request file and the acceptance test node id.
+   Expected: a written predicate you can test. Parse: the property list.
+   Decision: if the requirement has no observable assertion, BLOCK.
+
+3. **Semgrep.** `cd $H; python files\tools\semgrep_runner.py --paths <file> --repo $REPO`.
+   Expected: `"engine":"semgrep"`, `"findings":[]`, exit 0.
+   Parse: the JSON fields. Stop/FAIL if the engine is `fallback` or a finding
+   remains; a missing binary is BLOCKED, never PASS.
+
+4. **Oracle provenance.** `python files\tools\oracle_provenance.py --control`
+   then `python files\tools\oracle_provenance.py --diff <tests.diff> --repo $REPO`.
+   Expected: every control case passes; `findings":[]` on the diff.
+   Parse: `passed`, per-case classes, `assertions_scanned`.
+   Decision: a finding is a BLOCK unless the policy text itself exempts it —
+   "the heuristic looked wrong" is not an exemption.
+
+5. **Architecture.** `python files\tools\arch_check.py --repo $REPO --base <base> --head <head>`.
+   Expected: `findings":[]`, exit 0. Parse: files/imports scanned + findings.
+
+6. **Guard delta.** `python files\tools\guard_delta.py --repo $REPO --base <base> --head <head> --coverage <coverage.json>`.
+   Expected: `guard_removals` all covered, `findings":[]`. Parse: covered/total.
+
+7. **Test set.** `python files\tools\gate_run.py --check TEST_SET --input <roster.json>`.
+   Expected: `removals` only allowed ones, `findings":[]`. Parse: base/head counts.
+   Decision: an unexplained removal is a BLOCK; an allowed one cites
+   `test-removal-reasons.json`.
+
+8. **Authz matrix.** `<repo venv>\python.exe $H\files\tools\authz_matrix.py --repo $REPO`.
+   Expected: `missing=0`, `UNKNOWN=0`, exit 0. Parse: routes/rows; check any new
+   route's derivation.
+
+9. **Thread race.** With the PG URL above:
+   `$PY manage.py test <race class> --keepdb -v 2 --noinput`, 3 workers × 20 reps
+   (auditor tier). Expected per run: `Ran 1 test` + `OK`.
+   Parse: pass count. Any red rep or flake is FAIL, not a retry candidate.
+
+10. **Re-derive one acceptance property.** Write your own transient test (do not
+    copy the ticket), `$PY manage.py test <your label> -v 2 --noinput`, then
+    delete it and re-run `git -C $REPO status --porcelain`.
+    Expected: `OK` and the pre-audit status restored. Parse: `Ran 1` + `OK`.
+    Report MATCH/MISMATCH against the written property; MISMATCH is a BLOCK.
+
+11. **Verdict artifact.** Write `files/drain/<cluster>/<stage>-audit.json` with
+    the audited tree, model provider/model, per-check command/exit/evidence, and
+    SHIP/REJECT/BLOCKED. Hash it; never edit a previous record.
+    Parse: re-load the JSON and confirm the hash round-trips.
+
+12. **Report.** Per check: CMD / EXIT / parsed line; the verdict; every check you
+    could not run as BLOCKED. Do not merge; the release engineer does that.
+
+**Stop conditions (any one):** SHA mismatch; semgrep/oracle undecidable;
+a race rep fails; re-derivation MISMATCH; a required check BLOCKED and the
+verdict would be SHIP.
+
+## Lane / integration topology (permanent)
+
+- Audit the branch the capability names: `lane/a` (`<lane-a-worktree>`), `lane/b`
+  (`wt-async`), or `spec-comp` (`<worktree>`). `feat/add-frontend` is never
+  audited directly.
+- On SHIP, push exactly the audited branch once:
+  `scripts/push_ref.ps1 -Branch <branch>`. Lane branches get no PR;
+  `spec-comp` is the promotion PR head.
+- Never merge, never create/close/comment a PR, never push
+  `feat/add-frontend` or any ref other than the audited branch.
+- The only subagent the auditor may dispatch is its child `hacker`; every other
+  subagent stays denied.

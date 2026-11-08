@@ -1,0 +1,17 @@
+{
+  "threshold": "medium",
+  "findings": [
+    {
+      "rule": "template-injection",
+      "severity": "informational",
+      "path": ".github/workflows/ci.yml",
+      "line": 14
+    },
+    {
+      "rule": "cache-poisoning",
+      "severity": "low",
+      "path": ".github/workflows/release.yml",
+      "line": 27
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"schemaVersion":1,"version":1,"mode":"enforce","denyOnPolicyError":true,"toolPolicies":{"allowedTools":["read","glob","grep","list","edit","write","patch","bash","webfetch","task","shell","execute","agt_policy_status","agt_policy_check_text","subagent","question","skill","websearch"],"blockedTools":[],"defaultEffect":"deny","reviewTools":[]}}

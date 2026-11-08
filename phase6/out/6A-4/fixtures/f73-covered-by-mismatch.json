@@ -1,0 +1,10 @@
+{
+  "finding": "F-73",
+  "removed_id": "test_auth",
+  "added_ids": [
+    "test_auth_login"
+  ],
+  "covered_by": "test_auth_login",
+  "expected": "OK",
+  "note": "Exact match of an added id is required; only this shape passes."
+}

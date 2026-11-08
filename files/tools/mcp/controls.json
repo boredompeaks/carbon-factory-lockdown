@@ -1,0 +1,1993 @@
+{
+  "version": "6A-5",
+  "owner": "owner",
+  "description": "Negative controls: one known-bad call per F-id and per registry tool (3 per tool), each with the expected REJECT code. The 6B build must make every control reject with the stated code.",
+  "reject_codes": [
+    "REJECT_ROLE",
+    "REJECT_ARG",
+    "REJECT_PATH",
+    "REJECT_PATTERN",
+    "REJECT_ENUM",
+    "REJECT_PRECONDITION",
+    "REJECT_POLICY",
+    "REJECT_REDACTION"
+  ],
+  "controls": [
+    {
+      "id": "CF-F01",
+      "tool": "git.commit",
+      "role": "builder",
+      "args": {
+        "message": "--amend bypass hooks",
+        "tree": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_PATTERN",
+      "note": "tool args reject leading-dash free-form commands (finding: wildcard shell globs)",
+      "f_ids": [
+        "F-01"
+      ]
+    },
+    {
+      "id": "CF-F02",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".env"
+      },
+      "expect": "REJECT_PATH",
+      "note": "read_file path deny blocks .env (finding: git show rev:.env bypass)",
+      "f_ids": [
+        "F-02"
+      ]
+    },
+    {
+      "id": "CF-F03",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/verdicts/v1.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "read_file path deny blocks verdict records (finding: A1 quality/ledger contradiction)",
+      "f_ids": [
+        "F-03"
+      ]
+    },
+    {
+      "id": "CF-F04",
+      "tool": "ledger.append",
+      "role": "builder",
+      "args": {
+        "record_type": "verdict",
+        "record": {},
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "builder has no ledger role; verdict writes are typed auditor appends (finding: no write path)",
+      "f_ids": [
+        "F-04"
+      ]
+    },
+    {
+      "id": "CF-F05",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "path": "pytest.ini",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "code.write scope is backend/**; test-infra files are outside scope and denied (finding: edit/write deny gap)",
+      "f_ids": [
+        "F-05"
+      ]
+    },
+    {
+      "id": "CF-F06",
+      "tool": "git.read_file",
+      "role": "builder",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "files/policies/attack-catalog.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only; builder cannot read the catalog (finding: known-probe tuning)",
+      "f_ids": [
+        "F-06"
+      ]
+    },
+    {
+      "id": "CF-F07",
+      "tool": "git.commit",
+      "role": "builder",
+      "args": {
+        "message": "fix",
+        "tree": "0000000000000000000000000000000000000000",
+        "flags": [
+          "--no-verify"
+        ]
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown flags arg rejected; commit never accepts --no-verify (finding)",
+      "f_ids": [
+        "F-07"
+      ]
+    },
+    {
+      "id": "CF-F08",
+      "tool": "ledger.append",
+      "role": "orchestrator",
+      "args": {
+        "record_type": "verdict",
+        "record": {},
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "orchestrator may not append verdict records (per-role record types)",
+      "f_ids": [
+        "F-08"
+      ]
+    },
+    {
+      "id": "CF-F09",
+      "tool": "hacker.probe",
+      "role": "orchestrator",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "hacker-high",
+        "capability_id": "00000000-0000-0000-0000-000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "orchestrator cannot probe directly; capability creation is via ledger.append capability",
+      "f_ids": [
+        "F-09"
+      ]
+    },
+    {
+      "id": "CF-F10",
+      "tool": "k1.up",
+      "role": "hacker",
+      "args": {
+        "run_id": "r1",
+        "base": "0000000000000000000000000000000000000000",
+        "head": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "K1 lifecycle is auditor-only; hacker has no k1 grant",
+      "f_ids": [
+        "F-10"
+      ]
+    },
+    {
+      "id": "CF-F11",
+      "tool": "scratch.write",
+      "role": "hacker",
+      "args": {
+        "namespace": "auditor",
+        "capability_id": "cap-01",
+        "path": "audit-scratch/x.py",
+        "content": "x",
+        "extension": "py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "scratch namespace is bound to the caller role (hacker cannot write auditor namespace)",
+      "f_ids": [
+        "F-11"
+      ]
+    },
+    {
+      "id": "CF-F12",
+      "tool": "worktrees.list",
+      "role": "crouton",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "crouton has no worktree tool; orchestrator allow is undercut at the tool layer",
+      "f_ids": [
+        "F-12"
+      ]
+    },
+    {
+      "id": "CF-F13",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "latest",
+        "head": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_PATTERN",
+      "note": "K1 up requires full 40-hex base/head; placeholder tags and live-0.0.0.0 pg2 are outside the typed surface",
+      "f_ids": [
+        "F-13"
+      ]
+    },
+    {
+      "id": "CF-F14",
+      "tool": "git.state",
+      "role": "auditor",
+      "args": {
+        "root": "C:/Users/Admin/Downloads/backend",
+        "fields": [
+          "head"
+        ]
+      },
+      "expect": "REJECT_ARG",
+      "note": "no out-of-tree root argument exists in the typed surface (finding: external_directory)",
+      "f_ids": [
+        "F-14"
+      ]
+    },
+    {
+      "id": "CF-F15",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "files/policies/attack-catalog.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "attack-catalog is denied for git.read_file (finding: auditor catalog blindness)",
+      "f_ids": [
+        "F-15"
+      ]
+    },
+    {
+      "id": "CF-F16",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "action": "shell",
+        "command": "id"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "k1.exec actions are an enum; arbitrary command strings are not (finding: k1_exec as auditor)",
+      "f_ids": [
+        "F-16"
+      ]
+    },
+    {
+      "id": "CF-F17",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "backend/.env"
+      },
+      "expect": "REJECT_PATH",
+      "note": "object reads respect the same path denies as file reads (finding: cat-file bypass)",
+      "f_ids": [
+        "F-17"
+      ]
+    },
+    {
+      "id": "CF-F18",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "skills/hacker-exploit/SKILL.md"
+      },
+      "expect": "REJECT_PATH",
+      "note": "hacker skills are denied for read_file (finding: grep bypass of hacker-skill denies)",
+      "f_ids": [
+        "F-18"
+      ]
+    },
+    {
+      "id": "CF-F19",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "path": ".env",
+        "content": "X=1"
+      },
+      "expect": "REJECT_PATH",
+      "note": "secret paths are denied for code.write (finding: secret material writes)",
+      "f_ids": [
+        "F-19"
+      ]
+    },
+    {
+      "id": "CF-F20",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "action": "makemigrations write"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "only \"makemigrations check\" exists; write variants are rejected (finding)",
+      "f_ids": [
+        "F-20"
+      ]
+    },
+    {
+      "id": "CF-F21",
+      "tool": "docker.ensure",
+      "role": "auditor",
+      "args": {
+        "action": "run"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "docker.ensure never runs containers (finding: docker run on ask)",
+      "f_ids": [
+        "F-21"
+      ]
+    },
+    {
+      "id": "CF-F22",
+      "tool": "check.run",
+      "role": "builder",
+      "args": {
+        "check_id": "SUITE",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite",
+        "install": [
+          "evilpkg"
+        ]
+      },
+      "expect": "REJECT_ARG",
+      "note": "no package-install argument exists (finding: supply-chain installs)",
+      "f_ids": [
+        "F-22"
+      ]
+    },
+    {
+      "id": "CF-F23",
+      "tool": "git.commit",
+      "role": "auditor",
+      "args": {
+        "message": "x",
+        "tree": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "unlisted shell equivalents do not exist; commit is builder-only (finding: missing shell blanket deny)",
+      "f_ids": [
+        "F-23"
+      ]
+    },
+    {
+      "id": "CF-F24",
+      "tool": "check.run",
+      "role": "orchestrator",
+      "args": {
+        "check_id": "SUITE",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "orchestrator has no check.run grant (finding: unmetered gate execution)",
+      "f_ids": [
+        "F-24"
+      ]
+    },
+    {
+      "id": "CF-F25",
+      "tool": "drain.validate",
+      "role": "orchestrator",
+      "args": {
+        "stage": "R1",
+        "record_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "overwrite": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "drain validation is verify-only; no overwrite flag exists (finding: forged drain runs)",
+      "f_ids": [
+        "F-25"
+      ]
+    },
+    {
+      "id": "CF-F26",
+      "tool": "git.read_file",
+      "role": "orchestrator",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "backend/.env"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: grep bypass of secret denies)",
+      "f_ids": [
+        "F-26"
+      ]
+    },
+    {
+      "id": "CF-F27",
+      "tool": "pr.open",
+      "role": "orchestrator",
+      "args": {
+        "head": "0000000000000000000000000000000000000000",
+        "title": "x"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "PR creation is release-engineer only (finding: spawn release path without verdict)",
+      "f_ids": [
+        "F-27"
+      ]
+    },
+    {
+      "id": "CF-F28",
+      "tool": "git.state",
+      "role": "orchestrator",
+      "args": {
+        "fields": [
+          "branch"
+        ],
+        "op": "delete"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no branch-delete operation exists (finding: git branch* destructive ops)",
+      "f_ids": [
+        "F-28"
+      ]
+    },
+    {
+      "id": "CF-F29",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "human-directive",
+        "capability_id": "00000000-0000-0000-0000-000000000000"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "actor enum is machine actors only; no human impersonation (finding: question-channel relay)",
+      "f_ids": [
+        "F-29"
+      ]
+    },
+    {
+      "id": "CF-F30",
+      "tool": "worktrees.sync",
+      "role": "orchestrator",
+      "args": {
+        "lane": "lane-1"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "worktree sync is release-engineer only (finding: orchestrator lane sync gap)",
+      "f_ids": [
+        "F-30"
+      ]
+    },
+    {
+      "id": "CF-F31",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "item_id": "ROOT-ACCESS",
+        "actor": "hacker-high",
+        "capability_id": "00000000-0000-0000-0000-000000000000"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "item_id enum comes from attack-catalog only (finding: catalog self-selection)",
+      "f_ids": [
+        "F-31"
+      ]
+    },
+    {
+      "id": "CF-F32",
+      "tool": "git.read_file",
+      "role": "hacker",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/accept_test.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "audit-scratch is unreadable by the hacker (finding: acceptance-test read)",
+      "f_ids": [
+        "F-32"
+      ]
+    },
+    {
+      "id": "CF-F33",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "hacker-high"
+      },
+      "expect": "REJECT_ARG",
+      "note": "every probe must bind a capability_id (finding: uncounted probes)",
+      "f_ids": [
+        "F-33"
+      ]
+    },
+    {
+      "id": "CF-F34",
+      "tool": "repro.run",
+      "role": "hacker",
+      "args": {
+        "spec": "../../../etc/passwd",
+        "runs": 1,
+        "engine": "sqlite"
+      },
+      "expect": "REJECT_PATH",
+      "note": "specs are anchored relative names; traversal rejected (finding: host-shell execution)",
+      "f_ids": [
+        "F-34"
+      ]
+    },
+    {
+      "id": "CF-F35",
+      "tool": "git.read_file",
+      "role": "hacker",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/verdicts/v1.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: grep bypass of quality deny)",
+      "f_ids": [
+        "F-35"
+      ]
+    },
+    {
+      "id": "CF-F36",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "hacker-high",
+        "capability_id": "00000000-0000-0000-0000-000000000000",
+        "endpoint": "/__exec?cmd=id"
+      },
+      "expect": "REJECT_PATTERN",
+      "note": "endpoint is an anchored relative path (finding: out-of-band command channel)",
+      "f_ids": [
+        "F-36"
+      ]
+    },
+    {
+      "id": "CF-F37",
+      "tool": "code.write",
+      "role": "compliance",
+      "args": {
+        "path": "C:/Users/Admin/Downloads/backend/docs/compliance/S1.md",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "absolute out-of-tree paths rejected (finding: external_directory)",
+      "f_ids": [
+        "F-37"
+      ]
+    },
+    {
+      "id": "CF-F38",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".env"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: grep/glob secret bypass)",
+      "f_ids": [
+        "F-38"
+      ]
+    },
+    {
+      "id": "CF-F39",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "hacker-scratch/exp.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: hacker-scratch contamination)",
+      "f_ids": [
+        "F-39"
+      ]
+    },
+    {
+      "id": "CF-F40",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/verdicts/v1.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: verdict readability)",
+      "f_ids": [
+        "F-40"
+      ]
+    },
+    {
+      "id": "CF-F41",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "policy-manifest.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: duplicate manifest deny hygiene)",
+      "f_ids": [
+        "F-41"
+      ]
+    },
+    {
+      "id": "CF-F42",
+      "tool": "check.run",
+      "role": "compliance",
+      "args": {
+        "check_id": "SUITE",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "compliance has no check.run grant",
+      "f_ids": [
+        "F-42"
+      ]
+    },
+    {
+      "id": "CF-F43",
+      "tool": "git.state",
+      "role": "compliance",
+      "args": {
+        "fields": [
+          "head"
+        ]
+      },
+      "expect": "REJECT_ROLE",
+      "note": "git.state excludes compliance",
+      "f_ids": [
+        "F-43"
+      ]
+    },
+    {
+      "id": "CF-F44",
+      "tool": "code.write",
+      "role": "crouton",
+      "args": {
+        "path": "backend/app/models.py",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "crouton code.write scope is backend/docs/** (finding: docs/** breadth)",
+      "f_ids": [
+        "F-44"
+      ]
+    },
+    {
+      "id": "CF-F45",
+      "tool": "git.read_file",
+      "role": "crouton",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "skills/hacker-exploit/SKILL.md"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: default-agent contamination)",
+      "f_ids": [
+        "F-45"
+      ]
+    },
+    {
+      "id": "CF-F46",
+      "tool": "git.read_file",
+      "role": "crouton",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".env"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: grep bypass of secret denies)",
+      "f_ids": [
+        "F-46"
+      ]
+    },
+    {
+      "id": "CF-F47",
+      "tool": "check.run",
+      "role": "crouton",
+      "args": {
+        "check_id": "SUITE",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "crouton has no check.run grant",
+      "f_ids": [
+        "F-47"
+      ]
+    },
+    {
+      "id": "CF-F48",
+      "tool": "code.write",
+      "role": "crouton",
+      "args": {
+        "path": "C:/Users/Admin/Downloads/backend/docs/x.md",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "absolute out-of-tree paths rejected (finding: external_directory)",
+      "f_ids": [
+        "F-48"
+      ]
+    },
+    {
+      "id": "CF-F49",
+      "tool": "git.push_ref",
+      "role": "release-engineer",
+      "args": {
+        "ref": "refs/heads/main",
+        "expected_head": "0000000000000000000000000000000000000000",
+        "force": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "no force flag exists (finding: ps1 free args)",
+      "f_ids": [
+        "F-49"
+      ]
+    },
+    {
+      "id": "CF-F50",
+      "tool": "git.read_file",
+      "role": "release-engineer",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/accept_test.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "read_file is auditor-only (finding: auditor-evidence readability)",
+      "f_ids": [
+        "F-50"
+      ]
+    },
+    {
+      "id": "CF-F51",
+      "tool": "pr.merge",
+      "role": "release-engineer",
+      "args": {
+        "pr": 1,
+        "head": "0000000000000000000000000000000000000000",
+        "skip_verdict": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "no verdict-bypass flag exists (finding: merge-pr without verdict)",
+      "f_ids": [
+        "F-51"
+      ]
+    },
+    {
+      "id": "CF-F52",
+      "tool": "git.state",
+      "role": "release-engineer",
+      "args": {
+        "fields": [
+          "branch"
+        ],
+        "op": "delete"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no branch-delete operation exists (finding: git branch -D)",
+      "f_ids": [
+        "F-52"
+      ]
+    },
+    {
+      "id": "CF-F53",
+      "tool": "ledger.append",
+      "role": "auditor",
+      "args": {
+        "record_type": "release",
+        "record": {},
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "release records are release-engineer-only (finding: no write path)",
+      "f_ids": [
+        "F-53"
+      ]
+    },
+    {
+      "id": "CF-F54",
+      "tool": "hacker.probe",
+      "role": "release-engineer",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "hacker-high",
+        "capability_id": "00000000-0000-0000-0000-000000000000",
+        "endpoint": "/api/x"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "release-engineer has no probe grant (finding: tool-skill passthrough)",
+      "f_ids": [
+        "F-54"
+      ]
+    },
+    {
+      "id": "CF-F55",
+      "tool": "pr.watch",
+      "role": "release-engineer",
+      "args": {
+        "pr": 1,
+        "head": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_PRECONDITION",
+      "note": "one watch per (pr, head) enforced server-side (finding: uniqueness not encoded)",
+      "f_ids": [
+        "F-55"
+      ]
+    },
+    {
+      "id": "CF-F56",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "target": "shell-wrappers"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "gate control targets do not include wrapper contents (finding: wrappers invisible to digests)",
+      "f_ids": [
+        "F-56"
+      ]
+    },
+    {
+      "id": "CF-F57",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "action": "django test",
+        "provider": "openai/gpt-6-luna"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no provider argument exists in the typed surface (finding: provider-identity drift)",
+      "f_ids": [
+        "F-57"
+      ]
+    },
+    {
+      "id": "CF-F58",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "action": "django test",
+        "command": "/bin/sh -c id"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no free-form command argument exists (finding: k1_exec free command)",
+      "f_ids": [
+        "F-58"
+      ]
+    },
+    {
+      "id": "CF-F59",
+      "tool": "ledger.append",
+      "role": "auditor",
+      "args": {
+        "record_type": "attack-log",
+        "record": {
+          "endpoint": "/login",
+          "payload": "user=a@b.c&password=hunter2"
+        },
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_REDACTION",
+      "note": "PII in a ledger record fails closed at the output boundary (finding: AGT redaction-after-execution)",
+      "f_ids": [
+        "F-59"
+      ]
+    },
+    {
+      "id": "CF-F60",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "path": "files/policies/policy-manifest.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "policy-manifest.json is denied for code.write (finding: attrib-stripped manifest rewrite)",
+      "f_ids": [
+        "F-60"
+      ]
+    },
+    {
+      "id": "CF-F61",
+      "tool": "k1.exec",
+      "role": "hacker",
+      "args": {
+        "run_id": "r1",
+        "action": "django test"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "K1 execution is auditor-only; the hacker has no k1_exec (finding: documented capability unattainable)",
+      "f_ids": [
+        "F-61"
+      ]
+    },
+    {
+      "id": "CF-F62",
+      "tool": "harness.verify",
+      "role": "orchestrator",
+      "args": {
+        "scope": "count"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "verify scopes are harness_config/policy_manifest (finding: 180-file manifest claim)",
+      "f_ids": [
+        "F-62"
+      ]
+    },
+    {
+      "id": "CF-F63",
+      "tool": "docker.ensure",
+      "role": "builder",
+      "args": {
+        "action": "start_all"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "docker.ensure only ensures the engine (finding: start-everything -All)",
+      "f_ids": [
+        "F-63"
+      ]
+    },
+    {
+      "id": "CF-F64",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "0000000000000000000000000000000000000000",
+        "head": "0000000000000000000000000000000000000000",
+        "cap_add": [
+          "SETUID"
+        ]
+      },
+      "expect": "REJECT_ARG",
+      "note": "no capability argument exists (finding: cap-add privilege escalation)",
+      "f_ids": [
+        "F-64"
+      ]
+    },
+    {
+      "id": "CF-F65",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "action": "django test",
+        "pipe": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "no shell plumbing arguments exist (finding: /bin/sh -c command strings)",
+      "f_ids": [
+        "F-65"
+      ]
+    },
+    {
+      "id": "CF-F66",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "0000000000000000000000000000000000000000",
+        "head": "0000000000000000000000000000000000000000",
+        "postgres_password": "p@ss"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no password argument exists; credentials are server-generated (finding: env-passed password)",
+      "f_ids": [
+        "F-66"
+      ]
+    },
+    {
+      "id": "CF-F67",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "0000000000000000000000000000000000000000",
+        "head": "0000000000000000000000000000000000000000",
+        "publish": "0.0.0.0:5432"
+      },
+      "expect": "REJECT_ARG",
+      "note": "no port-publish argument exists (finding: 0.0.0.0 published postgres)",
+      "f_ids": [
+        "F-67"
+      ]
+    },
+    {
+      "id": "CF-F68",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "0000000000000000000000000000000000000000",
+        "head": "0000000000000000000000000000000000000000",
+        "archive_include": [
+          "media/"
+        ]
+      },
+      "expect": "REJECT_ARG",
+      "note": "archive contents are fixed at the tool layer (finding: media/ shipped into K1)",
+      "f_ids": [
+        "F-68"
+      ]
+    },
+    {
+      "id": "CF-F69",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "run_id": "r1",
+        "base": "9b10e00",
+        "head": "0000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_PATTERN",
+      "note": "full 40-hex refs required; abbreviated prefixes rejected (finding)",
+      "f_ids": [
+        "F-69"
+      ]
+    },
+    {
+      "id": "CF-F70",
+      "tool": "docker.ensure",
+      "role": "builder",
+      "args": {
+        "action": "ensure",
+        "start_desktop": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "no GUI-start argument exists (finding: unattended cold-start dependency)",
+      "f_ids": [
+        "F-70"
+      ]
+    },
+    {
+      "id": "CF-F71",
+      "tool": "harness.verify",
+      "role": "orchestrator",
+      "args": {
+        "scope": "required_checks"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "no required_checks scope exists (finding: check-set drift)",
+      "f_ids": [
+        "F-71"
+      ]
+    },
+    {
+      "id": "CF-F72",
+      "tool": "ledger.append",
+      "role": "auditor",
+      "args": {
+        "record_type": "finding",
+        "record": {
+          "class": "INVENTED_CLASS"
+        },
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_POLICY",
+      "note": "unknown severity classes fail closed (finding: severity class gaps)",
+      "f_ids": [
+        "F-72"
+      ]
+    },
+    {
+      "id": "CF-F73",
+      "tool": "check.run",
+      "role": "auditor",
+      "args": {
+        "check_id": "TEST_SET",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite",
+        "removed_id": "test_auth",
+        "covered_by": "test_auth_extra"
+      },
+      "expect": "REJECT_POLICY",
+      "note": "covered_by must exactly equal an added test id; substring rejected (finding)",
+      "f_ids": [
+        "F-73"
+      ]
+    },
+    {
+      "id": "CF-F74",
+      "tool": "check.run",
+      "role": "auditor",
+      "args": {
+        "check_id": "ORACLE_PROVENANCE",
+        "tree": "0000000000000000000000000000000000000000",
+        "engine": "sqlite",
+        "line": "assert True, 'looks fine'"
+      },
+      "expect": "REJECT_POLICY",
+      "note": "tautology with message/comment tail is now a blocked oracle finding (finding)",
+      "f_ids": [
+        "F-74"
+      ]
+    },
+    {
+      "id": "CF-F75",
+      "tool": "ledger.append",
+      "role": "auditor",
+      "args": {
+        "record_type": "attack-log",
+        "record": {
+          "note": "invalid ip 999.999.999.999 observed"
+        },
+        "expected_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": "REJECT_REDACTION",
+      "note": "unredactable PII fails closed at the output boundary (finding: phone/ipv4 mangling)",
+      "f_ids": [
+        "F-75"
+      ]
+    },
+    {
+      "id": "CF-F76",
+      "tool": "acceptance.materialize",
+      "role": "auditor",
+      "args": {
+        "spec": "ledger-spec:0006",
+        "path": "quality/ledger/verdicts/v1.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "materialization cannot write into the ledger (finding: no acceptance write path)",
+      "f_ids": [
+        "F-76"
+      ]
+    },
+    {
+      "id": "CF-F77",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "target": "registry"
+      },
+      "expect": "REJECT_ENUM",
+      "note": "gate control targets do not include the registry (finding: MCP server not in gate_impl_digest)",
+      "f_ids": [
+        "F-77"
+      ]
+    },
+    {
+      "id": "CTRL-git.state-1",
+      "tool": "git.state",
+      "role": "compliance",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.state.roles"
+    },
+    {
+      "id": "CTRL-git.state-2",
+      "tool": "git.state",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.state-3",
+      "tool": "git.state",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.status-1",
+      "tool": "git.status",
+      "role": "hacker",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.status.roles"
+    },
+    {
+      "id": "CTRL-git.status-2",
+      "tool": "git.status",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.status-3",
+      "tool": "git.status",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.log-1",
+      "tool": "git.log",
+      "role": "hacker",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.log.roles"
+    },
+    {
+      "id": "CTRL-git.log-2",
+      "tool": "git.log",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.log-3",
+      "tool": "git.log",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.diff-1",
+      "tool": "git.diff",
+      "role": "hacker",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.diff.roles"
+    },
+    {
+      "id": "CTRL-git.diff-2",
+      "tool": "git.diff",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.diff-3",
+      "tool": "git.diff",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.read_file-1",
+      "tool": "git.read_file",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.read_file.roles"
+    },
+    {
+      "id": "CTRL-git.read_file-2",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.read_file-3",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.commit-1",
+      "tool": "git.commit",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.commit.roles"
+    },
+    {
+      "id": "CTRL-git.commit-2",
+      "tool": "git.commit",
+      "role": "builder",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.commit-3",
+      "tool": "git.commit",
+      "role": "builder",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-git.push_ref-1",
+      "tool": "git.push_ref",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in git.push_ref.roles"
+    },
+    {
+      "id": "CTRL-git.push_ref-2",
+      "tool": "git.push_ref",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-git.push_ref-3",
+      "tool": "git.push_ref",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.list-1",
+      "tool": "worktrees.list",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in worktrees.list.roles"
+    },
+    {
+      "id": "CTRL-worktrees.list-2",
+      "tool": "worktrees.list",
+      "role": "orchestrator",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.list-3",
+      "tool": "worktrees.list",
+      "role": "orchestrator",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.sync-1",
+      "tool": "worktrees.sync",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in worktrees.sync.roles"
+    },
+    {
+      "id": "CTRL-worktrees.sync-2",
+      "tool": "worktrees.sync",
+      "role": "release-engineer",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.sync-3",
+      "tool": "worktrees.sync",
+      "role": "release-engineer",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.reconcile-1",
+      "tool": "worktrees.reconcile",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in worktrees.reconcile.roles"
+    },
+    {
+      "id": "CTRL-worktrees.reconcile-2",
+      "tool": "worktrees.reconcile",
+      "role": "release-engineer",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-worktrees.reconcile-3",
+      "tool": "worktrees.reconcile",
+      "role": "release-engineer",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-check.run-1",
+      "tool": "check.run",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in check.run.roles"
+    },
+    {
+      "id": "CTRL-check.run-2",
+      "tool": "check.run",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-check.run-3",
+      "tool": "check.run",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-gate.control-1",
+      "tool": "gate.control",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in gate.control.roles"
+    },
+    {
+      "id": "CTRL-gate.control-2",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-gate.control-3",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-k1.up-1",
+      "tool": "k1.up",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in k1.up.roles"
+    },
+    {
+      "id": "CTRL-k1.up-2",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-k1.up-3",
+      "tool": "k1.up",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-k1.down-1",
+      "tool": "k1.down",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in k1.down.roles"
+    },
+    {
+      "id": "CTRL-k1.down-2",
+      "tool": "k1.down",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-k1.down-3",
+      "tool": "k1.down",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-k1.exec-1",
+      "tool": "k1.exec",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in k1.exec.roles"
+    },
+    {
+      "id": "CTRL-k1.exec-2",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-k1.exec-3",
+      "tool": "k1.exec",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-k1.status-1",
+      "tool": "k1.status",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in k1.status.roles"
+    },
+    {
+      "id": "CTRL-k1.status-2",
+      "tool": "k1.status",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-k1.status-3",
+      "tool": "k1.status",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-hacker.probe-1",
+      "tool": "hacker.probe",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in hacker.probe.roles"
+    },
+    {
+      "id": "CTRL-hacker.probe-2",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-hacker.probe-3",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-repro.run-1",
+      "tool": "repro.run",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in repro.run.roles"
+    },
+    {
+      "id": "CTRL-repro.run-2",
+      "tool": "repro.run",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-repro.run-3",
+      "tool": "repro.run",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-static.scan-1",
+      "tool": "static.scan",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in static.scan.roles"
+    },
+    {
+      "id": "CTRL-static.scan-2",
+      "tool": "static.scan",
+      "role": "hacker",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-static.scan-3",
+      "tool": "static.scan",
+      "role": "hacker",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-scratch.write-1",
+      "tool": "scratch.write",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in scratch.write.roles"
+    },
+    {
+      "id": "CTRL-scratch.write-2",
+      "tool": "scratch.write",
+      "role": "hacker",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-scratch.write-3",
+      "tool": "scratch.write",
+      "role": "hacker",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-ledger.append-1",
+      "tool": "ledger.append",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in ledger.append.roles"
+    },
+    {
+      "id": "CTRL-ledger.append-2",
+      "tool": "ledger.append",
+      "role": "orchestrator",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-ledger.append-3",
+      "tool": "ledger.append",
+      "role": "orchestrator",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-acceptance.materialize-1",
+      "tool": "acceptance.materialize",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in acceptance.materialize.roles"
+    },
+    {
+      "id": "CTRL-acceptance.materialize-2",
+      "tool": "acceptance.materialize",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-acceptance.materialize-3",
+      "tool": "acceptance.materialize",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-drain.validate-1",
+      "tool": "drain.validate",
+      "role": "builder",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in drain.validate.roles"
+    },
+    {
+      "id": "CTRL-drain.validate-2",
+      "tool": "drain.validate",
+      "role": "auditor",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-drain.validate-3",
+      "tool": "drain.validate",
+      "role": "auditor",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-evidence.hash-1",
+      "tool": "evidence.hash",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in evidence.hash.roles"
+    },
+    {
+      "id": "CTRL-evidence.hash-2",
+      "tool": "evidence.hash",
+      "role": "builder",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-evidence.hash-3",
+      "tool": "evidence.hash",
+      "role": "builder",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-harness.verify-1",
+      "tool": "harness.verify",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in harness.verify.roles"
+    },
+    {
+      "id": "CTRL-harness.verify-2",
+      "tool": "harness.verify",
+      "role": "orchestrator",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-harness.verify-3",
+      "tool": "harness.verify",
+      "role": "orchestrator",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-pr.open-1",
+      "tool": "pr.open",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in pr.open.roles"
+    },
+    {
+      "id": "CTRL-pr.open-2",
+      "tool": "pr.open",
+      "role": "release-engineer",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-pr.open-3",
+      "tool": "pr.open",
+      "role": "release-engineer",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-pr.watch-1",
+      "tool": "pr.watch",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in pr.watch.roles"
+    },
+    {
+      "id": "CTRL-pr.watch-2",
+      "tool": "pr.watch",
+      "role": "release-engineer",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-pr.watch-3",
+      "tool": "pr.watch",
+      "role": "release-engineer",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-pr.merge-1",
+      "tool": "pr.merge",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in pr.merge.roles"
+    },
+    {
+      "id": "CTRL-pr.merge-2",
+      "tool": "pr.merge",
+      "role": "release-engineer",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-pr.merge-3",
+      "tool": "pr.merge",
+      "role": "release-engineer",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-docker.ensure-1",
+      "tool": "docker.ensure",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in docker.ensure.roles"
+    },
+    {
+      "id": "CTRL-docker.ensure-2",
+      "tool": "docker.ensure",
+      "role": "builder",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-docker.ensure-3",
+      "tool": "docker.ensure",
+      "role": "builder",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CTRL-code.write-1",
+      "tool": "code.write",
+      "role": "auditor",
+      "args": {},
+      "expect": "REJECT_ROLE",
+      "note": "wrong role is not in code.write.roles"
+    },
+    {
+      "id": "CTRL-code.write-2",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "__unknown_arg__": true
+      },
+      "expect": "REJECT_ARG",
+      "note": "unknown arguments are rejected"
+    },
+    {
+      "id": "CTRL-code.write-3",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "__dash__": "--bad-arg"
+      },
+      "expect": "REJECT_ARG",
+      "note": "leading-dash values are rejected"
+    }
+  ]
+}

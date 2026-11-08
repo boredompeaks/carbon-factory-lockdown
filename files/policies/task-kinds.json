@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "FEATURE": {
+    "requires_acceptance_tests": true,
+    "description": "New user-visible behaviour or a new capability."
+  },
+  "FIX": {
+    "requires_acceptance_tests": true,
+    "description": "Repair a defect without changing the public contract."
+  },
+  "SECURITY": {
+    "requires_acceptance_tests": true,
+    "description": "Close an authorization, money, session, or injection defect."
+  },
+  "DOC": {
+    "requires_acceptance_tests": false,
+    "description": "Documentation-only change with no executable behaviour.",
+    "allowed_path_globs": [
+      "**/*.md",
+      "**/*.rst",
+      "**/*.txt",
+      "**/docs/**/*.md",
+      "**/docs/**/*.rst",
+      "**/docs/**/*.txt"
+    ],
+    "denied_path_globs": [
+      "**/*.py",
+      "policies/**",
+      "files/policies/**",
+      "tools/**",
+      "files/tools/**",
+      ".opencode/**",
+      "backend/**"
+    ],
+    "denied_extensions": [
+      ".py"
+    ],
+    "allowed_rule": "EVERY diff path MUST match an allowed_path_globs entry AND MUST NOT match denied_extensions AND MUST NOT match denied_path_globs EXCEPT the backend/docs/** docs exception (backend/docs/**/*.md|rst|txt and **/docs/**/*.md|rst|txt override the backend/** deny; **/*.py overrides everything, including backend/docs/**)",
+    "reject_code": "DOC_PATH_VIOLATION",
+    "backend_docs_note": "docs/ lives inside backend/ (backend/docs/), NOT at repo root. backend/** is denied under DOC EXCEPT backend/docs/** docs: backend/docs/** is allowed ONLY with .md/.rst/.txt extensions (covered by **/docs/**/*.md|rst|txt and **/*.md|rst|txt). A .py under backend/docs/ is REJECTED.",
+    "enforcement_layer": "policy fields (this file + task-limits.json) are authoritative; orchestrator/builder must declare capability.scope from allowed_path_globs and every diff path is checked against them. gate_run.py DOC path rejection is NOT in this patch (owned scope is check_test_set only); SCOPE check enforces scope membership."
+  },
+  "INFRA": {
+    "requires_acceptance_tests": true,
+    "description": "Build, CI, deployment, dependency, or runtime configuration change."
+  },
+  "DRAIN": {
+    "requires_acceptance_tests": true,
+    "description": "Cluster and drain a backlog of reproduced defects, five rows per capability.",
+    "stages": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5"
+    ],
+    "cluster_by": "class",
+    "max_rows_per_capability": 5
+  }
+}

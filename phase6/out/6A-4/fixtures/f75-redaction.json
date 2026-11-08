@@ -1,0 +1,32 @@
+{
+  "finding": "F-75",
+  "cases": [
+    {
+      "text": "call 2125550199 (order 8081)",
+      "phone_nanp_matches": false,
+      "ipv4_matches": false,
+      "note": "bare 10-digit run is not a NANP-formatted phone"
+    },
+    {
+      "text": "call (212) 555-0199 or 212-555-0199",
+      "phone_nanp_matches": true,
+      "note": "formatted NANP phone still redacts"
+    },
+    {
+      "text": "cache node 999.999.999.999 ttl",
+      "ipv4_matches": false,
+      "note": "invalid octets are not an IPv4 address"
+    },
+    {
+      "text": "GET http://127.0.0.1:8081/health",
+      "fixture_allowlisted": true,
+      "note": "K1 fixture endpoint stays legible in evidence"
+    },
+    {
+      "text": "payment pay_3f9a1c2b4d5e6f70",
+      "fixture_allowlisted": true,
+      "note": "fake-provider id is a fixture constant"
+    }
+  ],
+  "note": "Narrower NANP/ipv4 patterns + fixture allowlist; session/CSRF tokens still fail closed via the entropy fallback (6B runner)."
+}

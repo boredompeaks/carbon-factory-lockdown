@@ -1,0 +1,15 @@
+diff --git a/backend/orders/views/refund.py b/backend/orders/views/refund.py
+index 1111111..2222222 100644
+--- a/backend/orders/views/refund.py
++++ b/backend/orders/views/refund.py
+@@ -1,1 +1,2 @@
+ def refund(order, amount):
++    # read-only annotation, no guard touched
+diff --git a/backend/orders/refunds.py b/backend/orders/refunds.py
+index 1111111..2222222 100644
+--- a/backend/orders/refunds.py
++++ b/backend/orders/refunds.py
+@@ -39,2 +39,1 @@ def refund(order, amount):
+-    if remaining <= 0:
+-        _reject_over_refund()
++    _reject_over_refund()

@@ -1,0 +1,383 @@
+{
+  "version": 1,
+  "evaluation": {
+    "mode": "all_matching_rules",
+    "order": "rule_id",
+    "before_target": "builder",
+    "max_prebuild_dispatches": 2,
+    "halt_on_compliance_fail": true
+  },
+  "rules": [
+    {
+      "rule_id": "DR-DRAIN-01",
+      "match": {
+        "task_kind": [
+          "DRAIN"
+        ],
+        "scope_globs": [
+          "backend/**/views/**",
+          "backend/**/api/**",
+          "backend/**/serializers/**",
+          "backend/**/orders/**",
+          "backend/**/cart/**",
+          "backend/**/shipping/**",
+          "backend/**/migrations/**",
+          "backend/**/common/**",
+          "backend/common/**",
+          "backend/**/accounts/**",
+          "backend/**/account/**",
+          "backend/**/roles/**",
+          "backend/**/permissions/**",
+          "backend/**/settings/**",
+          "backend/**/settings.py",
+          "backend/settings.py",
+          "backend/settings/**",
+          "backend/urls.py",
+          "backend/**/urls.py",
+          "backend/accounts/**",
+          "backend/roles/**",
+          "backend/accounts/views.py",
+          "backend/accounts/models.py",
+          "backend/common/roles.py",
+          "backend/common/fields.py",
+          "backend/common/testing.py",
+          "backend/config/settings.py",
+          "backend/orders/models.py",
+          "frontend/**/checkout/**",
+          "frontend/**/auth/**",
+          "quality/ledger/**",
+          "**/*.sql",
+          "AGENTS.md"
+        ],
+        "keywords": [
+          "role",
+          "permission",
+          "account",
+          "checkout",
+          "settings",
+          "policy",
+          "gate",
+          "workflow",
+          "migration",
+          "common",
+          "github"
+        ]
+      },
+      "require_records": [
+        {
+          "stage": "R1",
+          "schema": "drain-record/1",
+          "min_count": 1
+        },
+        {
+          "stage": "R2",
+          "schema": "drain-record/1",
+          "min_count": 1
+        },
+        {
+          "stage": "R3",
+          "schema": "drain-record/1",
+          "min_count": 1
+        }
+      ],
+      "require_before": "builder",
+      "dispatch_first": [
+        "compliance"
+      ],
+      "on_missing": {
+        "action": "HALT",
+        "reason_code": "DRAIN_STAGE_MISSING"
+      },
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    },
+    {
+      "rule_id": "DR-POLICY-01",
+      "match": {
+        "task_kind": [],
+        "scope_globs": [
+          "policies/**",
+          "tools/**",
+          ".opencode/**",
+          ".github/workflows/**"
+        ],
+        "keywords": []
+      },
+      "dispatch_first": [
+        "compliance"
+      ],
+      "require_before": "builder",
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    },
+    {
+      "rule_id": "DR-SECURITY-01",
+      "match": {
+        "task_kind": [
+          "SECURITY"
+        ],
+        "scope_globs": [
+          "backend/**/auth/**",
+          "backend/**/mfa/**",
+          "backend/**/accounts/**",
+          "backend/**/account/**",
+          "backend/**/roles/**",
+          "backend/**/permissions/**",
+          "backend/**/admin/**",
+          "backend/**/webhooks/**",
+          "backend/**/common/**",
+          "backend/auth/**",
+          "backend/mfa/**",
+          "backend/accounts/**",
+          "backend/roles/**",
+          "backend/common/**",
+          "backend/accounts/views.py",
+          "backend/accounts/models.py",
+          "backend/common/roles.py",
+          "backend/common/fields.py",
+          "backend/config/settings.py",
+          "backend/settings/**",
+          "backend/settings.py",
+          "backend/**/settings/**",
+          "backend/**/settings.py",
+          "frontend/**/auth/**",
+          "frontend/**/payment/**",
+          "**/.env*",
+          ".gitleaks.toml",
+          "backend/urls.py",
+          "backend/**/urls.py",
+          "backend/**/views/**",
+          "backend/**/api/**",
+          "backend/**/serializers/**",
+          "**/*.sql",
+          "AGENTS.md",
+          "quality/ledger/**",
+          ".github/**",
+          ".github/workflows/**"
+        ],
+        "keywords": [
+          "auth",
+          "login",
+          "password",
+          "mfa",
+          "otp",
+          "session",
+          "token",
+          "secret",
+          "admin",
+          "tenant",
+          "idor",
+          "role",
+          "permission",
+          "account",
+          "settings",
+          "policy",
+          "gate",
+          "common"
+        ]
+      },
+      "dispatch_first": [
+        "compliance"
+      ],
+      "require_before": "builder",
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    },
+    {
+      "rule_id": "DR-MONEY-01",
+      "match": {
+        "task_kind": [],
+        "scope_globs": [
+          "backend/**/payments/**",
+          "backend/**/payment/**",
+          "backend/**/refunds/**",
+          "backend/**/refund/**",
+          "backend/**/billing/**",
+          "backend/**/money/**",
+          "backend/**/pricing/**",
+          "backend/**/auth/**",
+          "backend/**/mfa/**",
+          "backend/**/webhooks/**",
+          "backend/**/admin/**",
+          "backend/**/accounts/**",
+          "backend/**/roles/**",
+          "backend/**/settings/**",
+          "backend/payments/**",
+          "backend/refunds/**",
+          "backend/auth/**",
+          "backend/mfa/**",
+          "backend/billing/**",
+          "backend/money.py",
+          "frontend/**/payment/**",
+          "frontend/**/checkout/**",
+          "**/.env*",
+          "backend/orders/refunds.py",
+          "backend/**/refunds.py",
+          "backend/**/refund*.py",
+          "backend/orders/models.py",
+          "backend/accounts/views.py",
+          "backend/accounts/models.py",
+          "backend/common/roles.py",
+          "backend/common/fields.py",
+          "backend/config/settings.py"
+        ],
+        "keywords": [
+          "refund",
+          "payment",
+          "payout",
+          "invoice",
+          "billing",
+          "money",
+          "webhook",
+          "auth",
+          "login",
+          "password",
+          "mfa",
+          "otp",
+          "session",
+          "token",
+          "admin",
+          "secret",
+          "tenant",
+          "idor",
+          "price",
+          "role",
+          "permission",
+          "account",
+          "checkout",
+          "settings"
+        ]
+      },
+      "dispatch_first": [
+        "compliance"
+      ],
+      "require_before": "builder",
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    },
+    {
+      "rule_id": "DR-INFRA-01",
+      "match": {
+        "task_kind": [
+          "INFRA"
+        ],
+        "scope_globs": [
+          ".github/workflows/**",
+          ".github/**",
+          "**/Dockerfile",
+          "**/docker-compose*.yml",
+          "**/requirements*.txt",
+          "**/pyproject.toml",
+          "**/package.json",
+          "**/package-lock.json",
+          "**/conftest.py",
+          "**/pytest.ini",
+          "**/tox.ini",
+          "**/.coveragerc",
+          "**/*.sql",
+          "backend/**/migrations/**",
+          "backend/**/settings/**",
+          "backend/**/settings.py",
+          "backend/settings.py",
+          "backend/settings/**",
+          "backend/urls.py",
+          "backend/**/urls.py",
+          "backend/**/views/**",
+          "backend/**/api/**",
+          "backend/**/serializers/**",
+          "backend/**/common/**",
+          "backend/common/**",
+          "backend/common/testing.py",
+          "backend/config/settings.py",
+          "quality/ledger/**",
+          "AGENTS.md",
+          "opencode.json",
+          ".agt/**",
+          ".gitleaks.toml",
+          "**/.env*",
+          "tools/**",
+          ".opencode/**",
+          "policies/**"
+        ],
+        "keywords": [
+          "settings",
+          "policy",
+          "gate",
+          "workflow",
+          "migration",
+          "common",
+          "github",
+          "role",
+          "permission",
+          "account",
+          "secret",
+          "token"
+        ]
+      },
+      "dispatch_first": [
+        "compliance"
+      ],
+      "require_before": "builder",
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    },
+    {
+      "rule_id": "DR-UI-01",
+      "match": {
+        "task_kind": [],
+        "scope_globs": [
+          "frontend/**"
+        ],
+        "keywords": []
+      },
+      "dispatch_first": [
+        "design-research"
+      ],
+      "require_before": "builder",
+      "on_compliance_result": {
+        "PASS": {
+          "action": "CONTINUE"
+        },
+        "FAIL": {
+          "action": "HALT",
+          "reason_code": "CTRL_FAILED"
+        }
+      }
+    }
+  ]
+}

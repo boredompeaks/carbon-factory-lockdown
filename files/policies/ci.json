@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "required_checks": [
+    "SUITE",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "POLICY_DIGEST",
+    "AUTHZ_MATRIX",
+    "BOOTTEST",
+    "ZIZMOR",
+    "ARCH"
+  ],
+  "not_run_in_ci": [
+    "SCOPE",
+    "TEST_SET",
+    "TEST_INFRA",
+    "BASE_FAIL_HEAD_PASS",
+    "MUTATION",
+    "SMELL",
+    "GATE_CONTROLS",
+    "ORACLE_PROVENANCE",
+    "GUARD_DELTA",
+    "SEMGREP",
+    "THREAD_RACE",
+    "SCHEMA_FUZZ",
+    "DAST_BASELINE",
+    "AGT_PARITY",
+    "AGT_AUDIT"
+  ],
+  "timeout_seconds": 1800,
+  "base_branch": "spec-comp",
+  "merge_method": "squash",
+  "promotion_branch_prefix": "task/",
+  "required_checks_source": "files/policies/checks.json required_in_ci (single source; see files/policies/ci-required.json)",
+  "one_source": "files/policies/ci-required.json",
+  "required_checks_only_self_audit": true,
+  "self_audit_owner": "release-engineer",
+  "promotion_branch": "feat/add-frontend",
+  "shadow": {
+    "cycles": 0,
+    "effect": "block",
+    "blocks_merge": true,
+    "applies_to": []
+  }
+}

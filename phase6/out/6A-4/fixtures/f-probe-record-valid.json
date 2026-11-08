@@ -1,0 +1,16 @@
+{
+  "finding": "probe-record",
+  "record": {
+    "item_id": "AUTHZ-ROUTE",
+    "probe_class": "cross_tenant",
+    "endpoint": "/api/orders/17",
+    "tenant_pair": [
+      "tenant-a",
+      "tenant-b"
+    ],
+    "engine": "postgres",
+    "outcome": "blocked",
+    "evidence_ref": "ledger:0006"
+  },
+  "expected": "VALID"
+}

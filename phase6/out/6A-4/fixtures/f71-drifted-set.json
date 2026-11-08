@@ -1,0 +1,16 @@
+{
+  "finding": "F-71",
+  "required_checks": [
+    "SUITE",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "POLICY_DIGEST",
+    "BOOTTEST",
+    "ZIZMOR",
+    "ARCH"
+  ],
+  "expected_lint": "FAIL",
+  "error": "REQUIRED_SET_DRIFT",
+  "note": "Pre-fix branch-protection.json (missing AUTHZ_MATRIX); lint must fail it."
+}

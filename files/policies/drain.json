@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "record_schema_ref": "policies/schemas/drain-record.json",
+  "stage_order": ["R1", "R2", "R3", "R4", "R5"],
+  "pre_builder_stages": ["R1", "R2", "R3"],
+  "stages": [
+    {
+      "stage": "R1",
+      "name": "CONFIRM",
+      "actor": "orchestrator",
+      "required_fields": ["cluster_id", "defect_ids", "class", "tree_sha", "locus"],
+      "exit_when": "every row is re-read at the capability head and marked CONFIRMED, or UNREPRODUCIBLE with tree_sha and attempt_log_ref",
+      "writes": "drain-record/1",
+      "next": "R2"
+    },
+    {
+      "stage": "R2",
+      "name": "EXPLOIT_SPEC",
+      "actor": "hacker-high|hacker-max",
+      "required_fields": ["cluster_id", "capability_id", "exploit_spec_ref", "invariant_broken"],
+      "exit_when": "an executable repro-spec exists for the cluster and fails on base",
+      "writes": "drain-record/1",
+      "next": "R3"
+    },
+    {
+      "stage": "R3",
+      "name": "ACCEPTANCE_RED",
+      "actor": "auditor",
+      "required_fields": ["cluster_id", "acceptance_ref", "base_outcome", "fail_kind", "evidence_ref"],
+      "exit_when": "every row has an acceptance ref that fails on base with fail_kind ASSERTION",
+      "writes": "drain-record/1",
+      "next": "R4"
+    },
+    {
+      "stage": "R4",
+      "name": "BUILD_AUDIT_RELEASE",
+      "actor": "builder|auditor|release-engineer",
+      "required_fields": ["cluster_id", "capability_id", "head", "tree", "verdict_ref", "release_ref", "guard_ref"],
+      "exit_when": "release.merged_tree equals verdict.tree and Q-GUARD passes: the guard_ref node is present at verdict.head, is not skipped or xfailed, and passes in the verdict SUITE result",
+      "writes": "drain-record/1",
+      "next": "R5"
+    },
+    {
+      "stage": "R5",
+      "name": "PERMANENT_GUARD",
+      "actor": "auditor",
+      "required_fields": ["cluster_id", "guard_ref", "guard_present_at_merged_tree", "guard_not_skipped", "guard_passes", "evidence_ref"],
+      "exit_when": "post-merge permanence verification: the guard_ref node remains in the merged_tree (post-merge head), is not skipped or xfailed, and passes; its removal or skip reopens R1",
+      "writes": "drain-record/1",
+      "next": null
+    }
+  ],
+  "unreproducible": {
+    "state": "UNREPRODUCIBLE",
+    "required_fields": ["tree_sha", "attempt_log_ref", "commands", "output_sha256"],
+    "delete_row": false,
+    "reopen_when": "the cited locus changes at a later tree"
+  },
+  "clustering": {
+    "order": ["class", "locus_prefix"],
+    "one_capability_per_cluster": true,
+    "max_rows_per_capability": 5,
+    "split_rule": "split by locus prefix, never by row"
+  },
+  "register_edit_policy": "the orchestrator never edits the register; drain-record is the audit trail"
+}

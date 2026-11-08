@@ -1,0 +1,66 @@
+# Gate 0 -- the harness directory is not a git repo, so nothing here is
+# protected by git today. These entries are the ones that must never be
+# committed if it becomes one.
+#
+# Hygienic initial commit (pre-phase6): expands the Gate 0 list to cover
+# venv, archives, runtime outputs and live ledgers. Tracked surfaces are
+# phase6/**, files/policies/**, files/tools/** (minus out/),
+# .opencode/agents/**, files/*.md, files/sop/**, .agt/**, scripts/**,
+# opencode.json, plus .gitignore/.gitattributes themselves.
+# Author identity for this checkout is local-only: user.name
+# opencode-agent / user.email opencode-agent@localhost, set via
+# `git config` (local .git/config) — NOT the global
+# C:\Users\Admin\.gitconfig (boredompeaks / biochem1981@gmail.com).
+
+# Secrets & credentials — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+**/service.json
+**/auth.json
+**/.playwright-mcp/
+
+# Playwright / browser artifacts
+**/shots/
+
+# Dependencies
+**/node_modules/
+
+# Python environments & caches
+**/venv/
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+**/.ruff_cache/
+**/.mypy_cache/
+**/.pytest_cache/
+
+# Databases & logs
+*.sqlite3
+*.log
+*.err
+
+# Harness runtime transcripts — never commit
+scratchpad/
+.opencode/archive/
+
+# Runtime outputs (regenerable, not contract baseline)
+files/tools/out/
+tools/out/
+
+# Live quality ledgers (append-only records, not contract baseline)
+quality/ledger/
+files/quality/ledger/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/

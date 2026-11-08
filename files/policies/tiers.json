@@ -1,0 +1,409 @@
+{
+  "version": 1,
+  "new_checks": [
+    {
+      "id": "AUTHZ_MATRIX",
+      "shadow": true
+    },
+    {
+      "id": "SEMGREP",
+      "shadow": false,
+      "note": "Money rules blocking this phase: GATEWAY_IN_ATOMIC, MISSING_IDEMPOTENCY, NONATOMIC_WATERMARK, LOCK_ACROSS_NETWORK."
+    },
+    {
+      "id": "SMELL",
+      "shadow": true
+    },
+    {
+      "id": "THREAD_RACE",
+      "shadow": true
+    },
+    {
+      "id": "SCHEMA_FUZZ",
+      "shadow": true
+    },
+    {
+      "id": "BOOTTEST",
+      "shadow": true
+    },
+    {
+      "id": "ZIZMOR",
+      "shadow": true
+    },
+    {
+      "id": "DAST_BASELINE",
+      "shadow": true
+    },
+    {
+      "id": "ARCH",
+      "shadow": false
+    },
+    {
+      "id": "ORACLE_PROVENANCE",
+      "shadow": true
+    },
+    {
+      "id": "GUARD_DELTA",
+      "shadow": true
+    },
+    {
+      "id": "POLICY_DIGEST",
+      "shadow": true
+    }
+  ],
+  "shadow_policy": {
+    "cycles": 1,
+    "scope": "auditor_verdict",
+    "effect": "record_only_first_cycle",
+    "verdict_effect": "none",
+    "outcome_recorded": true,
+    "ci_required_unaffected": true,
+    "applies_to": "new_checks"
+  },
+  "check_conditions": {
+    "THREAD_RACE": {
+      "description": "NOT_APPLICABLE is recorded (not PASS and not 20/20 green) when the closure matches none of applies_when_closure_matches or contains none of closure_symbols; a green PASS requires a matching closure plus 20/20 clean postgres repetitions.",
+      "applies_when_closure_matches": [
+        "**/locks/**",
+        "**/atomic/**",
+        "**/idempotency/**",
+        "**/watermark/**",
+        "**/models/**",
+        "**/services/**",
+        "**/tasks/**",
+        "**/views/**",
+        "**/api/**"
+      ],
+      "closure_symbols": [
+        "lock",
+        "atomic",
+        "select_for_update",
+        "idempotency_key",
+        "watermark"
+      ],
+      "required_engine": "postgres",
+      "sqlite_outcome": "NOT_APPLICABLE",
+      "else_outcome": "NOT_APPLICABLE"
+    },
+    "ZIZMOR": {
+      "applies_when_closure_matches": [
+        ".github/**"
+      ],
+      "else_schedule": "weekly_on_base",
+      "else_outcome": "PASS"
+    },
+    "DAST_BASELINE": {
+      "applies_to_tiers": [
+        "max"
+      ]
+    }
+  },
+  "none": {
+    "label": "low",
+    "hacker_variant": "none",
+    "hacker_mode": "parallel",
+    "on_block": "cancel_hacker",
+    "required_checks": [
+      "SCOPE",
+      "SUITE",
+      "TEST_SET",
+      "TEST_INFRA",
+      "BASE_FAIL_HEAD_PASS",
+      "MUTATION",
+      "CHANGELOG",
+      "SECRETS",
+      "CONVENTION",
+      "SMELL",
+      "GATE_CONTROLS",
+      "POLICY_DIGEST",
+      "ORACLE_PROVENANCE",
+      "BOOTTEST"
+    ],
+    "shadow_checks": [
+      {
+        "id": "SMELL",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "BOOTTEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "POLICY_DIGEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ORACLE_PROVENANCE",
+        "shadow": true,
+        "cycles": 1
+      }
+    ],
+    "builder_precheck_exclude": [
+      "GATE_CONTROLS",
+      "DAST_BASELINE"
+    ],
+    "budget": {
+      "wall_clock_s": 1800,
+      "tool_calls": 150,
+      "tokens": 400000
+    },
+    "max_cycles": 3,
+    "fault_retries": 1,
+    "builder_precheck_rounds": 2,
+    "mutation_kill_ratio": 0.5,
+    "mutation_kill_ratio_effect": "informative_only",
+    "mutation_high_path_bar": "0 survivors (100%) dominates; ratio cannot pass a high-path survivor",
+    "mutation_min_mutants_per_hunk": 1,
+    "mutation_fail_on_missing_score_threshold": true,
+    "repro_runs": 3,
+    "thread_race_repetitions": 0,
+    "thread_race_workers": 0,
+    "thread_race_repetitions_by_runner": {
+      "builder": 0,
+      "auditor": 0
+    }
+  },
+  "high": {
+    "label": "high",
+    "hacker_variant": "high",
+    "hacker_mode": "parallel",
+    "on_block": "cancel_hacker",
+    "required_checks": [
+      "SCOPE",
+      "SUITE",
+      "TEST_SET",
+      "TEST_INFRA",
+      "BASE_FAIL_HEAD_PASS",
+      "MUTATION",
+      "CHANGELOG",
+      "SECRETS",
+      "CONVENTION",
+      "SMELL",
+      "GATE_CONTROLS",
+      "POLICY_DIGEST",
+      "ARCH",
+      "ORACLE_PROVENANCE",
+      "GUARD_DELTA",
+      "AUTHZ_MATRIX",
+      "SEMGREP",
+      "THREAD_RACE",
+      "SCHEMA_FUZZ",
+      "BOOTTEST",
+      "ZIZMOR",
+      "AGT_PARITY",
+      "AGT_AUDIT"
+    ],
+    "shadow_checks": [
+      {
+        "id": "SMELL",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "BOOTTEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "POLICY_DIGEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ORACLE_PROVENANCE",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AUTHZ_MATRIX",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ARCH",
+        "shadow": false,
+        "cycles": 1
+      },
+      {
+        "id": "GUARD_DELTA",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "SCHEMA_FUZZ",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "THREAD_RACE",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ZIZMOR",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AGT_PARITY",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AGT_AUDIT",
+        "shadow": true,
+        "cycles": 1
+      }
+    ],
+    "builder_precheck_exclude": [
+      "GATE_CONTROLS",
+      "DAST_BASELINE"
+    ],
+    "budget": {
+      "wall_clock_s": 3600,
+      "tool_calls": 400,
+      "tokens": 1000000
+    },
+    "max_cycles": 3,
+    "fault_retries": 2,
+    "builder_precheck_rounds": 2,
+    "mutation_kill_ratio": 0.7,
+    "mutation_kill_ratio_effect": "informative_only",
+    "mutation_high_path_bar": "0 survivors (100%) dominates; ratio cannot pass a high-path survivor",
+    "mutation_min_mutants_per_hunk": 1,
+    "mutation_fail_on_missing_score_threshold": true,
+    "repro_runs": 5,
+    "thread_race_repetitions": 20,
+    "thread_race_workers": 1,
+    "thread_race_repetitions_by_runner": {
+      "builder": 5,
+      "auditor": 20
+    }
+  },
+  "max": {
+    "label": "max",
+    "hacker_variant": "max",
+    "hacker_mode": "parallel",
+    "on_block": "complete_hacker",
+    "required_checks": [
+      "SCOPE",
+      "SUITE",
+      "TEST_SET",
+      "TEST_INFRA",
+      "BASE_FAIL_HEAD_PASS",
+      "MUTATION",
+      "CHANGELOG",
+      "SECRETS",
+      "CONVENTION",
+      "SMELL",
+      "GATE_CONTROLS",
+      "POLICY_DIGEST",
+      "ARCH",
+      "ORACLE_PROVENANCE",
+      "GUARD_DELTA",
+      "AUTHZ_MATRIX",
+      "SEMGREP",
+      "THREAD_RACE",
+      "SCHEMA_FUZZ",
+      "BOOTTEST",
+      "ZIZMOR",
+      "DAST_BASELINE",
+      "AGT_PARITY",
+      "AGT_AUDIT"
+    ],
+    "shadow_checks": [
+      {
+        "id": "SMELL",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "BOOTTEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "POLICY_DIGEST",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ORACLE_PROVENANCE",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AUTHZ_MATRIX",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ARCH",
+        "shadow": false,
+        "cycles": 1
+      },
+      {
+        "id": "GUARD_DELTA",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "SCHEMA_FUZZ",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "THREAD_RACE",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "ZIZMOR",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "DAST_BASELINE",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AGT_PARITY",
+        "shadow": true,
+        "cycles": 1
+      },
+      {
+        "id": "AGT_AUDIT",
+        "shadow": true,
+        "cycles": 1
+      }
+    ],
+    "builder_precheck_exclude": [
+      "GATE_CONTROLS",
+      "DAST_BASELINE"
+    ],
+    "budget": {
+      "wall_clock_s": 7200,
+      "tool_calls": 800,
+      "tokens": 2000000
+    },
+    "max_cycles": 4,
+    "fault_retries": 3,
+    "builder_precheck_rounds": 3,
+    "mutation_kill_ratio": 0.8,
+    "mutation_kill_ratio_effect": "informative_only",
+    "mutation_high_path_bar": "0 survivors (100%) dominates; ratio cannot pass a high-path survivor",
+    "mutation_min_mutants_per_hunk": 1,
+    "mutation_fail_on_missing_score_threshold": true,
+    "repro_runs": 10,
+    "thread_race_repetitions": 20,
+    "thread_race_workers": 3,
+    "thread_race_repetitions_by_runner": {
+      "builder": 5,
+      "auditor": 20
+    }
+  }
+}

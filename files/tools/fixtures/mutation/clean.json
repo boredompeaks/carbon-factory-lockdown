@@ -1,0 +1,13 @@
+{
+  "score": 0.86,
+  "threshold": 0.8,
+  "changed_lines": [
+    "backend/orders/views/refund.py:118",
+    "backend/orders/services/refund.py:64"
+  ],
+  "survivors": [
+    {
+      "locus": "backend/orders/views/refund.py:141"
+    }
+  ]
+}

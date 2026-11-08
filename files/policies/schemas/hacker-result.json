@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hacker-result.json",
+  "title": "hacker-result",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "result_type",
+    "capability_id",
+    "variant",
+    "nonce",
+    "refusal_code",
+    "budget_exhausted",
+    "catalog",
+    "findings",
+    "cost"
+  ],
+  "properties": {
+    "schema": {
+      "const": "hacker-result/1"
+    },
+    "result_type": {
+      "type": "string",
+      "enum": [
+        "RESULT",
+        "REFUSED"
+      ]
+    },
+    "capability_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variant": {
+      "type": "string",
+      "enum": [
+        "high",
+        "max"
+      ]
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 16
+    },
+    "refusal_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SIG_INVALID",
+        "EXPLOIT_ABORT_CONTAMINATED",
+        "VARIANT_MISMATCH",
+        "STATE_MISMATCH",
+        null
+      ]
+    },
+    "budget_exhausted": {
+      "type": "boolean"
+    },
+    "catalog": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/catalog_item"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "cost": {
+      "$ref": "#/$defs/cost"
+    },
+    "exploit_spec_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authz_rows_covered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sig_status": {
+      "type": "string",
+      "enum": [
+        "unsigned_local",
+        "INVALID",
+        "ABSENT"
+      ],
+      "description": "Set by the harness. A refused envelope may carry the observed INVALID/ABSENT value."
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Set by the harness after the result is returned; agents must not fabricate it."
+    }
+  },
+  "$defs": {
+    "catalog_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "outcome",
+        "attempts",
+        "evidence_ref"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "REFUTED",
+            "REPRODUCED",
+            "NOT_RUN"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Required for REFUTED/REPRODUCED; may be empty for NOT_RUN."
+        },
+        "probes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/probe"
+          },
+          "description": "Per-execution probe trace for this item. Optional for backward compatibility (pre-probe records validate without it); required with minItems 1 when outcome is REFUTED or REPRODUCED. REFUTED additionally requires, mechanically checked by the auditor against policies/attack-catalog.json (schema alone cannot know the per-item probe_classes list): >=1 probe per listed probe_class, total probes >= min_probes[variant], and every counted probe outcome blocked (error/reproduced do not count). REPRODUCED requires >=1 probe outcome reproduced."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "REFUTED",
+                  "REPRODUCED"
+                ]
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "REFUTED",
+                  "REPRODUCED"
+                ]
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "probes"
+            ],
+            "properties": {
+              "probes": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "probe_class",
+        "engine",
+        "target",
+        "params",
+        "outcome"
+      ],
+      "properties": {
+        "probe_class": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Catalog probe_class (policies/attack-catalog.json items[].probe_classes). Auditor requires >=1 probe per listed probe_class for REFUTED."
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "postgres",
+            "none"
+          ],
+          "description": "Must be a member of item engines in attack-catalog.json (sqlite/postgres for DB items; none for static items such as PROMPT-INJECTION/SECRET-EXPOSURE, mirroring repro-spec engine)."
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Endpoint, tenant pair, file, or other distinct-execution discriminator; varying endpoint/tenant pair/engine makes a new probe per probe_definition."
+        },
+        "params": {
+          "type": "object",
+          "description": "Execution parameters for this distinct execution. Open object; distinct (probe_class, engine, target, params) tuples count as distinct probes."
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "reproduced",
+            "error"
+          ],
+          "description": "blocked = invariant held (supports REFUTED); reproduced = invariant broken (supports REPRODUCED); error = tool/fixture fault (does not count toward REFUTED coverage; fix and re-run per hacker R6)."
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "finding_id",
+        "class",
+        "locus",
+        "repro_ref",
+        "runs",
+        "reproduced",
+        "item_id"
+      ],
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]+$"
+        },
+        "locus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repro_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reproduced": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wall_clock_s",
+        "tool_calls",
+        "tokens"
+      ],
+      "properties": {
+        "wall_clock_s": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tool_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

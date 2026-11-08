@@ -1,0 +1,17 @@
+{
+  "paths": [
+    "backend/orders/views/refund.py",
+    "backend/orders/models.py",
+    "backend/orders/aaa_legacy.py"
+  ],
+  "rows": [
+    {
+      "paths": [
+        "backend/orders/views/refund.py"
+      ]
+    }
+  ],
+  "exempt": [
+    "backend/orders/aaa_legacy.py"
+  ]
+}

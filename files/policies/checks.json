@@ -1,0 +1,454 @@
+{
+  "version": 1,
+  "checks": {
+    "SCOPE": {
+      "title": "Scope containment",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Every path in the diff matches a glob in capability.scope.",
+      "blind_spots": [
+        "Symlinks and case folding can map a path differently on another filesystem."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ]
+    },
+    "SUITE": {
+      "title": "Full test suite",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "Zero failing test ids on sqlite and on postgres.",
+      "blind_spots": [
+        "A flaky test can pass by chance; only THREAD_RACE repeats executions."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "SUITE_FAILURE"
+      ]
+    },
+    "TEST_SET": {
+      "title": "Test set integrity",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Every base test id exists at head and passes, removals carry a reason_code and covered_by, no skip or xfail is added, no assertion count is lowered, and no added assertion matches a tautology pattern.",
+      "blind_spots": [
+        "Coverage-subset comparison depends on sealed coverage data being complete."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "TEST_REMOVAL_UNCOVERED",
+        "TAUTOLOGICAL_ASSERTION"
+      ]
+    },
+    "TEST_INFRA": {
+      "title": "Test-infrastructure containment",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "No diff touches a path in gate.test_infra_paths unless that path is in capability.scope.",
+      "blind_spots": [
+        "Test discovery configured outside the listed paths is not visible."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "TEST_INFRA_CHANGE"
+      ]
+    },
+    "BASE_FAIL_HEAD_PASS": {
+      "title": "Added-test falsifiability",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Every added test fails on base with fail_kind ASSERTION and passes on head; a base-green test is NON_FALSIFIABLE unless named in characterization_tests; acceptance is re-derived when the acceptance author family equals the builder family.",
+      "blind_spots": [
+        "A test that fails on base for an unrelated assertion still satisfies the ASSERTION fail_kind."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "NON_FALSIFIABLE"
+      ]
+    },
+    "MUTATION": {
+      "title": "Mutation adequacy",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "Kill ratio is at or above the tier threshold and every changed hunk in a high-tier path has at least one killed mutant.",
+      "blind_spots": [
+        "Equivalent mutants survive legitimately and are scored as survivors."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "TEST_GAP"
+      ]
+    },
+    "CHANGELOG": {
+      "title": "Changelog coverage",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Every added row names a subset of diff paths and every non-exempt diff path appears in at least one added row.",
+      "blind_spots": [
+        "A syntactically valid invariant sentence can still name the wrong property."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "CHANGELOG_GAP"
+      ]
+    },
+    "SECRETS": {
+      "title": "Secret scan",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "secret-scan reports zero hits on added lines beyond secrets-baseline.json.",
+      "blind_spots": [
+        "Secrets in binary files, build artifacts, and runtime configuration are not scanned."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "SECRET_LEAK"
+      ]
+    },
+    "CONVENTION": {
+      "title": "Lint convention",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "The ruff rule set reports zero violations on added lines.",
+      "blind_spots": [
+        "Rules outside the selected ruff set are not enforced."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "CONVENTION_VIOLATION"
+      ]
+    },
+    "SMELL": {
+      "title": "Test and code smell delta",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "No new smell appears on an added line; pre-existing smells that the diff did not increase are residual.",
+      "blind_spots": [
+        "Delta metrics miss code moved from another file."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "CODE_SMELL"
+      ]
+    },
+    "GATE_CONTROLS": {
+      "title": "Gate negative controls",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Every known-bad fixture is rejected, controls_total meets each per-check minimum and known_bad_min (total_min is the declared-entry floor), and controls_rejected equals controls_total for the current gate_sha, control_set_sha, and policy_digest.",
+      "blind_spots": [
+        "Controls prove rejection of known-bad fixtures, not completeness of the gate."
+      ],
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "GATE_CONTROL_FAILURE",
+        "CONTROL_UNDERCOUNT"
+      ]
+    },
+    "POLICY_DIGEST": {
+      "title": "Policy digest binding",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "Hash policies/** as sorted path and sha256 pairs; a changed digest requires a gate-control record carrying that digest, and a record with a different digest fails as POLICY_DRIFT.",
+      "blind_spots": [
+        "The digest proves policy bytes changed, not that the change is correct."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "POLICY_DRIFT"
+      ]
+    },
+    "ARCH": {
+      "title": "Architecture containment",
+      "min_tier": "high",
+      "predicate_kind": "aggregate",
+      "predicate": "A new cross-layer edge, dependency, public export, or unowned module path is refused unless capability.architecture_allow declares it with a reason.",
+      "blind_spots": [
+        "Dynamic imports and runtime plugin loading are invisible statically."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "ARCH_VIOLATION"
+      ]
+    },
+    "ORACLE_PROVENANCE": {
+      "title": "Oracle provenance",
+      "min_tier": "none",
+      "predicate_kind": "aggregate",
+      "predicate": "No added assertion line is a SELF_COMPARE, ORACLE_BY_COPY, or MOCK_ECHO according to assert-rules.json.",
+      "blind_spots": [
+        "An oracle computed by a different but wrong path is not detectable statically."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "WEAK_ORACLE"
+      ]
+    },
+    "GUARD_DELTA": {
+      "title": "Guard removal coverage",
+      "min_tier": "high",
+      "predicate_kind": "collection",
+      "predicate": "Every removed conditional or guard line in a high-tier path is named by an added test covering the changed hunk or by capability.guard_delta.",
+      "blind_spots": [
+        "A guard moved between files is a removal plus an addition; the destination hunk must still be covered."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "GUARD_REMOVED"
+      ]
+    },
+    "AUTHZ_MATRIX": {
+      "title": "Authorization matrix",
+      "min_tier": "high",
+      "predicate_kind": "collection",
+      "predicate": "Every URLconf route and method has a matrix row and each role client is compared with the view's declared permission classes.",
+      "blind_spots": [
+        "Object-level permissions are not visible in the route matrix; the hacker covers them."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "required_reason": "fails if backend route added without permission rules",
+      "class_tags": [
+        "AUTHZ_MATRIX_GAP"
+      ]
+    },
+    "SEMGREP": {
+      "title": "Semantic grep ruleset",
+      "min_tier": "high",
+      "predicate_kind": "aggregate",
+      "predicate": "The project ruleset in policies/semgrep.yml reports zero new findings on added lines, each with its policy class tag.",
+      "blind_spots": [
+        "AST and regex rules miss semantic equivalents and generated code."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "GATEWAY_IN_ATOMIC",
+        "LOCK_ACROSS_NETWORK",
+        "MISSING_IDEMPOTENCY",
+        "MUTABLE_DEFAULT",
+        "BARE_EXCEPT",
+        "UNSAFE_RMW",
+        "NONATOMIC_WATERMARK"
+      ]
+    },
+    "THREAD_RACE": {
+      "title": "Thread and process race",
+      "min_tier": "high",
+      "predicate_kind": "aggregate",
+      "predicate": "When the closure touches a lock, atomic block, idempotency key, or watermark, added concurrency tests run on postgres for the tier's thread_race_repetitions_by_runner[runner] repetitions per worker with thread_race_workers workers, and reproduce the protected property every time.",
+      "blind_spots": [
+        "SQLite green is insufficient; only postgres repetitions count."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "RACE_CONDITION",
+        "FLAKY_TEST"
+      ]
+    },
+    "SCHEMA_FUZZ": {
+      "title": "OpenAPI schema fuzz",
+      "min_tier": "high",
+      "predicate_kind": "aggregate",
+      "predicate": "schemathesis runs with the fixed seed on added routes and changed shapes and observes no schema violation or 5xx response.",
+      "blind_spots": [
+        "Schema-derived cases do not cover authorization or business invariants."
+      ],
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "SCHEMA_FUZZ_FAILURE"
+      ]
+    },
+    "BOOTTEST": {
+      "title": "Production boot test",
+      "min_tier": "none",
+      "predicate_kind": "collection",
+      "predicate": "The app boots with production settings and DEBUG=false, answers a health probe, and exits non-zero when a required environment variable is removed.",
+      "blind_spots": [
+        "A boot that reads a different config source can mask a missing variable."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "BOOT_FAIL_OPEN"
+      ]
+    },
+    "ZIZMOR": {
+      "title": "GitHub Actions hardening",
+      "min_tier": "high",
+      "predicate_kind": "aggregate",
+      "predicate": "When .github/** is in the closure, or weekly on base otherwise, zizmor reports no finding above the policy threshold.",
+      "blind_spots": [
+        "Only GitHub Actions workflow semantics are modeled."
+      ],
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "CI_HARDENING"
+      ]
+    },
+    "DAST_BASELINE": {
+      "title": "Dynamic application security baseline",
+      "min_tier": "max",
+      "predicate_kind": "aggregate",
+      "predicate": "At max only, the ZAP baseline scan against the hacker runtime has no alert above the policy threshold; informational alerts are residual.",
+      "blind_spots": [
+        "A passive baseline cannot prove absence of exploitable issues."
+      ],
+      "runners": [
+        "hacker"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "DAST_FINDING"
+      ]
+    },
+    "AGT_PARITY": {
+      "title": "AGT policy and install parity",
+      "min_tier": "high",
+      "predicate_kind": "collection",
+      "predicate": "The resolved AGT policy path is <root>/.agt/policy.json, opencode.json names exactly @microsoft/agent-governance-opencode@5.0.0 as its only plugin, .opencode/package.json pins 5.0.0, the lockfile resolves 5.0.0, and the policy body equals the mandated advisory contract.",
+      "blind_spots": [
+        "A byte-identical policy can still be semantically wrong; parity proves shape and pins, not policy quality.",
+        "Parity does not prove the plugin loads under the installed OpenCode plugin API."
+      ],
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "AGT_PARITY_MISMATCH"
+      ]
+    },
+    "AGT_AUDIT": {
+      "title": "AGT deny audit evidence",
+      "min_tier": "high",
+      "predicate_kind": "collection",
+      "predicate": "Every deny entry in the AGT audit log carries action and decision fields, and a golden expectation of a deny is satisfied by at least one deny entry.",
+      "blind_spots": [
+        "The log is accepted as a JSON array or JSONL; the hash chain is not recomputed.",
+        "Absence of a deny is only detectable when a golden expectation records that a deny occurred."
+      ],
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "fail_action": "BLOCK",
+      "class_tags": [
+        "AGT_AUDIT_GAP"
+      ]
+    }
+  }
+}

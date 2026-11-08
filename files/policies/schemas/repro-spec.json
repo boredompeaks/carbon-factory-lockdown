@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repro-spec.json",
+  "title": "repro-spec",
+  "version": 1,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "repro_id",
+    "kind",
+    "engine",
+    "ref",
+    "command",
+    "runs",
+    "timeout_s",
+    "expected"
+  ],
+  "properties": {
+    "schema": {
+      "const": "repro-spec/1"
+    },
+    "repro_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "pytest",
+        "script",
+        "race_schedule",
+        "static_match"
+      ]
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "sqlite",
+        "postgres",
+        "none"
+      ]
+    },
+    "ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "runs": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timeout_s": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "head",
+        "base"
+      ],
+      "properties": {
+        "head": {
+          "type": "string",
+          "enum": [
+            "REPRODUCED",
+            "NOT_REPRODUCED"
+          ]
+        },
+        "base": {
+          "type": "string",
+          "enum": [
+            "REPRODUCED",
+            "NOT_REPRODUCED"
+          ]
+        }
+      }
+    },
+    "schedule": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "repetitions": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pattern": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixture_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "race_schedule"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "required": [
+              "schedule"
+            ]
+          },
+          {
+            "required": [
+              "repetitions"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "static_match"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "file",
+          "pattern"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,511 @@
+{
+  "version": 1,
+  "controls_declared": 53,
+  "known_bad_total": 28,
+  "total_min": 53,
+  "known_bad_min": 28,
+  "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
+  "enforcement": {
+    "per_check_min_field": "min_count",
+    "total_min_field": "total_min",
+    "known_bad_min_field": "known_bad_min",
+    "gate_control_total_field": "controls_total",
+    "gate_control_declared_field": "controls_declared",
+    "manifest_declared_field": "controls_declared",
+    "manifest_legacy_declared_field": "controls_total",
+    "manifest_known_bad_total_field": "known_bad_total",
+    "gate_control_rejected_field": "controls_rejected",
+    "gate_control_controls_field": "controls",
+    "per_check_rule": "count(FAIL controls where check_id == key) + tombstones(check_id == key) >= min_count[key]",
+    "rule": "record.controls_total == len(bad) and record.controls_declared == manifest.controls_declared and effective_total (len(bad) + tombstone count) >= known_bad_min and effective_declared (record.controls_declared, counting tombstones) >= total_min and controls_rejected == record.controls_total; total_min is the declared-entry floor and is not compared with the known-bad count; legacy manifest key controls_total is read as controls_declared during transition only",
+    "retired_controls_field": "retired_controls",
+    "retirement_tombstone_fields": [
+      "control_id",
+      "check_id"
+    ],
+    "slack": "tombstone",
+    "retirement_rule": "A control is retired by removing it from controls and appending a tombstone to retired_controls; tombstones preserve every count, so one sanctioned retirement fires no per-check, global, or header failure. A silent deletion without a tombstone still undercounts and fails.",
+    "reject_reason_under_minimum": "CONTROL_UNDERCOUNT",
+    "runner_root": "files/",
+    "pending_rule": "pending controls never count toward controls_declared, known_bad_total, or total_min",
+    "discrimination_rule": "PASS controls must be accepted; they are not counted in known_bad_total (record.controls_total)"
+  },
+  "controls": {
+    "AUTHZ_MATRIX": {
+      "min_count": 2,
+      "controls": [
+        {
+          "control_id": "AUTHZ-01",
+          "fixture_ref": "tools/fixtures/authz_control/urls.py",
+          "runner": "tools/authz_matrix.py --repo tools/fixtures/authz_control --roles-file tools/fixtures/authz_control/roles.json --require-derivation /decorated/=STAFF",
+          "expected_outcome": "PASS"
+        },
+        {
+          "control_id": "AUTHZ-02",
+          "fixture_ref": "tools/fixtures/authz_control/urls.py",
+          "runner": "tools/authz_matrix.py --repo tools/fixtures/authz_control --roles-file tools/fixtures/authz_control/roles.json --require-route /missing/",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "AUTHZ-03",
+          "fixture_ref": "tools/fixtures/authz_control/urls.py",
+          "runner": "tools/authz_matrix.py --repo tools/fixtures/authz_control --roles-file tools/fixtures/authz_control/roles.json --require-derivation /gated/=PUBLIC",
+          "expected_outcome": "FAIL"
+        }
+      ]
+    },
+    "SEMGREP": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SEMGREP-01",
+          "fixture_ref": "tools/fixtures/semgrep/bad.py",
+          "runner": "tools/semgrep_runner.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SEMGREP-02",
+          "fixture_ref": "tools/fixtures/semgrep/clean.py",
+          "runner": "tools/semgrep_runner.py --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "ORACLE_PROVENANCE": {
+      "min_count": 3,
+      "controls": [
+        {
+          "control_id": "ORACLE-01",
+          "fixture_ref": "tools/fixtures/oracle/bad_test.py",
+          "runner": "tools/oracle_provenance.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "ORACLE-02",
+          "fixture_ref": "tools/fixtures/oracle/clean_test.py",
+          "runner": "tools/oracle_provenance.py --control",
+          "expected_outcome": "PASS"
+        },
+        {
+          "control_id": "ORACLE-03",
+          "fixture_ref": "tools/fixtures/oracle/mirror_refund_race.py",
+          "runner": "tools/oracle_provenance.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "ORACLE-04",
+          "fixture_ref": "tools/fixtures/oracle/call_count_test.py",
+          "runner": "tools/oracle_provenance.py --control",
+          "expected_outcome": "PASS"
+        },
+        {
+          "control_id": "ORACLE-05",
+          "fixture_ref": "tools/fixtures/oracle/impl_constant_test.py",
+          "runner": "tools/oracle_provenance.py --control",
+          "expected_outcome": "FAIL"
+        }
+      ]
+    },
+    "SMELL": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SMELL-01",
+          "fixture_ref": "tools/fixtures/smell/bad_test.py",
+          "runner": "tools/smell.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SMELL-02",
+          "fixture_ref": "tools/fixtures/smell/clean_test.py",
+          "runner": "tools/smell.py --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "GUARD_DELTA": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "GUARD-01",
+          "fixture_ref": "tools/fixtures/guard_delta/bad.diff",
+          "runner": "tools/guard_delta.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "GUARD-02",
+          "fixture_ref": "tools/fixtures/guard_delta/good.diff",
+          "runner": "tools/guard_delta.py --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "ARCH": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "ARCH-01",
+          "fixture_ref": "tools/fixtures/arch_check/bad.diff",
+          "runner": "tools/arch_check.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "ARCH-02",
+          "fixture_ref": "tools/fixtures/arch_check/clean.diff",
+          "runner": "tools/arch_check.py --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "SCOPE": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SCOPE-01",
+          "fixture_ref": "tools/fixtures/scope/bad.json",
+          "runner": "tools/gate_run.py --check SCOPE --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SCOPE-02",
+          "fixture_ref": "tools/fixtures/scope/clean.json",
+          "runner": "tools/gate_run.py --check SCOPE --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "TEST_SET": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "TEST_SET-01",
+          "fixture_ref": "tools/fixtures/test_set/bad.json",
+          "runner": "tools/gate_run.py --check TEST_SET --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "TEST_SET-02",
+          "fixture_ref": "tools/fixtures/test_set/clean.json",
+          "runner": "tools/gate_run.py --check TEST_SET --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "TEST_INFRA": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "TEST_INFRA-01",
+          "fixture_ref": "tools/fixtures/test_infra/bad.json",
+          "runner": "tools/gate_run.py --check TEST_INFRA --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "TEST_INFRA-02",
+          "fixture_ref": "tools/fixtures/test_infra/clean.json",
+          "runner": "tools/gate_run.py --check TEST_INFRA --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "CHANGELOG": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "CHG-01",
+          "fixture_ref": "tools/fixtures/changelog/bad.json",
+          "runner": "tools/gate_run.py --check CHANGELOG --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "CHG-02",
+          "fixture_ref": "tools/fixtures/changelog/clean.json",
+          "runner": "tools/gate_run.py --check CHANGELOG --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "SECRETS": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SEC-01",
+          "fixture_ref": "tools/fixtures/secrets/bad/bad_key.py",
+          "runner": "tools/gate_run.py --check SECRETS --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SEC-02",
+          "fixture_ref": "tools/fixtures/secrets/clean/clean.py",
+          "runner": "tools/gate_run.py --check SECRETS --control",
+          "expected_outcome": "PASS"
+        },
+        {
+          "control_id": "SEC-03",
+          "fixture_ref": "tools/fixtures/secrets/baseline/bad_key.py",
+          "runner": "tools/gate_run.py --check SECRETS --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "CONVENTION": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "CONV-01",
+          "fixture_ref": "tools/fixtures/convention/bad.py",
+          "runner": "tools/gate_run.py --check CONVENTION --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "CONV-02",
+          "fixture_ref": "tools/fixtures/convention/clean.py",
+          "runner": "tools/gate_run.py --check CONVENTION --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "GATE_CONTROLS": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "GC-01",
+          "fixture_ref": "builtin://controls/gate-controls/undercounted.json",
+          "runner": "tools/gate_run.py --check GATE_CONTROLS --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "GC-02",
+          "fixture_ref": "builtin://controls/gate-controls/valid.json",
+          "runner": "tools/gate_run.py --check GATE_CONTROLS --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "POLICY_DIGEST": {
+      "min_count": 2,
+      "controls": [
+        {
+          "control_id": "PD-01",
+          "fixture_ref": "builtin://controls/policy-digest/policy-byte-change",
+          "runner": "tools/policy_digest.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "PD-02",
+          "fixture_ref": "builtin://controls/policy-digest/policy-missing-file",
+          "runner": "tools/policy_digest.py --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "PD-03",
+          "fixture_ref": "builtin://controls/policy-digest/policy-clean",
+          "runner": "tools/policy_digest.py --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "AGT_PARITY": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "AGT-PARITY-01",
+          "fixture_ref": "tools/fixtures/agt_parity/good_root",
+          "runner": "tools/agt_parity.py --control",
+          "expected_outcome": "PASS"
+        },
+        {
+          "control_id": "AGT-PARITY-02",
+          "fixture_ref": "tools/fixtures/agt_parity/bad_root",
+          "runner": "tools/agt_parity.py --control",
+          "expected_outcome": "FAIL"
+        }
+      ]
+    },
+    "AGT_AUDIT": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "AGT-AUDIT-01",
+          "fixture_ref": "tools/fixtures/agt_audit/audit-missing-deny.jsonl",
+          "runner": "tools/agt_audit.py --control",
+          "expected_outcome": "FAIL"
+        }
+      ]
+    },
+    "SUITE": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SUITE-01",
+          "fixture_ref": "tools/fixtures/suite/bad.json",
+          "runner": "tools/gate_run.py --check SUITE --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SUITE-02",
+          "fixture_ref": "tools/fixtures/suite/clean.json",
+          "runner": "tools/gate_run.py --check SUITE --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "BASE_FAIL_HEAD_PASS": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "BFHP-01",
+          "fixture_ref": "tools/fixtures/base_fail_head_pass/bad.json",
+          "runner": "tools/gate_run.py --check BASE_FAIL_HEAD_PASS --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "BFHP-02",
+          "fixture_ref": "tools/fixtures/base_fail_head_pass/clean.json",
+          "runner": "tools/gate_run.py --check BASE_FAIL_HEAD_PASS --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "MUTATION": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "MUT-01",
+          "fixture_ref": "tools/fixtures/mutation/bad.json",
+          "runner": "tools/gate_run.py --check MUTATION --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "MUT-02",
+          "fixture_ref": "tools/fixtures/mutation/clean.json",
+          "runner": "tools/gate_run.py --check MUTATION --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "THREAD_RACE": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "THREAD-01",
+          "fixture_ref": "tools/fixtures/thread_race/bad.json",
+          "runner": "tools/gate_run.py --check THREAD_RACE --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "THREAD-02",
+          "fixture_ref": "tools/fixtures/thread_race/clean.json",
+          "runner": "tools/gate_run.py --check THREAD_RACE --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "SCHEMA_FUZZ": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "SCHEMA-01",
+          "fixture_ref": "tools/fixtures/schema_fuzz/bad.json",
+          "runner": "tools/gate_run.py --check SCHEMA_FUZZ --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "SCHEMA-02",
+          "fixture_ref": "tools/fixtures/schema_fuzz/clean.json",
+          "runner": "tools/gate_run.py --check SCHEMA_FUZZ --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "BOOTTEST": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "BOOT-01",
+          "fixture_ref": "tools/fixtures/boottest/bad.json",
+          "runner": "tools/gate_run.py --check BOOTTEST --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "BOOT-02",
+          "fixture_ref": "tools/fixtures/boottest/clean.json",
+          "runner": "tools/gate_run.py --check BOOTTEST --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "ZIZMOR": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "ZIZMOR-01",
+          "fixture_ref": "tools/fixtures/zizmor/bad.json",
+          "runner": "tools/gate_run.py --check ZIZMOR --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "ZIZMOR-02",
+          "fixture_ref": "tools/fixtures/zizmor/clean.json",
+          "runner": "tools/gate_run.py --check ZIZMOR --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    },
+    "DAST_BASELINE": {
+      "min_count": 1,
+      "controls": [
+        {
+          "control_id": "DAST-01",
+          "fixture_ref": "tools/fixtures/dast_baseline/bad.json",
+          "runner": "tools/gate_run.py --check DAST_BASELINE --control",
+          "expected_outcome": "FAIL"
+        },
+        {
+          "control_id": "DAST-02",
+          "fixture_ref": "tools/fixtures/dast_baseline/clean.json",
+          "runner": "tools/gate_run.py --check DAST_BASELINE --control",
+          "expected_outcome": "PASS"
+        }
+      ]
+    }
+  },
+  "retired_controls": [],
+  "pending": [],
+  "pending_note": "No pending controls: every declared runtime check has an executable body and is counted in controls_declared (active controls plus retired tombstones).",
+  "control_set_sha_rule": {
+    "algorithm": "sha256",
+    "canonicalization": "RFC8785",
+    "encoding": "utf-8",
+    "input": "resolved controls manifest + thresholds + retired_controls tombstones",
+    "check_id_source": "controls_object_key",
+    "min_count_source": "parent_min_count",
+    "fields": [
+      "check_id",
+      "control_id",
+      "fixture_ref",
+      "runner",
+      "expected_outcome",
+      "min_count",
+      "controls_declared",
+      "known_bad_total",
+      "known_bad_min",
+      "total_min"
+    ],
+    "tombstone_fields": [
+      "check_id",
+      "control_id"
+    ],
+    "sort_by": [
+      "check_id",
+      "control_id"
+    ],
+    "exclude": [
+      "version",
+      "enforcement",
+      "control_set_sha",
+      "pending",
+      "pending_note"
+    ]
+  }
+}

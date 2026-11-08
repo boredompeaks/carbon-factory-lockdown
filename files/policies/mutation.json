@@ -1,0 +1,149 @@
+{
+  "version": 2,
+  "operators": [
+    {
+      "id": "AOR",
+      "name": "arithmetic_operator_replacement",
+      "description": "Replace + with -, - with +, * with /, / with *.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "ROR",
+      "name": "relational_operator_replacement",
+      "description": "Replace < with <=, > with >=, == with !=.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "LCR",
+      "name": "logical_connector_replacement",
+      "description": "Replace and with or and or with and.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "NEG",
+      "name": "condition_negation",
+      "description": "Negate an if or while condition.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "SDL",
+      "name": "statement_deletion",
+      "description": "Delete one statement from a changed line set.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "RET",
+      "name": "return_value_replacement",
+      "description": "Replace a return expression with None or a zero value of the same type.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "VDL",
+      "name": "value_default_replacement",
+      "description": "Replace a default argument with None or an empty container.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "high",
+        "max"
+      ]
+    },
+    {
+      "id": "BCR",
+      "name": "break_continue_replacement",
+      "description": "Replace break with continue and continue with break.",
+      "applies_to": "python",
+      "enabled_tiers": [
+        "high",
+        "max"
+      ]
+    }
+  ],
+  "semantics": "Effective high-path bar is 100% (0 survivors dominates). kill_ratio is informative-only and cannot pass a high-path survivor; a single survivor on a changed high-path line fails even when score >= threshold. This unifies the former contradictory ratio comfort with the max_survivors_in_high_path=0 bar.",
+  "thresholds": {
+    "none": {
+      "kill_ratio": 0.5,
+      "kill_ratio_effect": "informative_only",
+      "effective_bar": "0 survivors (100%) on changed high-path lines",
+      "changed_hunk_required": false,
+      "min_mutants_per_hunk": 1,
+      "max_survivors_in_high_path": 0
+    },
+    "high": {
+      "kill_ratio": 0.7,
+      "kill_ratio_effect": "informative_only",
+      "effective_bar": "0 survivors (100%) on changed high-path lines",
+      "changed_hunk_required": true,
+      "min_mutants_per_hunk": 1,
+      "max_survivors_in_high_path": 0
+    },
+    "max": {
+      "kill_ratio": 0.8,
+      "kill_ratio_effect": "informative_only",
+      "effective_bar": "0 survivors (100%) on changed high-path lines",
+      "changed_hunk_required": true,
+      "min_mutants_per_hunk": 1,
+      "max_survivors_in_high_path": 0
+    }
+  },
+  "changed_lines_only": true,
+  "overlay": true,
+  "min_mutants_per_hunk": 1,
+  "fail_closed": {
+    "on_missing_score": "BLOCK",
+    "on_missing_threshold": "BLOCK",
+    "on_zero_mutants": "BLOCK",
+    "on_missing_total_mutatable_or_total_generated": "BLOCK",
+    "note": "Missing score, threshold, or 0 mutants must not PASS via 0<0. The gate_run checker owned by another agent must emit MUTATION_MISSING_SCORE / MUTATION_MISSING_THRESHOLD / MUTATION_NO_MUTANTS findings; see gate_run_patch_pending."
+  },
+  "max_mutants_per_hunk": 20,
+  "cap_enforcement": {
+    "rule": "Require total_mutatable == total_generated or FAIL with finding mutants_truncated (MUTATION_TRUNCATED). Truncation at the cap must never silently pass.",
+    "enforced": false,
+    "reason": "No mutate-run generator lives in this harness (only gate_run.check_mutation scores fixture score/threshold/survivors; it does not generate or count mutants), so the cap cannot be enforced from policy alone.",
+    "gate_run_patch_pending": "In files/tools/gate_run.py check_mutation: if data.get('total_mutatable') is not None and data.get('total_generated') is not None and data['total_mutatable'] != data['total_generated']: findings.append(finding('MUTATION_TRUNCATED','mutants_truncated',f\"total_mutatable {data['total_mutatable']} != total_generated {data['total_generated']} (cap {policy.max_mutants_per_hunk})\")); also treat missing score/threshold as BLOCK with MUTATION_MISSING_SCORE / MUTATION_MISSING_THRESHOLD and mutants==0 as MUTATION_NO_MUTANTS. Patch text is provided for the gate_run owner; it is not applied here because gate_run.py is owned by another agent."
+  },
+  "language_handling": {
+    "python": {
+      "outcome": "enforced",
+      "note": "All operators applies_to python."
+    },
+    "typescript": {
+      "outcome": "NOT_APPLICABLE",
+      "note": "python-only confirmed, TS N/A — delivery scope files/ + scripts/ has 0 *.ts/*.tsx/*.js changed files (vendored scratchpad/node_modules excluded); no TypeScript operators exist. NOT_APPLICABLE is fail-closed on 0 mutants (BLOCK, never PASS); a future TS engine would need its own operators and min_mutants_per_hunk guard."
+    }
+  },
+  "timeout_s": 300,
+  "engines": [
+    "sqlite",
+    "postgres"
+  ]
+}

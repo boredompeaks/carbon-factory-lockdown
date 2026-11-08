@@ -1,0 +1,24 @@
+# Line-ending normalization for the hygienic initial commit.
+# Checkout is on Windows; repo stores LF for text so diffs stay stable.
+* text=auto eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+*.json text eol=lf diff=json
+*.md text eol=lf
+*.py text eol=lf
+*.ps1 text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.csv text eol=lf
+*.txt text eol=lf
+*.toml text eol=lf
+*.js text eol=lf
+*.ipynb text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.pyc binary
+*.sqlite3 binary

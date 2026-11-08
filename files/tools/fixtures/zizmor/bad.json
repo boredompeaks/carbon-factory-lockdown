@@ -1,0 +1,17 @@
+{
+  "threshold": "medium",
+  "findings": [
+    {
+      "rule": "template-injection",
+      "severity": "low",
+      "path": ".github/workflows/ci.yml",
+      "line": 14
+    },
+    {
+      "rule": "unpinned-action",
+      "severity": "high",
+      "path": ".github/workflows/release.yml",
+      "line": 27
+    }
+  ]
+}

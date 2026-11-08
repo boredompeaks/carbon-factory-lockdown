@@ -1,0 +1,16 @@
+{
+  "runtime": "docker",
+  "engine": "zap",
+  "target": "http://app:8000",
+  "threshold": "high",
+  "alerts": [
+    {
+      "risk": "Informational",
+      "name": "Modern web application"
+    },
+    {
+      "risk": "Low",
+      "name": "X-Content-Type-Options header missing"
+    }
+  ]
+}

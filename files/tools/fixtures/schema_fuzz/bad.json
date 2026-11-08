@@ -1,0 +1,13 @@
+{
+  "engine": "schemathesis",
+  "spec": "openapi/openapi.yaml",
+  "cases": 36,
+  "failures": [
+    {
+      "endpoint": "/api/orders/{order_id}",
+      "status": 500,
+      "detail": "Server error on generated negative id"
+    }
+  ],
+  "errors": []
+}

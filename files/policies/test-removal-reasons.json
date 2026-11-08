@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "reason_codes": {
+    "DUPLICATE_COVERAGE": {
+      "requires_covered_by": true,
+      "description": "Another test already covers the same behaviour."
+    },
+    "OBSOLETE_BEHAVIOUR": {
+      "requires_covered_by": true,
+      "description": "The behaviour the test asserted no longer exists."
+    },
+    "RENAMED_TEST": {
+      "requires_covered_by": true,
+      "description": "The test id changed while the assertion moved to a new id."
+    },
+    "MERGED_TEST": {
+      "requires_covered_by": true,
+      "description": "The test was merged into a broader test."
+    },
+    "FIXTURE_ONLY": {
+      "requires_covered_by": true,
+      "description": "The removed test exercised a fixture, not a behaviour. Proof-required: covered_by must name an added test."
+    },
+    "FLAKY_QUARANTINE": {
+      "requires_covered_by": true,
+      "description": "The test is removed from the gate and replaced by a deterministic test."
+    },
+    "POLICY_PROHIBITED": {
+      "requires_covered_by": true,
+      "description": "The test is prohibited by policy. Proof-required: covered_by must name an added test, even when the test cannot be replaced.",
+      "proof_mode": "proof_required",
+      "compliance_alternative_note": "Alternative considered: gate POLICY_PROHIBITED behind explicit compliance approval instead of covered_by proof. Rejected; decision is proof-required for every code including POLICY_PROHIBITED."
+    },
+    "SECURITY_REGRESSION": {
+      "requires_covered_by": true,
+      "description": "The test asserted vulnerable behaviour and is replaced by a safe assertion."
+    }
+  },
+  "enforcement": {
+    "unknown_code": "REJECT",
+    "covered_by_must_be_added_test": true,
+    "covered_lines_subset_required": true,
+    "reason_required": true,
+    "requires_covered_by_for_all_codes": true,
+    "covered_by_must_be_non_empty": true,
+    "covered_by_null_allowed": false,
+    "reject_code": "TEST_REMOVAL_UNCOVERED",
+    "proof_rule": "EVERY reason_code (including FIXTURE_ONLY and POLICY_PROHIBITED) requires a non-empty covered_by that EXACTLY equals an added test id (string equality after stripping; no substring or prefix matching); null, missing, or empty covered_by is REJECTED as TEST_REMOVAL_UNCOVERED"
+  }
+}

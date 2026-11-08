@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "max_examples": 200,
+  "timeout": 300,
+  "schema_source": "runtime-openapi:/openapi.json",
+  "scope": "implementation_changed_routes_in_diff_closure_including_added_routes_and_changed_shapes",
+  "scope_definition": "All routes whose handler/serializer/middleware implementation changed in `git diff --name-only base..head` closure (directly modified files plus files they import/call into), INCLUDING routes that were only added, routes whose request/response shape changed, and routes whose implementation changed without a shape change. Added-routes-only and shape-only are subsets, not the scope.",
+  "protocols": [
+    "http"
+  ],
+  "workers": 2,
+  "seed_policy": {
+    "mode": "per_cycle_random_no_plaintext_seed",
+    "plaintext_seed": null,
+    "source": "CSPRNG per fuzz cycle (e.g. secrets.token_bytes(8) -> int), fresh each cycle; never a fixed constant such as 20261106",
+    "persist_in": "evidence_only",
+    "replay": "the runner records {seed, cycle_id, scope_route_list_hash, max_examples} in the fuzz evidence artifact ONLY, so a failure can be replayed from evidence; the policy file itself must not contain a usable seed",
+    "rotation": "every new fuzz cycle re-draws; re-running the same cycle with the recorded seed must reproduce the same payload sequence"
+  },
+  "payload_shuffle": {
+    "mode": "randomized_order_per_cycle",
+    "algorithm": "Fisher-Yates shuffle of (a) the payload-case list and (b) within each JSON object payload, the key insertion order derived from the per-cycle seed; implemented as random.Random(seed).shuffle() over the case list + sorted-key presentation shuffled per case. Deterministic given (seed, case list).",
+    "evidence_recording": "runner records in evidence: seed, cycle_id, shuffled_case_order (list of case ids in execution order), per-case key_order_hash, and the pre-shuffle case list hash; without this the sequence is not replayable and the run FAILs (SCHEMA_NO_CASES equivalent).",
+    "anti_enumeration_note": "which payload hits first is random per cycle, so neither the service nor a listener can infer a fixed probe order; combined with per-cycle seed rotation this removes the fixed-order/fixed-seed enumeration signal."
+  },
+  "status_classification": {
+    "429": {
+      "disposition": "allow_but_record",
+      "meaning": "rate-limited responses are NOT a failure and NOT in allow_status_codes as a pass-through; the runner records count, Retry-After, and affected route in evidence, and continues/throttles accordingly",
+      "record_fields": ["status", "route", "count", "retry_after", "cycle_id", "seed"]
+    },
+    "3xx": {
+      "disposition": "fail_unless_declared",
+      "meaning": "any 3xx on an API route FAILS unless the route declares a redirect in declared_redirects (method+path+status+Location); an undeclared 3xx is a SCHEMA_FAILURE finding",
+      "applies_to": "all API routes in scope; 3xx allowlist is empty by default"
+    }
+  },
+  "declared_redirects": [],
+  "fail_on": [
+    "5xx",
+    "schema_violation",
+    "3xx_undeclared"
+  ],
+  "allow_status_codes": [
+    200,
+    201,
+    202,
+    204,
+    400,
+    401,
+    403,
+    404,
+    409,
+    422
+  ],
+  "allow_but_record_status_codes": [
+    429
+  ],
+  "fail_unless_declared_status_codes": [
+    301,
+    302,
+    303,
+    307,
+    308
+  ]
+}

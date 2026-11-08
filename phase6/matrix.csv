@@ -1,0 +1,235 @@
+role,file,line,action,resource,effect,purpose,disposition
+auditor,auditor.md,38,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+auditor,auditor.md,39,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+auditor,auditor.md,40,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,41,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,42,skill,gate-run,allow,skill gate-run wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,43,skill,authz-matrix,allow,skill authz-matrix wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,44,skill,arch-check,allow,skill arch-check wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,45,skill,guard-delta,allow,skill guard-delta wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,46,skill,oracle-provenance,allow,skill oracle-provenance wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,47,skill,semgrep-runner,allow,skill semgrep-runner wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,48,skill,smell,allow,skill smell wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,49,skill,policy-digest,allow,skill policy-digest wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,50,skill,django-test,allow,skill django-test wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,51,skill,gate-control,allow,skill gate-control wraps typed tool gate.control,TOOL:gate.control
+auditor,auditor.md,52,skill,agt-parity,allow,skill agt-parity wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,53,skill,agt-audit,allow,skill agt-audit wraps typed tool check.run,TOOL:check.run
+auditor,auditor.md,54,skill,push-ref,allow,skill push-ref wraps typed tool git.push_ref,TOOL:git.push_ref
+auditor,auditor.md,55,skill,ensure-docker,allow,skill ensure-docker wraps typed tool docker.ensure,TOOL:docker.ensure
+auditor,auditor.md,56,skill,k1-sandbox,allow,skill k1-sandbox wraps typed tool k1.status,TOOL:k1.status
+auditor,auditor.md,71,shell,*,deny,deny guard for shell on *; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,72,shell,*push_ref.ps1*,allow,"SHIP/release push at checked sha, fast-forward only",TOOL:git.push_ref
+auditor,auditor.md,73,shell,*audit_test_runner.ps1*,allow,acceptance re-run in sandbox,TOOL:repro.run
+auditor,auditor.md,74,shell,*gate_run.py*,allow,run gate (suite + checks) in sandbox,TOOL:check.run
+auditor,auditor.md,75,shell,*gate_control.py*,allow,gate-control record run/verify,TOOL:gate.control
+auditor,auditor.md,76,shell,*semgrep_runner.py*,allow,semgrep ruleset on added lines,TOOL:check.run
+auditor,auditor.md,77,shell,*oracle_provenance.py*,allow,oracle provenance check,TOOL:check.run
+auditor,auditor.md,78,shell,*arch_check.py*,allow,architecture containment check,TOOL:check.run
+auditor,auditor.md,79,shell,*guard_delta.py*,allow,guard removal coverage check,TOOL:check.run
+auditor,auditor.md,80,shell,*authz_matrix.py*,allow,authorization matrix check,TOOL:check.run
+auditor,auditor.md,81,shell,*smell.py*,allow,smell delta check,TOOL:check.run
+auditor,auditor.md,82,shell,*policy_digest.py*,allow,policy digest binding check,TOOL:check.run
+auditor,auditor.md,83,shell,*agt_parity.py*,allow,AGT parity check,TOOL:check.run
+auditor,auditor.md,84,shell,*agt_audit.py*,allow,AGT deny audit check,TOOL:check.run
+auditor,auditor.md,85,shell,*manage.py test*,allow,Django test suite in sandbox (SUITE),TOOL:check.run
+auditor,auditor.md,86,shell,*manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write)",TOOL:k1.exec
+auditor,auditor.md,87,shell,*ensure_docker.ps1*,allow,Docker engine ensure (never pulls/runs/containers),TOOL:docker.ensure
+auditor,auditor.md,88,shell,*k1_up.ps1*,allow,K1 stack up with TTL lease,TOOL:k1.up
+auditor,auditor.md,89,shell,*k1_exec.ps1*,allow,K1 enum command execution,TOOL:k1.exec
+auditor,auditor.md,90,shell,*k1_down.ps1*,allow,K1 stack down (reap containers/network),TOOL:k1.down
+auditor,auditor.md,91,subagent,*,deny,deny guard for subagent on *; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,92,subagent,hacker,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+auditor,auditor.md,94,edit,*,deny,deny guard for edit on *; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,95,write,*,deny,deny guard for write on *; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,97,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,98,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,99,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,108,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
+auditor,auditor.md,109,shell,git status*,allow,worktree status at checked ref,TOOL:git.status
+auditor,auditor.md,110,shell,git log*,allow,history log at checked ref,TOOL:git.log
+auditor,auditor.md,111,shell,git diff*,allow,diff between validated refs,TOOL:git.diff
+auditor,auditor.md,112,shell,git merge-base*,allow,merge-base query,TOOL:git.state
+auditor,auditor.md,113,shell,git ls-tree*,allow,tree listing,TOOL:git.state
+auditor,auditor.md,114,shell,git cat-file*,allow,object read by sha with path denies,TOOL:git.read_file
+auditor,auditor.md,115,shell,git show*,allow,content read by rev+path with path denies,TOOL:git.read_file
+auditor,auditor.md,116,shell,Get-FileHash*,allow,content hash of evidence files,TOOL:evidence.hash
+auditor,auditor.md,122,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+auditor,auditor.md,123,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,29,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+builder,builder.md,30,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+builder,builder.md,31,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,32,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,33,skill,gate-run,allow,skill gate-run wraps typed tool check.run,TOOL:check.run
+builder,builder.md,34,skill,authz-matrix,allow,skill authz-matrix wraps typed tool check.run,TOOL:check.run
+builder,builder.md,35,skill,arch-check,allow,skill arch-check wraps typed tool check.run,TOOL:check.run
+builder,builder.md,36,skill,guard-delta,allow,skill guard-delta wraps typed tool check.run,TOOL:check.run
+builder,builder.md,37,skill,oracle-provenance,allow,skill oracle-provenance wraps typed tool check.run,TOOL:check.run
+builder,builder.md,38,skill,semgrep-runner,allow,skill semgrep-runner wraps typed tool check.run,TOOL:check.run
+builder,builder.md,39,skill,smell,allow,skill smell wraps typed tool check.run,TOOL:check.run
+builder,builder.md,40,skill,policy-digest,allow,skill policy-digest wraps typed tool check.run,TOOL:check.run
+builder,builder.md,41,skill,django-test,allow,skill django-test wraps typed tool check.run,TOOL:check.run
+builder,builder.md,42,skill,ensure-docker,allow,skill ensure-docker wraps typed tool docker.ensure,TOOL:docker.ensure
+builder,builder.md,52,edit,backend/**,allow,worktree code edit/write under capability scope,TOOL:code.write
+builder,builder.md,53,write,backend/**,allow,worktree code edit/write under capability scope,TOOL:code.write
+builder,builder.md,54,edit,**/tests_gate*.py,deny,deny guard for edit on **/tests_gate*.py; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,55,write,**/tests_gate*.py,deny,deny guard for write on **/tests_gate*.py; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,56,edit,**/conftest.py,deny,deny guard for edit on **/conftest.py; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,57,write,**/conftest.py,deny,deny guard for write on **/conftest.py; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,58,edit,**/pytest.ini,deny,deny guard for edit on **/pytest.ini; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,59,edit,**/tox.ini,deny,deny guard for edit on **/tox.ini; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,60,edit,**/.coveragerc,deny,deny guard for edit on **/.coveragerc; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,61,edit,.github/**,deny,deny guard for edit on .github/**; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,62,edit,.gitleaks.toml,deny,deny guard for edit on .gitleaks.toml; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,63,edit,.opencode/**,deny,deny guard for edit on .opencode/**; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,64,shell,gate-run*,allow,run gate in sandbox,TOOL:check.run
+builder,builder.md,65,shell,secret-scan*,allow,secret scan on added lines,TOOL:check.run
+builder,builder.md,66,shell,mutate-run*,allow,mutation adequacy run,TOOL:check.run
+builder,builder.md,67,shell,repro-run*,allow,repro execution at git object id,TOOL:repro.run
+builder,builder.md,68,shell,manage.py test*,allow,Django test suite in sandbox (SUITE),TOOL:check.run
+builder,builder.md,69,shell,python manage.py test*,allow,Django test suite in sandbox (SUITE),TOOL:check.run
+builder,builder.md,70,shell,py -3 manage.py test*,allow,Django test suite in sandbox (SUITE),TOOL:check.run
+builder,builder.md,71,shell,*ensure_docker.ps1*,allow,Docker engine ensure (never pulls/runs/containers),TOOL:docker.ensure
+builder,builder.md,73,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,74,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,75,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,88,shell,git status*,allow,worktree status at checked ref,TOOL:git.status
+builder,builder.md,89,shell,git add*,allow,stage+commit via staged-diff validation,TOOL:git.commit
+builder,builder.md,90,shell,git commit*,allow,"commit staged diff (scope + test-infra denies, never --no-verify)",TOOL:git.commit
+builder,builder.md,91,shell,git log*,allow,history log at checked ref,TOOL:git.log
+builder,builder.md,92,shell,git diff*,allow,diff between validated refs,TOOL:git.diff
+builder,builder.md,93,shell,git merge-base*,allow,merge-base query,TOOL:git.state
+builder,builder.md,94,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
+builder,builder.md,95,shell,python -m ruff*,allow,ruff convention check on added lines,TOOL:check.run
+builder,builder.md,96,shell,ruff*,allow,ruff convention check on added lines,TOOL:check.run
+builder,builder.md,97,shell,Get-FileHash*,allow,content hash of evidence files,TOOL:evidence.hash
+builder,builder.md,98,shell,python manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write)",TOOL:k1.exec
+builder,builder.md,99,shell,manage.py makemigrations*,allow,"K1 enum action ""makemigrations check"" (read-only check, no repo write)",TOOL:k1.exec
+builder,builder.md,106,shell,*docker pull*,ask,shell/read *docker pull* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,107,shell,*docker build*,ask,shell/read *docker build* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,108,shell,*docker run*,ask,shell/read *docker run* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,109,shell,*docker create*,ask,shell/read *docker create* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,110,shell,*docker compose*,ask,shell/read *docker compose* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,111,shell,*git clone*,ask,shell/read *git clone* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,112,shell,*python -m venv*,ask,shell/read *python -m venv* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,113,shell,*venv*Scripts*activate*,ask,shell/read *venv*Scripts*activate* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,114,shell,*venv/bin/activate*,ask,shell/read *venv/bin/activate* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,115,shell,*pip install*,ask,shell/read *pip install* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,116,shell,*pip3 install*,ask,shell/read *pip3 install* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,117,shell,*npm install*,ask,shell/read *npm install* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,118,shell,*pnpm install*,ask,shell/read *pnpm install* gated by human ask; no typed equivalent (arbitrary command),DELETE
+builder,builder.md,142,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+builder,builder.md,143,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,17,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+compliance,compliance.md,18,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+compliance,compliance.md,19,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,20,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,21,skill,compliance,allow,skill compliance wraps typed tool check.run,TOOL:check.run
+compliance,compliance.md,24,write,backend/docs/compliance/*,allow,compliance section doc write (single scoped exception),TOOL:code.write
+compliance,compliance.md,25,edit,backend/docs/compliance/*,allow,compliance section doc write (single scoped exception),TOOL:code.write
+compliance,compliance.md,27,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,28,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,29,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,45,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+compliance,compliance.md,46,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,8,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+crouton,crouton-alpha.md,9,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+crouton,crouton-alpha.md,10,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,11,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,17,edit,*,deny,deny guard for edit on *; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,18,write,*,deny,deny guard for write on *; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,19,edit,backend/docs/**,allow,docs write under capability scope,TOOL:code.write
+crouton,crouton-alpha.md,20,write,backend/docs/**,allow,docs write under capability scope,TOOL:code.write
+crouton,crouton-alpha.md,22,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,23,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,24,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,36,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+crouton,crouton-alpha.md,37,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,34,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+hacker,hacker.md,35,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,36,skill,hacker-exploit,allow,skill hacker-exploit wraps typed tool hacker.probe,TOOL:hacker.probe
+hacker,hacker.md,37,question,*,allow,human question channel (R3 data becomes prompt channel; harness-level),KEEP-READ
+hacker,hacker.md,47,edit,audit-scratch/**,allow,"scratch-area write; namespaced by role+capability, size/extension caps",TOOL:scratch.write
+hacker,hacker.md,48,write,audit-scratch/**,allow,"scratch-area write; namespaced by role+capability, size/extension caps",TOOL:scratch.write
+hacker,hacker.md,49,shell,gate-run*,allow,run gate in sandbox,TOOL:check.run
+hacker,hacker.md,50,shell,secret-scan*,allow,secret scan on added lines,TOOL:check.run
+hacker,hacker.md,51,shell,mutate-run*,allow,mutation adequacy run,TOOL:check.run
+hacker,hacker.md,52,shell,repro-run*,allow,repro execution at git object id,TOOL:repro.run
+hacker,hacker.md,54,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,55,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,56,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,63,edit,hacker-scratch/**,allow,"scratch-area write; namespaced by role+capability, size/extension caps",TOOL:scratch.write
+hacker,hacker.md,64,write,hacker-scratch/**,allow,"scratch-area write; namespaced by role+capability, size/extension caps",TOOL:scratch.write
+hacker,hacker.md,65,shell,python hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
+hacker,hacker.md,66,shell,python3 hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
+hacker,hacker.md,67,shell,bash hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
+hacker,hacker.md,68,shell,sh hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
+hacker,hacker.md,69,shell,powershell -File hacker-scratch/*,allow,execute own scratch reproducer in sandbox (runs parameter),TOOL:repro.run
+hacker,hacker.md,75,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+hacker,hacker.md,76,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,36,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+orchestrator,orchestrator.md,37,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+orchestrator,orchestrator.md,38,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,39,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,40,skill,dispatch,allow,dispatch skill; harness-level routing (allow list enforced by subagent invariant),KEEP-READ
+orchestrator,orchestrator.md,41,subagent,*,deny,deny guard for subagent on *; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,42,subagent,builder,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+orchestrator,orchestrator.md,43,subagent,auditor,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+orchestrator,orchestrator.md,44,subagent,hacker,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+orchestrator,orchestrator.md,45,subagent,release-engineer,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+orchestrator,orchestrator.md,46,subagent,compliance,allow,subagent dispatch stays harness-level; allow list enforced by subagent invariant (INV-7),KEEP-READ
+orchestrator,orchestrator.md,47,question,*,allow,human question channel (R3 data becomes prompt channel; harness-level),KEEP-READ
+orchestrator,orchestrator.md,63,edit,quality/ledger/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records",TOOL:ledger.append
+orchestrator,orchestrator.md,64,edit,quality/**,allow,"ledger-path edit/write; only ledger.append produces typed, hash-chained records",TOOL:ledger.append
+orchestrator,orchestrator.md,65,shell,gate-run*,allow,run gate in sandbox,TOOL:check.run
+orchestrator,orchestrator.md,66,shell,secret-scan*,allow,secret scan on added lines,TOOL:check.run
+orchestrator,orchestrator.md,67,shell,mutate-run*,allow,mutation adequacy run,TOOL:check.run
+orchestrator,orchestrator.md,68,shell,repro-run*,allow,repro execution at git object id,TOOL:repro.run
+orchestrator,orchestrator.md,70,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
+orchestrator,orchestrator.md,71,shell,git status*,allow,worktree status at checked ref,TOOL:git.status
+orchestrator,orchestrator.md,72,shell,git diff*,allow,diff between validated refs,TOOL:git.diff
+orchestrator,orchestrator.md,73,shell,git log*,allow,history log at checked ref,TOOL:git.log
+orchestrator,orchestrator.md,74,shell,git merge-base*,allow,merge-base query,TOOL:git.state
+orchestrator,orchestrator.md,75,shell,git worktree list*,allow,worktree listing,TOOL:worktrees.list
+orchestrator,orchestrator.md,76,shell,git branch*,allow,branch listing only; destructive ops have no tool (DELETED intent),TOOL:git.state
+orchestrator,orchestrator.md,77,shell,git push*,deny,deny guard for shell on git push*; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,79,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,80,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,81,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,91,shell,python scripts/check_harness_config.py*,allow,harness config invariant verification,TOOL:harness.verify
+orchestrator,orchestrator.md,92,shell,python scripts/policy_manifest.py --verify,allow,policy manifest verification,TOOL:harness.verify
+orchestrator,orchestrator.md,93,shell,python files/tools/validatedrain.py*,allow,drain validation (read-only),TOOL:drain.validate
+orchestrator,orchestrator.md,94,shell,python files/tools/gate_control.py --verify*,allow,gate-control record run/verify,TOOL:gate.control
+orchestrator,orchestrator.md,100,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+orchestrator,orchestrator.md,101,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,39,external_directory,C:/Users/Admin/AppData/Local/Temp/opencode/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+release-engineer,release-engineer.md,40,external_directory,C:/Users/Admin/Downloads/backend/**,allow,out-of-tree root access; temp/ephemeral state moves to scratch.write; repo reads move to git object ids,DELETE
+release-engineer,release-engineer.md,41,skill,*,deny,deny guard for skill on *; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,42,skill,hacker-*,deny,deny guard for skill on hacker-*; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,43,skill,push-ref,allow,skill push-ref wraps typed tool git.push_ref,TOOL:git.push_ref
+release-engineer,release-engineer.md,44,skill,reconcile-lanes,allow,skill reconcile-lanes wraps typed tool worktrees.reconcile,TOOL:worktrees.reconcile
+release-engineer,release-engineer.md,45,skill,open-pr,allow,skill open-pr wraps typed tool pr.open,TOOL:pr.open
+release-engineer,release-engineer.md,46,skill,watch-checks,allow,skill watch-checks wraps typed tool pr.watch,TOOL:pr.watch
+release-engineer,release-engineer.md,47,skill,merge-pr,allow,skill merge-pr wraps typed tool pr.merge,TOOL:pr.merge
+release-engineer,release-engineer.md,48,skill,sync-worktrees,allow,skill sync-worktrees wraps typed tool worktrees.sync,TOOL:worktrees.sync
+release-engineer,release-engineer.md,58,edit,*,deny,deny guard for edit on *; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,59,write,*,deny,deny guard for write on *; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,60,shell,*,deny,deny guard for shell on *; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,61,shell,*push_ref.ps1*,allow,"SHIP/release push at checked sha, fast-forward only",TOOL:git.push_ref
+release-engineer,release-engineer.md,62,shell,*reconcile_lanes.ps1*,allow,lane reconciliation (native),TOOL:worktrees.reconcile
+release-engineer,release-engineer.md,63,shell,*open_pr.ps1*,allow,open PR at checked head,TOOL:pr.open
+release-engineer,release-engineer.md,64,shell,*watch_checks.ps1*,allow,"watch checks (one per pr+head, server-side)",TOOL:pr.watch
+release-engineer,release-engineer.md,65,shell,*merge_pr.ps1*,allow,"merge at pinned head (squash, no admin)",TOOL:pr.merge
+release-engineer,release-engineer.md,66,shell,*sync_worktrees.ps1*,allow,worktree sync (native),TOOL:worktrees.sync
+release-engineer,release-engineer.md,68,edit,**/policy-manifest.json,deny,deny guard for edit on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,69,write,**/policy-manifest.json,deny,deny guard for write on **/policy-manifest.json; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,70,shell,*policy-manifest.json*,deny,deny guard for shell on *policy-manifest.json*; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,80,shell,git rev-parse*,allow,repo state (head/tree/branch/clean/merge-base/is-ancestor/ls-tree),TOOL:git.state
+release-engineer,release-engineer.md,81,shell,git status*,allow,worktree status at checked ref,TOOL:git.status
+release-engineer,release-engineer.md,82,shell,git branch*,allow,branch listing only; destructive ops have no tool (DELETED intent),TOOL:git.state
+release-engineer,release-engineer.md,83,shell,git log*,allow,history log at checked ref,TOOL:git.log
+release-engineer,release-engineer.md,84,shell,git diff*,allow,diff between validated refs,TOOL:git.diff
+release-engineer,release-engineer.md,85,shell,git merge-base*,allow,merge-base query,TOOL:git.state
+release-engineer,release-engineer.md,86,shell,git worktree list*,allow,worktree listing,TOOL:worktrees.list
+release-engineer,release-engineer.md,92,edit,**/.opencode/**,deny,deny guard for edit on **/.opencode/**; superseded by typed registry (blanket deny),DELETE
+release-engineer,release-engineer.md,93,write,**/.opencode/**,deny,deny guard for write on **/.opencode/**; superseded by typed registry (blanket deny),DELETE

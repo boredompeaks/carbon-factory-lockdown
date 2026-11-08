@@ -1,0 +1,16 @@
+{
+  "finding": "F-71",
+  "required_checks": [
+    "SUITE",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "POLICY_DIGEST",
+    "AUTHZ_MATRIX",
+    "BOOTTEST",
+    "ZIZMOR",
+    "ARCH"
+  ],
+  "expected_lint": "PASS",
+  "note": "ci.json, branch-protection.json and checks.json(required_in_ci) all equal this set (single source ci-required.json)."
+}

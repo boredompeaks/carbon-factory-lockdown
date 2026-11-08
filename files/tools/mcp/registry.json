@@ -1,0 +1,2061 @@
+{
+  "version": "6A-3",
+  "owner": "owner",
+  "description": "Typed MCP tool registry: every role capability is a typed tool; no shell. Permission files are a generated fallback layer.",
+  "tools": [
+    {
+      "name": "git.state",
+      "description": "Repo state: head/tree/branch/clean/merge-base/is-ancestor/ls-tree. Replaces every rev-parse.",
+      "roles": [
+        "auditor",
+        "builder",
+        "orchestrator",
+        "hacker",
+        "crouton",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "fields"
+        ],
+        "additionalProperties": false,
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "head",
+              "tree",
+              "branch",
+              "clean",
+              "merge-base",
+              "is-ancestor",
+              "ls-tree"
+            ]
+          },
+          "maxItems": 7
+        },
+        "rev": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.state-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.state-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.state-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.status",
+      "description": "Working-tree status at a validated ref.",
+      "roles": [
+        "auditor",
+        "builder",
+        "orchestrator",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "ref"
+        ],
+        "additionalProperties": false,
+        "ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.status-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.status-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.status-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.log",
+      "description": "History log at a validated ref.",
+      "roles": [
+        "auditor",
+        "builder",
+        "orchestrator",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false,
+        "ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.log-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.log-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.log-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.diff",
+      "description": "Diff between two validated refs (no ext-diff or textconv).",
+      "roles": [
+        "auditor",
+        "builder",
+        "orchestrator",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "base",
+          "head"
+        ],
+        "additionalProperties": false,
+        "base": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.diff-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.diff-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.diff-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.read_file",
+      "description": "File read at a validated rev; path deny globs (.env*, *.pem, *.key, secrets/**, policy-manifest.json, .opencode/**, hacker-scratch, audit-scratch, quality/ledger/verdicts, attack-catalog, skills/hacker*).",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "rev",
+          "path"
+        ],
+        "additionalProperties": false,
+        "rev": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SECRET_LEAK",
+        "AUTHZ_BYPASS"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.read_file-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.read_file-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.read_file-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.commit",
+      "description": "Commit the staged diff: validates staged paths against scope + test-infra denies; HEAD == capability.head; branch == task_branch; never --no-verify.",
+      "roles": [
+        "builder"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "message",
+          "tree"
+        ],
+        "additionalProperties": false,
+        "message": {
+          "type": "string",
+          "pattern": "^(?!-)[^\\r\\n]{1,500}$",
+          "maxLength": 500
+        },
+        "tree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+            "maxLength": 240
+          },
+          "maxItems": 100
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION",
+        "TEST_INFRA_CHANGE"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.commit-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.commit-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.commit-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "git.push_ref",
+      "description": "Push refs/heads/<branch> only, fast-forward only.",
+      "roles": [
+        "auditor",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "ref",
+          "expected_head"
+        ],
+        "additionalProperties": false,
+        "ref": {
+          "type": "string",
+          "pattern": "^refs/heads/(?!-)[A-Za-z0-9_][A-Za-z0-9_./-]{0,200}$",
+          "maxLength": 230
+        },
+        "expected_head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "AUTHZ_BYPASS",
+        "POLICY_DRIFT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-git.push_ref-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-git.push_ref-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-git.push_ref-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "worktrees.list",
+      "description": "Native worktree listing (no .ps1).",
+      "roles": [
+        "orchestrator",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-worktrees.list-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-worktrees.list-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-worktrees.list-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "worktrees.sync",
+      "description": "Native worktree sync (no .ps1).",
+      "roles": [
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "lane"
+        ],
+        "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_/-]{0,63}$",
+          "maxLength": 64
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-worktrees.sync-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-worktrees.sync-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-worktrees.sync-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "worktrees.reconcile",
+      "description": "Native lane reconciliation (no .ps1).",
+      "roles": [
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "lane"
+        ],
+        "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_/-]{0,63}$",
+          "maxLength": 64
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-worktrees.reconcile-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-worktrees.reconcile-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-worktrees.reconcile-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "check.run",
+      "description": "One dispatcher for all checks.json checks; ruff pinned config on added lines; gitleaks --redact pinned config+baseline over base..head; semgrep anchored excludes. Builder code runs only in the sandbox; auditor runs at the git object id.",
+      "roles": [
+        "auditor",
+        "builder",
+        "hacker"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "check_id",
+          "tree",
+          "engine"
+        ],
+        "additionalProperties": false,
+        "check_id": {
+          "type": "string",
+          "enum": [
+            "SCOPE",
+            "SUITE",
+            "TEST_SET",
+            "TEST_INFRA",
+            "BASE_FAIL_HEAD_PASS",
+            "MUTATION",
+            "CHANGELOG",
+            "SECRETS",
+            "CONVENTION",
+            "SMELL",
+            "GATE_CONTROLS",
+            "POLICY_DIGEST",
+            "ARCH",
+            "ORACLE_PROVENANCE",
+            "GUARD_DELTA",
+            "AUTHZ_MATRIX",
+            "SEMGREP",
+            "THREAD_RACE",
+            "SCHEMA_FUZZ",
+            "BOOTTEST",
+            "ZIZMOR",
+            "DAST_BASELINE",
+            "AGT_PARITY",
+            "AGT_AUDIT"
+          ]
+        },
+        "tree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "postgres",
+            "none"
+          ]
+        },
+        "base": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40,
+          "default": null
+        },
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40,
+          "default": null
+        },
+        "line": {
+          "type": "string",
+          "pattern": "^(?!-)[^\\r\\n]{1,500}$",
+          "maxLength": 500
+        },
+        "removed_id": {
+          "type": "string",
+          "pattern": "^(?!-)[^\\r\\n]{1,200}$",
+          "maxLength": 200
+        },
+        "covered_by": {
+          "type": "string",
+          "pattern": "^(?!-)[^\\r\\n]{1,200}$",
+          "maxLength": 200
+        }
+      },
+      "exec_mode": "sandbox",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": true,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "AGT_AUDIT_GAP",
+        "AGT_PARITY_MISMATCH",
+        "ARCH_VIOLATION",
+        "AUTHZ_MATRIX_GAP",
+        "BARE_EXCEPT",
+        "BOOT_FAIL_OPEN",
+        "CHANGELOG_GAP",
+        "CI_HARDENING",
+        "CODE_SMELL",
+        "CONTROL_UNDERCOUNT",
+        "CONVENTION_VIOLATION",
+        "DAST_FINDING",
+        "FLAKY_TEST",
+        "GATEWAY_IN_ATOMIC",
+        "GATE_CONTROL_FAILURE",
+        "GUARD_REMOVED",
+        "LOCK_ACROSS_NETWORK",
+        "MISSING_IDEMPOTENCY",
+        "MUTABLE_DEFAULT",
+        "NONATOMIC_WATERMARK",
+        "NON_FALSIFIABLE",
+        "POLICY_DRIFT",
+        "RACE_CONDITION",
+        "SCHEMA_FUZZ_FAILURE",
+        "SCOPE_VIOLATION",
+        "SECRET_LEAK",
+        "SUITE_FAILURE",
+        "TAUTOLOGICAL_ASSERTION",
+        "TEST_GAP",
+        "TEST_INFRA_CHANGE",
+        "TEST_REMOVAL_UNCOVERED",
+        "UNSAFE_RMW",
+        "WEAK_ORACLE"
+      ],
+      "output_cap": 262144,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-check.run-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-check.run-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-check.run-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json",
+        "files/policies/check-runners.json",
+        "files/policies/ci-required.json"
+      ],
+      "check_runners": {
+        "SCOPE": [
+          "builder",
+          "auditor"
+        ],
+        "SUITE": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "TEST_SET": [
+          "builder",
+          "auditor"
+        ],
+        "TEST_INFRA": [
+          "builder",
+          "auditor"
+        ],
+        "BASE_FAIL_HEAD_PASS": [
+          "builder",
+          "auditor"
+        ],
+        "MUTATION": [
+          "builder",
+          "auditor"
+        ],
+        "CHANGELOG": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "SECRETS": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "CONVENTION": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "SMELL": [
+          "builder",
+          "auditor"
+        ],
+        "GATE_CONTROLS": [
+          "auditor"
+        ],
+        "POLICY_DIGEST": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "ARCH": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "ORACLE_PROVENANCE": [
+          "builder",
+          "auditor"
+        ],
+        "GUARD_DELTA": [
+          "builder",
+          "auditor"
+        ],
+        "AUTHZ_MATRIX": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "SEMGREP": [
+          "builder",
+          "auditor"
+        ],
+        "THREAD_RACE": [
+          "builder",
+          "auditor"
+        ],
+        "SCHEMA_FUZZ": [
+          "builder",
+          "auditor"
+        ],
+        "BOOTTEST": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "ZIZMOR": [
+          "builder",
+          "auditor",
+          "ci"
+        ],
+        "DAST_BASELINE": [
+          "hacker"
+        ],
+        "AGT_PARITY": [
+          "auditor"
+        ],
+        "AGT_AUDIT": [
+          "auditor"
+        ]
+      },
+      "note": "Roles are the agent roles named in checks.json runners (auditor, builder, hacker); 'ci' in check_runners is the CI runner and invokes check.run in the pipeline, not as an agent."
+    },
+    {
+      "name": "gate.control",
+      "description": "Gate/invariant control run; orchestrator is verify-only.",
+      "roles": [
+        "auditor",
+        "orchestrator"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false,
+        "target": {
+          "type": "string",
+          "enum": [
+            "gate",
+            "impl",
+            "policy_digest",
+            "gate_impl",
+            "drain",
+            "manifest"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "run",
+            "verify"
+          ]
+        }
+      },
+      "exec_mode": "sandbox",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "GATE_CONTROL_FAILURE",
+        "CONTROL_UNDERCOUNT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-gate.control-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-gate.control-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-gate.control-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/gate.json"
+      ],
+      "scopes": {
+        "auditor": "run",
+        "orchestrator": "verify"
+      }
+    },
+    {
+      "name": "k1.up",
+      "description": "Bring up the K1 stack (TTL lease reapered).",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "run_id",
+          "base",
+          "head"
+        ],
+        "additionalProperties": false,
+        "run_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "maxLength": 64
+        },
+        "base": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "k1",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "BOOT_FAIL_OPEN"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-k1.up-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-k1.up-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-k1.up-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "k1.down",
+      "description": "Tear down the K1 stack for one run.",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false,
+        "run_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "maxLength": 64
+        }
+      },
+      "exec_mode": "k1",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "BOOT_FAIL_OPEN"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-k1.down-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-k1.down-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-k1.down-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "k1.exec",
+      "description": "Execute one enum action inside K1 (no free-form command strings).",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "run_id",
+          "action"
+        ],
+        "additionalProperties": false,
+        "run_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "maxLength": 64
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "django test",
+            "migrate",
+            "makemigrations check",
+            "boot test"
+          ]
+        },
+        "node": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "maxLength": 64
+        }
+      },
+      "exec_mode": "k1",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "SUITE_FAILURE",
+        "RACE_CONDITION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-k1.exec-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-k1.exec-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-k1.exec-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "k1.status",
+      "description": "K1 stack status for one run.",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false,
+        "run_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "maxLength": 64
+        }
+      },
+      "exec_mode": "k1",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "BOOT_FAIL_OPEN"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-k1.status-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-k1.status-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-k1.status-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "hacker.probe",
+      "description": "Catalog-bound probe execution against the K1 runtime (actor enum, capability bound, per-probe records).",
+      "roles": [
+        "hacker"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "item_id",
+          "actor",
+          "capability_id"
+        ],
+        "additionalProperties": false,
+        "item_id": {
+          "type": "string",
+          "enum": [
+            "AUTHZ-ROUTE",
+            "OBJECT-IDOR",
+            "TENANT-ESCAPE",
+            "RACE-ORDERS",
+            "REFUND-OVERSPEND",
+            "MFA-REPLAY",
+            "MFA-BYPASS",
+            "PROMPT-INJECTION",
+            "PRICE-TAMPER",
+            "IDEMPOTENCY",
+            "MASS-ASSIGNMENT",
+            "SECRET-EXPOSURE"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "enum": [
+            "hacker-high",
+            "hacker-max"
+          ]
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+          "maxLength": 36
+        },
+        "endpoint": {
+          "type": "string",
+          "pattern": "^/[A-Za-z0-9_\\-./]{0,200}$",
+          "maxLength": 201
+        },
+        "tenant_pair": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "batch": {
+          "type": "boolean"
+        },
+        "barrier": {
+          "type": "boolean"
+        }
+      },
+      "exec_mode": "k1",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": true
+      },
+      "class_tags": [
+        "AUTHZ_BYPASS",
+        "IDOR",
+        "TENANT_ESCAPE",
+        "MFA_BYPASS",
+        "MFA_REPLAY",
+        "REFUND_OVERSPEND",
+        "PRICE_TAMPER",
+        "MASS_ASSIGNMENT",
+        "PROMPT_INJECTION_ATTEMPT",
+        "SECRET_LEAK",
+        "IDEMPOTENCY_VIOLATION"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-hacker.probe-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-hacker.probe-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-hacker.probe-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/attack-catalog.json",
+        "files/policies/schemas/probe-record.json"
+      ]
+    },
+    {
+      "name": "repro.run",
+      "description": "Ledger-copy repro execution in the sandbox (runs parameter).",
+      "roles": [
+        "auditor",
+        "hacker",
+        "builder"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "spec"
+        ],
+        "additionalProperties": false,
+        "spec": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_/-]{0,200}$",
+          "maxLength": 201
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "postgres",
+            "none"
+          ]
+        }
+      },
+      "exec_mode": "sandbox",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "NON_FALSIFIABLE",
+        "WEAK_ORACLE"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-repro.run-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-repro.run-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-repro.run-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "static.scan",
+      "description": "Read-only static match for PROMPT-INJECTION (file_comment, test_name, commit_message, doc_string, fixture_data).",
+      "roles": [
+        "hacker"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false,
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "PROMPT_INJECTION_ATTEMPT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-static.scan-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-static.scan-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-static.scan-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/attack-catalog.json"
+      ]
+    },
+    {
+      "name": "scratch.write",
+      "description": "Role+capability namespaced scratch writes with size/extension caps; returns content sha.",
+      "roles": [
+        "hacker",
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "namespace",
+          "capability_id",
+          "path",
+          "content"
+        ],
+        "additionalProperties": false,
+        "namespace": {
+          "type": "string",
+          "enum": [
+            "hacker",
+            "auditor"
+          ]
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,64}$",
+          "maxLength": 64
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 262144
+        },
+        "extension": {
+          "type": "string",
+          "enum": [
+            "py",
+            "json",
+            "md",
+            "txt"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SECRET_LEAK",
+        "PROMPT_INJECTION_ATTEMPT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-scratch.write-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-scratch.write-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-scratch.write-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "ledger.append",
+      "description": "Typed hash-chained ledger writes; expected_prev_hash required; per-role record types enforced server-side.",
+      "roles": [
+        "orchestrator",
+        "auditor",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "record_type",
+          "record",
+          "expected_prev_hash"
+        ],
+        "additionalProperties": false,
+        "record_type": {
+          "type": "string",
+          "enum": [
+            "dispatch",
+            "capability",
+            "verdict",
+            "finding",
+            "attack-log",
+            "gate-control",
+            "release"
+          ]
+        },
+        "record": {
+          "type": "object"
+        },
+        "expected_prev_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "maxLength": 64
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "POLICY_DRIFT",
+        "GATE_CONTROL_FAILURE"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-ledger.append-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-ledger.append-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-ledger.append-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ],
+      "record_types_by_role": {
+        "orchestrator": [
+          "dispatch",
+          "capability"
+        ],
+        "auditor": [
+          "verdict",
+          "finding",
+          "attack-log",
+          "gate-control"
+        ],
+        "release-engineer": [
+          "release"
+        ]
+      }
+    },
+    {
+      "name": "acceptance.materialize",
+      "description": "Deterministic repro-spec to test file materialization (content-hashed).",
+      "roles": [
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "spec",
+          "path"
+        ],
+        "additionalProperties": false,
+        "spec": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_/-]{0,200}$",
+          "maxLength": 201
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "NON_FALSIFIABLE",
+        "WEAK_ORACLE"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-acceptance.materialize-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-acceptance.materialize-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-acceptance.materialize-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "drain.validate",
+      "description": "Drain validation (read-only).",
+      "roles": [
+        "auditor",
+        "orchestrator",
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "stage"
+        ],
+        "additionalProperties": false,
+        "stage": {
+          "type": "string",
+          "enum": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5"
+          ]
+        },
+        "record_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "maxLength": 64
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "verify"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "POLICY_DRIFT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-drain.validate-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-drain.validate-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-drain.validate-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "evidence.hash",
+      "description": "Content hash of a file at a validated rev (replaces Get-FileHash).",
+      "roles": [
+        "builder",
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "rev",
+          "path"
+        ],
+        "additionalProperties": false,
+        "rev": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SECRET_LEAK"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-evidence.hash-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-evidence.hash-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-evidence.hash-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "harness.verify",
+      "description": "check_harness_config + policy manifest verification (read-only).",
+      "roles": [
+        "orchestrator"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "scope"
+        ],
+        "additionalProperties": false,
+        "scope": {
+          "type": "string",
+          "enum": [
+            "harness_config",
+            "policy_manifest"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "POLICY_DRIFT",
+        "AGT_PARITY_MISMATCH"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-harness.verify-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-harness.verify-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-harness.verify-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "pr.open",
+      "description": "Open a PR at a pinned head.",
+      "roles": [
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "head",
+          "title"
+        ],
+        "additionalProperties": false,
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^(?!-)[^\\r\\n]{1,300}$",
+          "maxLength": 300
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "CI_HARDENING",
+        "POLICY_DRIFT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-pr.open-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-pr.open-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-pr.open-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "pr.watch",
+      "description": "Watch checks on a PR head; one watch per (pr, head) enforced server-side.",
+      "roles": [
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "pr",
+          "head"
+        ],
+        "additionalProperties": false,
+        "pr": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999999
+        },
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "CI_HARDENING",
+        "POLICY_DRIFT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-pr.watch-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-pr.watch-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-pr.watch-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "pr.merge",
+      "description": "Merge at a pinned head only; no admin, no bypass, no force.",
+      "roles": [
+        "release-engineer"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "pr",
+          "head"
+        ],
+        "additionalProperties": false,
+        "pr": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999999
+        },
+        "head": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "maxLength": 40
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "squash"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "CI_HARDENING",
+        "POLICY_DRIFT"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-pr.merge-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-pr.merge-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-pr.merge-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "docker.ensure",
+      "description": "Ensure the Docker engine is up (starts the engine only; never pulls, builds, or runs containers).",
+      "roles": [
+        "builder",
+        "auditor"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false,
+        "action": {
+          "type": "string",
+          "enum": [
+            "ensure"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "CI_HARDENING"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-docker.ensure-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-docker.ensure-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-docker.ensure-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    },
+    {
+      "name": "code.write",
+      "description": "Role-scoped worktree write under capability scope (builder backend/**; compliance backend/docs/compliance/*; crouton backend/docs/**); scope + test-infra denies enforced server-side.",
+      "roles": [
+        "builder",
+        "compliance",
+        "crouton"
+      ],
+      "args": {
+        "type": "object",
+        "properties": {},
+        "required": [
+          "path",
+          "content"
+        ],
+        "additionalProperties": false,
+        "path": {
+          "type": "string",
+          "pattern": "^(?!-)[^:\\r\\n]{1,240}$",
+          "maxLength": 240
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 262144
+        },
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "utf-8"
+          ]
+        }
+      },
+      "exec_mode": "pure",
+      "sealed": true,
+      "cache_key": {
+        "tree": true,
+        "check_id": false,
+        "check_impl_sha": true,
+        "engine": false
+      },
+      "class_tags": [
+        "SCOPE_VIOLATION",
+        "TEST_INFRA_CHANGE",
+        "SECRET_LEAK"
+      ],
+      "output_cap": 65536,
+      "redact": true,
+      "controls": [
+        {
+          "id": "CTRL-code.write-1",
+          "expect": "REJECT_ROLE"
+        },
+        {
+          "id": "CTRL-code.write-2",
+          "expect": "REJECT_ARG"
+        },
+        {
+          "id": "CTRL-code.write-3",
+          "expect": "REJECT_ARG"
+        }
+      ],
+      "policy_refs": [
+        "files/policies/checks.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "runtime": "docker",
+  "engine": "zap",
+  "target": "http://app:8000",
+  "threshold": "high",
+  "alerts": [
+    {
+      "risk": "Low",
+      "name": "X-Content-Type-Options header missing"
+    },
+    {
+      "risk": "High",
+      "name": "Reflected cross-site scripting"
+    }
+  ]
+}

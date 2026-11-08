@@ -1,0 +1,34 @@
+{
+  "finding": "F-74",
+  "cases": [
+    {
+      "line": "assert True, \"looks fine\" # done",
+      "expected": "TAUTOLOGICAL_ASSERTION"
+    },
+    {
+      "line": "assert count == count  # same var",
+      "expected": "TAUTOLOGAL_SAME_VAR"
+    },
+    {
+      "line": "self.assertEqual(a, a, \"same\")",
+      "expected": "TAUTOLOGICAL_ASSERTION"
+    },
+    {
+      "line": "self.assertTrue(True)",
+      "expected": "TAUTOLOGICAL_ASSERTION"
+    },
+    {
+      "line": "expect(true).toBe(true);",
+      "expected": "TAUTOLOGICAL_ASSERTION"
+    },
+    {
+      "line": "expect(x).toBe(x); // same",
+      "expected": "TAUTOLOGICAL_ASSERTION"
+    },
+    {
+      "line": "assert total == expected",
+      "expected": "OK"
+    }
+  ],
+  "note": "Message/comment tails, unittest forms, and JS/TS forms are now matched; a real comparison passes."
+}

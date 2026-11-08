@@ -1,0 +1,17 @@
+diff --git a/backend/orders/refunds.py b/backend/orders/refunds.py
+index 1111111..2222222 100644
+--- a/backend/orders/refunds.py
++++ b/backend/orders/refunds.py
+@@ -39,2 +39,1 @@ def refund(order, amount):
+-    if remaining <= 0:
+-        _reject_over_refund()
++    _reject_over_refund()
+diff --git a/backend/orders/tests.py b/backend/orders/tests.py
+index 3333333..4444444 100644
+--- a/backend/orders/tests.py
++++ b/backend/orders/tests.py
+@@ -1,0 +2,4 @@
++
++def test_refund_rejects_non_positive_remaining():
++    with pytest.raises(ValueError):
++        refund(order, 0)

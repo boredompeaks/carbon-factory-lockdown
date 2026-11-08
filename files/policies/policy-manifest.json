@@ -1,0 +1,915 @@
+{
+  "schema": "policy-manifest/2",
+  "version": 2,
+  "owner_only": true,
+  "read_deny_rule": "**/policy-manifest.json",
+  "created_at": "2026-11-07T16:13:18Z",
+  "file_count": 202,
+  "files": [
+    {
+      "path": "agent:files/FACTORY-POLICY-MAP.md",
+      "sha256": "7b2562b89b12565e79305406c96cb03f3e400535b22fe7a462a4a0fbfe2be36b"
+    },
+    {
+      "path": "agent:files/K1-CONTAINER-PLAN.md",
+      "sha256": "524a8382abd4d19bf969d448dc415025c3b8aefc0f9730ff69447ce63961a2b5"
+    },
+    {
+      "path": "agent:files/auditor.md",
+      "sha256": "5d4e76c67f50a50b24c358b4fec8d92a4352aab033d6810c63e4e35b43be4e14"
+    },
+    {
+      "path": "agent:files/builder.md",
+      "sha256": "63ddf06b5d2e28fd098bcf5168518a42845386ca40ebef48bb6fd6191631b5bd"
+    },
+    {
+      "path": "agent:files/compliance.md",
+      "sha256": "008bcb995e037b074d11b49dca3946f1b6c731436b2cd6185aa043d09576d886"
+    },
+    {
+      "path": "agent:files/crouton-alpha.md",
+      "sha256": "fc81e7b3f5b918aa68c3d2d49d9f1c0d5d305928916dfc742b56df87b123a0a9"
+    },
+    {
+      "path": "agent:files/hacker.md",
+      "sha256": "0b52773832b423d4925adaf97a814164faa54e9b78bdf8a64df9dc54a204b352"
+    },
+    {
+      "path": "agent:files/orchestrator.md",
+      "sha256": "2209088e79a07241c96cc385aafaab2032f715860271b8073927964810bbbf6d"
+    },
+    {
+      "path": "agent:files/release-engineer.md",
+      "sha256": "23f9a8ec3aadf49f6ad82c4c159550b7307a71e07c26c1bd01602467839fa84f"
+    },
+    {
+      "path": "docker:files/docker/k1/Dockerfile",
+      "sha256": "9c280a6611a93a44806902a4c2f1ee37b86d2e2150d7acf6e182bbe6bc8be54c"
+    },
+    {
+      "path": "docker:files/docker/k1/README.md",
+      "sha256": "c7549a5719986f987a3ac317a6d27f172ff3d67004ec20bfefa29c739b46ced4"
+    },
+    {
+      "path": "docker:files/docker/k1/entrypoint.sh",
+      "sha256": "d078014bbae2121063de81e9177a39aefd010814d3282b8fe6ae0d0755ac30e5"
+    },
+    {
+      "path": "docker:files/docker/k1/fake_provider.py",
+      "sha256": "a34456e527be89a5f866b4ba7dc53fcd7999a95a6e8b825023fd70336417e010"
+    },
+    {
+      "path": "docker:files/docker/k1/requirements.lock",
+      "sha256": "fbcd1317c76e5f8472e2f422a6074e848772b4c961576ce14f97f87904105384"
+    },
+    {
+      "path": "docker:files/docker/k1/requirements.txt",
+      "sha256": "9c42a80b0270394adbd900c1fc8e890909c22c6d4474d870e5de69d199098f21"
+    },
+    {
+      "path": "docker:files/docker/k1/seed.py",
+      "sha256": "71507ca22f2ac0366f55f60b213d72bdf483c54386e2645950e9ae21d878d6b8"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_audit/audit-complete.jsonl",
+      "sha256": "14b184ddc5cfae2170d2daa8919c2d360014757a1c04967d1b08eb00f9d70843"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_audit/audit-complete.jsonl.expect.json",
+      "sha256": "4fe2546b236df5ae705f82bfe4e968b2da7837d3c05b784483775710d424ddae"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_audit/audit-missing-deny.jsonl",
+      "sha256": "13c65633edeed39a06b2836fd1423952f98ffaa8fbe02cccdba1344ac23aec6e"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_audit/audit-missing-deny.jsonl.expect.json",
+      "sha256": "3047504c3b4a23a641ebe5ccfef873e580c54ae39baf0c24f4f2c3a8b835c394"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/.agt/policy.json",
+      "sha256": "d529514ed42a67f8b82bdef78c103f519ae39d21d5ffad080a9478b2f91ad0b7"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/.opencode/package-lock.json",
+      "sha256": "3141c6c2e92a98ca9b743f12f4716cce7d671929e4aa5aaf4fd67401990082db"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/.opencode/package.json",
+      "sha256": "b0d8527c6afcbe186518d676b7624490b286c2d69f62d7df02248b4f280cbbb4"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/.opencode/plugins/agt.js",
+      "sha256": "fc0320dc5f5b972dacbe545830762f891122df272dab593fc5e430d0ff70da3c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/DEVIATION.txt",
+      "sha256": "a80898c037aa406ef1fe614a2a31238f104ba349d957eeb0b6855c9f8e040f74"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/bad_root/opencode.json",
+      "sha256": "1a215713ac442684edb2c2b5e5a32ca643f0d3ab90226b3f6faa56c6edd51ea0"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/good_root/.agt/policy.json",
+      "sha256": "760737a87bfc44eb89de2184d10b063e94e8c13ceaff6693f53b0b9cccf680d9"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/good_root/.opencode/package-lock.json",
+      "sha256": "3141c6c2e92a98ca9b743f12f4716cce7d671929e4aa5aaf4fd67401990082db"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/good_root/.opencode/package.json",
+      "sha256": "b0d8527c6afcbe186518d676b7624490b286c2d69f62d7df02248b4f280cbbb4"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/good_root/.opencode/plugins/agt.js",
+      "sha256": "a17fbd3fcf5019fa0d6882274e32104b7a87b4e78ba78bb17b12a4622625aa61"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/agt_parity/good_root/opencode.json",
+      "sha256": "1a215713ac442684edb2c2b5e5a32ca643f0d3ab90226b3f6faa56c6edd51ea0"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/arch_check/bad.diff",
+      "sha256": "d964d160054409310141e83edf7621a311f460907af51b1342297589b49d4baa"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/arch_check/clean.diff",
+      "sha256": "511f1be3d7fe1e3190033eb0559143870ecfc6b49a022a9125378cd5d689639a"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/CONTROL.md",
+      "sha256": "75a5c078937a9d8353a20a815519713467db28249c4edc5e7884edac8ab7e93f"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/control-matrix.json",
+      "sha256": "5f50d56f5406a9a442e52a9d4f24e567e7a00a7eb282ebb3e240b34d090b932c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/control-missing.json",
+      "sha256": "ca0558631e674b1a5b7b18ff6ce00bfc6f92ed4a30fcbf1fe718ff44c7c1f527"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/roles.json",
+      "sha256": "65eabb77258425f53d719e6a75a3f8becc5c9ff1895819bd33286742ed70fbd1"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/urls.py",
+      "sha256": "e47da8f2d0088a73f6a7c04c1656129f34a8b43b0f2aa7fa19f3272e0ce7ad40"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/authz_control/views.py",
+      "sha256": "69a2fdad3252f1b29ae80acfd2e41e583754d7a01969b53404ce0e0b48e8e895"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/base_fail_head_pass/bad.json",
+      "sha256": "6ad06585e32fabd8b9039f814154b4f2b56336f005f7927e7c2bcd76d4c8f3fe"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/base_fail_head_pass/clean.json",
+      "sha256": "0cc07a2510ff7ad821f3ae0b0d9d97ff0f8cdbfa643376f38d5d7fff0b1e1966"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/boottest/bad.json",
+      "sha256": "4571a99f7cc8dee98d41a20dfebfee8a92a114abeba9852e902c6bfe8e97e929"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/boottest/clean.json",
+      "sha256": "27e50655f6c287525cf50a0183284eda11b0a7ec307035764a1f41599c94da04"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/changelog/bad.json",
+      "sha256": "1a1154c647ddff031b7b1aa2ff384f8801fcbfc2dc56a69246f81cd068156874"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/changelog/clean.json",
+      "sha256": "b8da941abe15461ecffcd1cc976cf996388e38b928540bb0e4bdf50ee6914010"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/convention/bad.py",
+      "sha256": "3727adff524e0616022eadd8f4af21a0778b29fc4c77bdfefd1afce2cbf5e4b7"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/convention/clean.py",
+      "sha256": "976730f78b2f388a88ac5ba984e11aee87bc5db326fc6ea3ba7b2a5da2f67bcd"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/dast_baseline/bad.json",
+      "sha256": "9bf0ed51b4992fbf7943f73023d9711688edf619945cc13f476e524406cb4496"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/dast_baseline/clean.json",
+      "sha256": "d9c96bb041b9076ae854207a1ada7f196a182e5d029b9c8a03473d65b714ec2a"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/guard_delta/bad.diff",
+      "sha256": "bda824adc50ee969179be45dd90256eb0b34c88a18793ed68c5dd6043edaff77"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/guard_delta/covering-tests.json",
+      "sha256": "acf1a04fa2ffc8e5999991f5be46db51ad7a73e00c38c1ca928d14d743cbd78c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/guard_delta/good.diff",
+      "sha256": "027f028f24fbb823c2a042473bc1a07460d7c6191babf56ab8b5f51bfb24c13d"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/mutation/bad.json",
+      "sha256": "21b32551776fce0e9084057919e0936b4665b35933a6cda99eec577077ad894c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/mutation/clean.json",
+      "sha256": "ca381adb7546f4320ae121802d75089dfa49d539f42fd0c483ab10dd7310c247"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/oracle/bad_test.py",
+      "sha256": "5b880d538d3f15385e5fd16c64a3a2c675f9b0e1c2f17d8ec019777960269a9c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/oracle/call_count_test.py",
+      "sha256": "f119d0ded6312f67774b0c846ede8dd8c8bd67a427e1d659f18ff8475eccc9db"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/oracle/clean_test.py",
+      "sha256": "627e226a45941c034d397b5465c71aa3799235c792bf0aa18b13792ed5c243b3"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/oracle/impl_constant_test.py",
+      "sha256": "a9e6ecce5cdd9faf6a19ecccb9769acb159857702362d448f8525234db2e630c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/oracle/mirror_refund_race.py",
+      "sha256": "391a04daa3fd9e9e6bc6952e63e8f6b05d5487bc0a03492ec9719fdaa87cbafb"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/schema_fuzz/bad.json",
+      "sha256": "73f664eaa9f9a8629cc767c01ad1ce86801f71a8cec1188fe094dccaac75d230"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/schema_fuzz/clean.json",
+      "sha256": "41ce4f1b4bf0e2b05417bc64baeaca99c7c88970379520bc333bec3f85aaf57f"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/scope/bad.json",
+      "sha256": "76f9511ed31e410c3f37e3b07e2472b6ba649ce549e5e0eb55c1ff681277450c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/scope/clean.json",
+      "sha256": "679ff45773561fc13f2805690183576a52e32168089df373cd192179ee341396"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/secrets/bad/bad_key.py",
+      "sha256": "515d6800056b2c606fd2d066701457b98e6972d5a7b477e15647d3046b8ff794"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/secrets/baseline/.gitleaks.toml",
+      "sha256": "8221a10bd30df30109bb250f985b6a102c23aa148c59fc57a226699b69cad0a5"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/secrets/baseline/bad_key.py",
+      "sha256": "515d6800056b2c606fd2d066701457b98e6972d5a7b477e15647d3046b8ff794"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/secrets/clean/clean.py",
+      "sha256": "585c93666fcb046b7b264d3fa73202aa2a38254ae82a4b3ba19e873c2d5a9886"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/semgrep/bad.py",
+      "sha256": "fdc89ee19d9f22b0f2b6fbe9842be93fbaa47b7d547a76471e301a08f506d56c"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/semgrep/clean.py",
+      "sha256": "357c8268db5c6c0e7d569a3650f69b4f5c6e7e9d4dfde8fe48846d896529fd13"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/smell/bad_test.py",
+      "sha256": "544fcc92fed65be031bccde3afb11a78e1875031759b2f77a81160fa838a08f1"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/smell/clean_test.py",
+      "sha256": "4b96bf1e5804339d5225e5cb9be0cf6140e63dc47b64b7d46bb9b50bbff65474"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/suite/bad.json",
+      "sha256": "c56adfb2afb9eee48beb073ce4755e15bf88a26f4f05c901c631c7d90cb6f869"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/suite/clean.json",
+      "sha256": "a821eaaf432a0c564046881db1a97a0c890ea032c3afee107a667440249acc5f"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/test_infra/bad.json",
+      "sha256": "eceee67cc6bc579504b8896790f115b268aa0b135ade6690d29f1ffd7b4dd853"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/test_infra/clean.json",
+      "sha256": "236be16cd39940c59411aac3835a6f9026f91e895469e514e3bd4dae5d3cd021"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/test_set/bad.json",
+      "sha256": "dc62968b9264976b6dcaab4e63acd0f8a79a278fccc834b4b3f28d920e0d11ba"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/test_set/clean.json",
+      "sha256": "c7d1c288822828651bd191a820c6578bb03e1b673543d2e410986f950ce0c205"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/thread_race/bad.json",
+      "sha256": "3c07b90578b9542507852278b6d355b4bc8bb53670f9904c00c502d9574f13fa"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/thread_race/clean.json",
+      "sha256": "f6e42bd4f4666d701a153a101233bd0f25c625118918e7c6ab16859966443162"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/zizmor/bad.json",
+      "sha256": "9eb32776bfae8304d348b8254fac7d72e745a2b0283023afd406d23768ab04d1"
+    },
+    {
+      "path": "fixture:files/tools/fixtures/zizmor/clean.json",
+      "sha256": "11cb7d422bab53612441a5293be3abf6ad70dd9cc3d124e607ea0ad2903e87bf"
+    },
+    {
+      "path": "harness:.agt/policy.json",
+      "sha256": "9bbc72ca28396a3728d916e050915854f2d8a890a9a7ba2609a02ccb95f38ea5"
+    },
+    {
+      "path": "harness:.opencode/package-lock.json",
+      "sha256": "93f7644c641ffaee45e5abaa6aff110fd64b70d15b66561c68ed34ffafdc7f07"
+    },
+    {
+      "path": "harness:.opencode/package.json",
+      "sha256": "279c013716c99d098c992352ecdbcaeef56c3d2493bb90a976fc5184057b589d"
+    },
+    {
+      "path": "harness:.opencode/plugins/agt.js",
+      "sha256": "41b0d3b33edb17b357ff1a07c47cc3fcee0e3e41335c3ff880c59ea841831cb9"
+    },
+    {
+      "path": "harness:opencode.json",
+      "sha256": "5fb58b2cb3d5508727e206e9560dc57d7b5850baf2de0fced6f729c58d98da7b"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/auditor.md",
+      "sha256": "5d4e76c67f50a50b24c358b4fec8d92a4352aab033d6810c63e4e35b43be4e14"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/builder.md",
+      "sha256": "63ddf06b5d2e28fd098bcf5168518a42845386ca40ebef48bb6fd6191631b5bd"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/compliance.md",
+      "sha256": "008bcb995e037b074d11b49dca3946f1b6c731436b2cd6185aa043d09576d886"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/crouton-alpha.md",
+      "sha256": "fc81e7b3f5b918aa68c3d2d49d9f1c0d5d305928916dfc742b56df87b123a0a9"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/hacker.md",
+      "sha256": "0b52773832b423d4925adaf97a814164faa54e9b78bdf8a64df9dc54a204b352"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/orchestrator.md",
+      "sha256": "2209088e79a07241c96cc385aafaab2032f715860271b8073927964810bbbf6d"
+    },
+    {
+      "path": "installed_agent:.opencode/agents/release-engineer.md",
+      "sha256": "23f9a8ec3aadf49f6ad82c4c159550b7307a71e07c26c1bd01602467839fa84f"
+    },
+    {
+      "path": "policy:files/policies/assert-rules.json",
+      "sha256": "7c6b4e6efcea26e255befea4e9ef4c0209a0d7b11c75f330017d88ead2b648c0"
+    },
+    {
+      "path": "policy:files/policies/attack-catalog.json",
+      "sha256": "5093323e8303b39c51cb37d915e0551d6fc50707cded4674e53746bc5a30f121"
+    },
+    {
+      "path": "policy:files/policies/branch-protection.json",
+      "sha256": "a2d98efd7b7cfc204c81cd1d084d307a06c2a5e3980e8238aecd5974011a14fc"
+    },
+    {
+      "path": "policy:files/policies/changelog.json",
+      "sha256": "9715a7a79f1b1e48bd647436343a4b7773f32f02e061a27a346645ad585a11ba"
+    },
+    {
+      "path": "policy:files/policies/check-runners.json",
+      "sha256": "dfdf3d15c034e901267ad5ed76ce21af530e98d77f54e7314f7aa3ca0719c1b7"
+    },
+    {
+      "path": "policy:files/policies/checks.json",
+      "sha256": "b5357d7e1f1681db73427c4c03a81aafa379b4b2c6aab2c5a8a15ddd0012a3dd"
+    },
+    {
+      "path": "policy:files/policies/ci.json",
+      "sha256": "5f38fea014e7cce6a8d7f46002fc501b45651ecef27656df3a6fa2f75ea8936d"
+    },
+    {
+      "path": "policy:files/policies/dispatch-rules.json",
+      "sha256": "9b50c67766bfa27768837eca76b41febd0ec86a122c244c581cf83468587da46"
+    },
+    {
+      "path": "policy:files/policies/drain.json",
+      "sha256": "7c4c99416c32c23aca66e9684e80a1545f9840e940dd1477b15111e35bed1dd5"
+    },
+    {
+      "path": "policy:files/policies/escalation.json",
+      "sha256": "9b683b9d87aa6d7e83a6822c69dfc1ac5ce33cc6c844567c11e5e6d7b92452f0"
+    },
+    {
+      "path": "policy:files/policies/gate.json",
+      "sha256": "dabcc250739a30af78ef614a3ef21268891fcafad324114091f15ce778eba6bd"
+    },
+    {
+      "path": "policy:files/policies/invariants.json",
+      "sha256": "ffcd40a8c56d01b51ed37f2cc75d1be37a4d1ac8edf6e2c361d1e902313e3b96"
+    },
+    {
+      "path": "policy:files/policies/layers.json",
+      "sha256": "13c64d551e5d55dff2286a73510b31890f1626b20a715dad7b6814d3393ea2de"
+    },
+    {
+      "path": "policy:files/policies/lessons.json",
+      "sha256": "4cbb8a4f5bea62964ee46291bfe751b93f8a01c33b6ba682858e6c0a40672b29"
+    },
+    {
+      "path": "policy:files/policies/models.json",
+      "sha256": "09d2d14897bc13808c1e6a9e620c05bd89483c7ca1395205c38997fd102f9689"
+    },
+    {
+      "path": "policy:files/policies/mutation.json",
+      "sha256": "07c3a58128da0f3135875183ee214b7aba0f359d0c484fcbb644dba4df0a82ea"
+    },
+    {
+      "path": "policy:files/policies/negative-controls.json",
+      "sha256": "eefd96c958a92b96fd35158957b05f239b4d0083e005676c2356eadcf4b3428b"
+    },
+    {
+      "path": "policy:files/policies/redaction.json",
+      "sha256": "6ce77acac9c0fda9d7ce5a36586bc6d6609cf1971c4e310f8aec09495b5085ab"
+    },
+    {
+      "path": "policy:files/policies/reuse.json",
+      "sha256": "f44aad4c6cd5de319861dc03f1d03ef5934111f7e7f3e2ed31444f2028714e59"
+    },
+    {
+      "path": "policy:files/policies/risk-map.json",
+      "sha256": "7efe8c6761b3f1ec043c938fb76b4a9b54cf0d8984d647455fccf07efb80bfc0"
+    },
+    {
+      "path": "policy:files/policies/schema-fuzz.json",
+      "sha256": "fa34048796e8e4158fadc8e25b229213827e224bd002266fdf13e01f17ad4a33"
+    },
+    {
+      "path": "policy:files/policies/schemas/auditor-verdict.json",
+      "sha256": "cd30c81a05737f9213d877a545a34e640b991cf0cedf77fe90f7f0fd7e35f8ba"
+    },
+    {
+      "path": "policy:files/policies/schemas/builder-result.json",
+      "sha256": "76d01de4e3718bb3cd86af0ac4f465572fa06faaebbbbc03ba2dcb655bd93921"
+    },
+    {
+      "path": "policy:files/policies/schemas/capability.json",
+      "sha256": "29a57f9b09a5943eebda899d201e772e46c909bc2d6058399dde3dbd8c835393"
+    },
+    {
+      "path": "policy:files/policies/schemas/drain-record.json",
+      "sha256": "b1860a46c8d05d288c4462480fff3f3bebc97ec828be56233608f4676d4c7a47"
+    },
+    {
+      "path": "policy:files/policies/schemas/fault-codes.json",
+      "sha256": "79db524c47757bc07969c564214eae8b15787ece232681a4aa57a290c9a3ce5d"
+    },
+    {
+      "path": "policy:files/policies/schemas/gate-control.json",
+      "sha256": "f7bd7ad00df80a72f5caa4279888045cce559213ed8f6918f2c511bf6b276407"
+    },
+    {
+      "path": "policy:files/policies/schemas/hacker-envelope.json",
+      "sha256": "7057a8a7c3d5d77ed68c771ad5c96b5cca044a31d58f2c8809cc0ccdd1e3e57a"
+    },
+    {
+      "path": "policy:files/policies/schemas/hacker-result.json",
+      "sha256": "10b66edef5d54a4f8a0e57ee87a1625f513fc8e8b9261bc461168e1413d58be0"
+    },
+    {
+      "path": "policy:files/policies/schemas/orchestrator-decision.json",
+      "sha256": "981106c33145d077260ffe3643796d70efa6bc0e1c2a407ad33539fcfe785448"
+    },
+    {
+      "path": "policy:files/policies/schemas/release-result.json",
+      "sha256": "9daab1f3ee0c69cbabc5493c37de022149379cc5f2da7f37de605a0a49ad183c"
+    },
+    {
+      "path": "policy:files/policies/schemas/repro-spec.json",
+      "sha256": "ee2653ff7d8330e6fb642eb20b58bb94d26dd05689f447020fd7f952f3d12ae8"
+    },
+    {
+      "path": "policy:files/policies/schemas/stages.json",
+      "sha256": "247d8a6f4284c6a00871d54311199cf4f30cc7473cda727c65ac45e68ab2050e"
+    },
+    {
+      "path": "policy:files/policies/secrets-baseline.json",
+      "sha256": "79f3de308a823249e1a949219e17d311e07dcf189677abb79fef7bc282b28c9c"
+    },
+    {
+      "path": "policy:files/policies/semgrep.yml",
+      "sha256": "e7ccdf7ff4307995ab25acb405095f226a3646915f6a23564fdaea87e47847b0"
+    },
+    {
+      "path": "policy:files/policies/severity.json",
+      "sha256": "3bfc5aa20078b81058fb99c2ae8bc09ad585ad131a505a4ceb9861b67986a573"
+    },
+    {
+      "path": "policy:files/policies/task-kinds.json",
+      "sha256": "a14ed4f46f3a01155eaec4bbd3d39a2dd4b916d2c6383702e7ba3245cd400e6d"
+    },
+    {
+      "path": "policy:files/policies/task-limits.json",
+      "sha256": "341181dcc0718bd4bfb99ba6c2a9ba662c0bcfb1b3daa9200cbd03d660ca8a07"
+    },
+    {
+      "path": "policy:files/policies/test-removal-reasons.json",
+      "sha256": "a39f639d9efda6c919e1d44e54fae8d946191724db5cef8a1a1e2cfb1a3e3b44"
+    },
+    {
+      "path": "policy:files/policies/tiers.json",
+      "sha256": "daa93b25714317bcf64e129ab12df07656c468de9867f8aefd8ccee56a361a61"
+    },
+    {
+      "path": "request:requests/R05-01-model-independence.md",
+      "sha256": "0d3ccc0371d2917f9dcfdc42bdeb66bda3e32f6a39c7cb5150435cdf00bd63aa"
+    },
+    {
+      "path": "request:requests/R05-02-oracle-class-alignment.md",
+      "sha256": "1535f5e6c0ba57c09afb92772df5fbb613a3c3ce1c51e9a6a91da39b0c933d50"
+    },
+    {
+      "path": "request:requests/R05-03-agt-checks-scheduled.md",
+      "sha256": "4e0b60d7c9fd750ab0ca889fe0b5f7fc32f82eb2882d54c57b9d7f9e6725e3de"
+    },
+    {
+      "path": "request:requests/R05-04-agt-adapter-serialization.md",
+      "sha256": "f599f73dc68afe51241354246459c225df7048e5bfa20ff8a25580cf08b1ce6a"
+    },
+    {
+      "path": "request:requests/R05-05-distributed-topology.md",
+      "sha256": "53b415b80c776d207271398e57e7d5c1ca2d7e057d2ea5c7f9b960271ba3cc2a"
+    },
+    {
+      "path": "request:requests/R05-06-control-minima-reconcile.md",
+      "sha256": "049ce2a66c3910110afb925d154cc17d658c8f70bb2a2f158ac7d73fa9f10752"
+    },
+    {
+      "path": "request:requests/R05-07-release-path-reconcile.md",
+      "sha256": "665fe30824658459d3f98c658a2ba7cf74f4f718257bff12c2479ecc7d48ca2a"
+    },
+    {
+      "path": "request:requests/R05-08-hacker-abort-schema.md",
+      "sha256": "def2f9e01e66046fa16b5cb6ce63229523c5b351655a08ab97e801543dad4d0f"
+    },
+    {
+      "path": "request:requests/R05-09-external-directory-batch.md",
+      "sha256": "d2c0eb7bfa6e0f8355777af4ba01bfe15037991b25352ae3542c92b04c3dde8e"
+    },
+    {
+      "path": "request:requests/R05-10-opencode-tree-deny.md",
+      "sha256": "120fbf126f0beca9d7c7d29b26be958344f303f18477776d4df5b0b7ef3b7201"
+    },
+    {
+      "path": "script:scripts/backfill_register.py",
+      "sha256": "db511ee949057f3fff8fb201704795c0a032b2a4d2de6850a5113d2922159182"
+    },
+    {
+      "path": "script:scripts/bug_lint.py",
+      "sha256": "7a9a8c690cfcaf2c8471617d3525076169b409a770b9ed234def919dc86a1696"
+    },
+    {
+      "path": "script:scripts/check_harness_config.py",
+      "sha256": "6449468a3c8c057d3d399db6897cd46418dd1119d699c7df26ebd47730a7e630"
+    },
+    {
+      "path": "script:scripts/control_mutation.py",
+      "sha256": "14054df1f12d4f188e0a35502f16e447f4e14f55bcc8e64cae59171a8d23f00c"
+    },
+    {
+      "path": "script:scripts/outcome_parse.py",
+      "sha256": "df1a8c0fe610a6a6a2cc931923026c529c248b98d9360e49c39b62979e6565b1"
+    },
+    {
+      "path": "script:scripts/policy_manifest.py",
+      "sha256": "c404d4549c7586a6628b622ee5ea8a3ceda3cb42bf74ae5b0f07a21e36396dec"
+    },
+    {
+      "path": "script:scripts/scan_sessions.py",
+      "sha256": "e5c50107cdd49d01f01a523a3756dbb0f87638e06b0725e6a1103f8bc14a8991"
+    },
+    {
+      "path": "script:scripts/test_outcome_parse.py",
+      "sha256": "d764b979ccbddec590f1a4231b0875b624d898339fd2af84b1d10f9c69989edb"
+    },
+    {
+      "path": "skill:.opencode/skills/agt-audit/SKILL.md",
+      "sha256": "51ec5c77498f27ef53f5285794e8580d4dbaf0ecd9b26a05d6e3710f47477cd8"
+    },
+    {
+      "path": "skill:.opencode/skills/agt-parity/SKILL.md",
+      "sha256": "c5e38a88b130c8b8b1c72509ee80bb2a224bedb3d71aad6ddcc7e2cddf5bbfee"
+    },
+    {
+      "path": "skill:.opencode/skills/arch-check/SKILL.md",
+      "sha256": "48e50a8ad6c02c5f3cbb9dae743ab7d4693d1458402f632a115260a44beeb5a6"
+    },
+    {
+      "path": "skill:.opencode/skills/authz-matrix/SKILL.md",
+      "sha256": "fb44cd71884e59c7cf9c87a81acf7e623c88574146d9a59cf46f9b48da32b029"
+    },
+    {
+      "path": "skill:.opencode/skills/compliance/SKILL.md",
+      "sha256": "ddf0d29b4bf9b14a6fce24c79c06eabc3fad649d9c473473524c14e52ee809b7"
+    },
+    {
+      "path": "skill:.opencode/skills/dispatch/SKILL.md",
+      "sha256": "0bdfc557638b72cb400202fad06952b2a2041c500ee3a90becdedac4e8bb2349"
+    },
+    {
+      "path": "skill:.opencode/skills/django-test/SKILL.md",
+      "sha256": "a95f6ffc186d5b435d0e627dc2910c76389297b6f57c9f949375c09fc89254b9"
+    },
+    {
+      "path": "skill:.opencode/skills/ensure-docker/SKILL.md",
+      "sha256": "6ddaf19fb068481ac38852847629c7ac5d655d8d7724d98cbcfa0a3caa4eccaa"
+    },
+    {
+      "path": "skill:.opencode/skills/gate-control/SKILL.md",
+      "sha256": "f66646404123bc1d7bb5001091eb64d9563943446d2a81416232766ecf2872ac"
+    },
+    {
+      "path": "skill:.opencode/skills/gate-run/SKILL.md",
+      "sha256": "c7f822ef8bb65c15377cb4fca3e3d13e3155a0ae9c24a4bdb5d6487035de83e6"
+    },
+    {
+      "path": "skill:.opencode/skills/guard-delta/SKILL.md",
+      "sha256": "6c43a7c9b3e0a97b714b7fb66c8ef30b912f5101c9a608bd7a88f304e8f5eebf"
+    },
+    {
+      "path": "skill:.opencode/skills/hacker-exploit/SKILL.md",
+      "sha256": "928c7aa35c1da3c7d584388dfe8ab77bacd1e4a9b6c56b61bdaf4e6ae46726fc"
+    },
+    {
+      "path": "skill:.opencode/skills/k1-sandbox/SKILL.md",
+      "sha256": "b145cc225a990d5c729e535313df450274e8e38c5fd8094b14c1f880b004bf28"
+    },
+    {
+      "path": "skill:.opencode/skills/merge-pr/SKILL.md",
+      "sha256": "9e76c4364d958d3ffdafeeabf9f1ecf756b57346ac6e43d626fc7e0384939000"
+    },
+    {
+      "path": "skill:.opencode/skills/open-pr/SKILL.md",
+      "sha256": "1ec734280229df308523e34335ac8075c1db8456830c1f1dc6f718669f60d168"
+    },
+    {
+      "path": "skill:.opencode/skills/oracle-provenance/SKILL.md",
+      "sha256": "8e1f27fc8198ab6be681051a22aa81f046d3749cf7ec56c9b40e94fc527ff1ca"
+    },
+    {
+      "path": "skill:.opencode/skills/policy-digest/SKILL.md",
+      "sha256": "97aa3afcfe9f283760f73938d4981cf1945806f0264a81ac78f0f9f0de194eb6"
+    },
+    {
+      "path": "skill:.opencode/skills/push-ref/SKILL.md",
+      "sha256": "a502bad09feed7b2a8420dc5f9eddeb99e451fdad0b6416e4252e3929be678db"
+    },
+    {
+      "path": "skill:.opencode/skills/reconcile-lanes/SKILL.md",
+      "sha256": "89db91f0faac3226ee0577d27ec928dd6ae41d5bc324ed643e9583c1facf2892"
+    },
+    {
+      "path": "skill:.opencode/skills/semgrep-runner/SKILL.md",
+      "sha256": "822898da082389536754ee3088691773d77e6ec25b0d6c0516a35d5dc675d181"
+    },
+    {
+      "path": "skill:.opencode/skills/smell/SKILL.md",
+      "sha256": "49b288399940a49198db8b0d8db4b7d6399bf2e4bb98c9028e27d8fde7d02e8b"
+    },
+    {
+      "path": "skill:.opencode/skills/sync-worktrees/SKILL.md",
+      "sha256": "e1a1574d81b15a2f5ea990b99a8234ffa1223fbec4e4ec1606ff26b2776602c7"
+    },
+    {
+      "path": "skill:.opencode/skills/watch-checks/SKILL.md",
+      "sha256": "cbc4def404c17c957ba07d9bdd881dc223e944d2562ebd01378a57e49db69d53"
+    },
+    {
+      "path": "sop:files/sop/auditor.md",
+      "sha256": "3c297ad97104965f0413fc824b1c19d550e0f5f3576ada5cb5d98b792d86c73c"
+    },
+    {
+      "path": "sop:files/sop/builder.md",
+      "sha256": "b9ded04bf2024b9ef153f3b48c728223844482b81e90233a41e812844b28c9c9"
+    },
+    {
+      "path": "sop:files/sop/orchestrator.md",
+      "sha256": "147c2bf968f5e268019b8b1714bffdf8e70e89827a2db14041389d82a3b665cf"
+    },
+    {
+      "path": "sop:files/sop/release-engineer.md",
+      "sha256": "390c72ceca2ed64302f81729150294b22b52f114ebf9a8b9e108656deaf05d56"
+    },
+    {
+      "path": "tool:files/tools/agt_audit.py",
+      "sha256": "49a43fc432eede7d95a4b6f195e622f603741801a13ceebe6fb9aec6d9bd1baa"
+    },
+    {
+      "path": "tool:files/tools/agt_parity.py",
+      "sha256": "fc9a520b8e67b0d24c488321aadff798c22caaaa7ec4357fa3cbc9790e4ade58"
+    },
+    {
+      "path": "tool:files/tools/arch_check.py",
+      "sha256": "80232521fe5f6061d4f69be7ecaa3a1bada79cb0835e1c65c5c243179faa165d"
+    },
+    {
+      "path": "tool:files/tools/authz_matrix.py",
+      "sha256": "52e314dcad75645ea980ab75010c7a69fcf61751f4eb098be1aba40cda5f37a6"
+    },
+    {
+      "path": "tool:files/tools/gate_control.py",
+      "sha256": "e0cad1805d04ac0709b232c6960adc6e53e7dde11646b2da21d8a06d66e8d44d"
+    },
+    {
+      "path": "tool:files/tools/gate_run.py",
+      "sha256": "98af49cdedf40d0e0405067f20d92cdc7e34fc3b5de8d14a37f9c4d504d35c26"
+    },
+    {
+      "path": "tool:files/tools/guard_delta.py",
+      "sha256": "83fdf8011521f7d82289e1fc294d657594d86c809a44008a04333c2d4b382899"
+    },
+    {
+      "path": "tool:files/tools/oracle_provenance.py",
+      "sha256": "a5f0aa8f59e6541869af5d2bee0e62e2d07269cdb19562f5d081fecf4e14e1e1"
+    },
+    {
+      "path": "tool:files/tools/policy_digest.py",
+      "sha256": "b0f7960eb302ef9ca0319ba0316f70cef3b8ee5e0e62f512f3f2f3614c67ad0e"
+    },
+    {
+      "path": "tool:files/tools/semgrep_runner.py",
+      "sha256": "816920b578e15370577b20974af4e87a8d195e29b7e13cf0067c76f296bf278d"
+    },
+    {
+      "path": "tool:files/tools/smell.py",
+      "sha256": "9c83d1fc29a11b0f8f755f2c27820e65417f9ec3e87b769f8c10f7876952ceaa"
+    },
+    {
+      "path": "tool:files/tools/validatedrain.py",
+      "sha256": "0f2b45c289189b4ea58471e50d57721cded8eb8f242b1aedab7437922696fce7"
+    },
+    {
+      "path": "wrapper:scripts/audit_test_runner.ps1",
+      "sha256": "f330702a0d68da24ba0f399b87ed37daae032ef339b9a49a3b7a38072ceb65a5"
+    },
+    {
+      "path": "wrapper:scripts/ensure_docker.ps1",
+      "sha256": "32a57d0fc06e5ef861188704ff8c3db809257987f0286291906097ea50465fac"
+    },
+    {
+      "path": "wrapper:scripts/k1_down.ps1",
+      "sha256": "7a6cdd5b4676cf694c7a33885680676eccc6e20c80164683157301c614ec3496"
+    },
+    {
+      "path": "wrapper:scripts/k1_exec.ps1",
+      "sha256": "7d8b68d45613cff0ee0c9569be9d41ffc1764d44fc1ee28f90d40322ea98ef3d"
+    },
+    {
+      "path": "wrapper:scripts/k1_up.ps1",
+      "sha256": "bf73e28e0857252749a56811a838c2a96d699f90501dc715cee4bc619307d362"
+    },
+    {
+      "path": "wrapper:scripts/merge_pr.ps1",
+      "sha256": "468d107ee8247a0784cb64e725ab1655869c5ddcc4bcdb7f53cb46191f6f6b62"
+    },
+    {
+      "path": "wrapper:scripts/open_pr.ps1",
+      "sha256": "6ebecca7e5d0693d3d4254f38b2373a47c0dad033abb69cec0b0900ad8158182"
+    },
+    {
+      "path": "wrapper:scripts/push_ref.ps1",
+      "sha256": "9fea8943e68ea40c7c6e5e5287508031fe983d659a40f9a6cfc2d2f470eae69b"
+    },
+    {
+      "path": "wrapper:scripts/reconcile_lanes.ps1",
+      "sha256": "0aa6c7c4f14ca7f363166b782b58c325c75caa1e16816d7caeb10c25b5966094"
+    },
+    {
+      "path": "wrapper:scripts/sync_worktrees.ps1",
+      "sha256": "2cea96eb27545d2a13bea1f7ba70c56a6d9b123e56296205ae1655d897b3bd61"
+    },
+    {
+      "path": "wrapper:scripts/watch_checks.ps1",
+      "sha256": "3956819d16af47f9299937a74ea30a259bab4f2d54fe2fc0d43e11a5c6f31ebc"
+    }
+  ],
+  "digests": {
+    "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8",
+    "control_set_sha": "971f1fdac1698a8b43265de31b13dca97126848dedf56bb8aed7eff0cb481267",
+    "gate_impl_digest": "224cbf99bf50d4caa79d6d27c1a2098507ca013ee555a2ce91ceed4cb97c096d"
+  },
+  "gate_control": {
+    "record": "0008-7567ce1902de.json",
+    "record_hash": "3722fb8964d0fc4910d59e4084b1b29f4831f41489cc6e237239c686c2602afe",
+    "gate_sha": "7567ce1902de1fb57b908d2341ba8812337c5ee2",
+    "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8",
+    "control_set_sha": "971f1fdac1698a8b43265de31b13dca97126848dedf56bb8aed7eff0cb481267",
+    "gate_impl_digest": "224cbf99bf50d4caa79d6d27c1a2098507ca013ee555a2ce91ceed4cb97c096d",
+    "result": "PASS"
+  },
+  "drift": [],
+  "dependencies": {
+    "policy_digest": {
+      "covers": [
+        "tiers.json",
+        "severity.json",
+        "negative-controls.json",
+        "check-runners.json",
+        "layers.json"
+      ],
+      "invalidates": [
+        "gate-control.policy_digest",
+        "drain R1/R2/R3.policy_digest",
+        "capability.policy_digest",
+        "dispatch.evidence_refs[policies]",
+        "SIGNING.md",
+        "policy-manifest.digests.policy_digest"
+      ]
+    },
+    "control_set_sha": {
+      "covers": "resolved negative-controls.json (check_id, control_id, fixture_ref, runner, expected_outcome, min_count)",
+      "invalidates": [
+        "gate-control.control_set_sha",
+        "release-result.control_set_sha",
+        "policy-manifest.digests.control_set_sha"
+      ]
+    },
+    "gate_impl_digest": {
+      "covers": [
+        "files/tools/authz_matrix.py",
+        "files/tools/arch_check.py",
+        "files/tools/guard_delta.py",
+        "files/tools/oracle_provenance.py",
+        "files/tools/semgrep_runner.py",
+        "files/tools/smell.py",
+        "files/tools/gate_run.py",
+        "files/tools/policy_digest.py",
+        "files/tools/agt_parity.py",
+        "files/tools/agt_audit.py",
+        "files/tools/gate_control.py",
+        "files/tools/validatedrain.py",
+        "opencode.json",
+        ".agt/policy.json",
+        ".opencode/plugins/agt.js",
+        ".opencode/package.json",
+        ".opencode/package-lock.json",
+        "files/tools/fixtures/**",
+        "files/tools/agt_parity.py",
+        "files/tools/agt_audit.py"
+      ],
+      "invalidates": [
+        "gate-control.gate_impl_digest",
+        "policy-manifest.digests.gate_impl_digest"
+      ]
+    },
+    "gate_sha": {
+      "covers": "git log -1 over policies/gate.json gate_paths in the audited repo",
+      "invalidates": [
+        "gate-control.gate_sha",
+        "policy-manifest.gate_control.gate_sha"
+      ]
+    },
+    "agent_permission": {
+      "covers": [
+        "files/<role>.md",
+        ".opencode/agents/<role>.md",
+        ".opencode/skills/*/SKILL.md",
+        ".agt/policy.json allowedTools",
+        "opencode.json (no widening override)"
+      ],
+      "invalidates": [
+        "check_harness_config.py",
+        "policy-manifest.files[agent|installed_agent|skill|harness]"
+      ]
+    },
+    "schema": {
+      "covers": "files/policies/schemas/*.json",
+      "invalidates": [
+        "the validator named by the schema (capability, drain-record, release-result, hacker-result, repro-spec)"
+      ]
+    }
+  },
+  "manifest_sha": "8541b17df4c618166807b5ede212bb0f569457a14b0fb06847573441e8755f83"
+}

@@ -1,0 +1,15 @@
+{
+  "finding": "probe-record",
+  "record": {
+    "item_id": "AUTHZ-ROUTE",
+    "probe_class": "not_a_class",
+    "endpoint": "api/orders",
+    "tenant_pair": [
+      "tenant-a"
+    ],
+    "engine": "mysql",
+    "outcome": "maybe",
+    "evidence_ref": ""
+  },
+  "expected": "INVALID"
+}

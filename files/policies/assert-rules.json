@@ -1,0 +1,194 @@
+{
+  "version": 2,
+  "tautology_patterns": [
+    {
+      "id": "TAUT-01",
+      "lang": ["python"],
+      "regex": "^assert\\s+True(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "asserts a literal truth (optional message and comment tails)"
+    },
+    {
+      "id": "TAUT-02",
+      "lang": ["python"],
+      "regex": "^assert\\s+not\\s+False(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "asserts the negation of a literal falsehood (optional tails)"
+    },
+    {
+      "id": "TAUT-03",
+      "lang": ["python"],
+      "regex": "^assert\\s+([A-Za-z_]\\w*)\\s*==\\s*\\1(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "compares a value to itself (optional tails)"
+    },
+    {
+      "id": "TAUT-04",
+      "lang": ["python"],
+      "regex": "^assert\\s+.*\\s+or\\s+True(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "disjunction with literal truth (optional tails)"
+    },
+    {
+      "id": "TAUT-05",
+      "lang": ["python"],
+      "regex": "^assert\\s+.*\\s+and\\s+False(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "conjunction with literal falsehood (optional tails)"
+    },
+    {
+      "id": "TAUT-06",
+      "lang": ["python"],
+      "regex": "^assert\\s+isinstance\\(.*,\\s*object\\)(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "every value is an object (optional tails)"
+    },
+    {
+      "id": "TAUT-07",
+      "lang": ["python"],
+      "regex": "^assert\\s+len\\(.*\\)\\s*>=\\s*0(?:\\s*,.*|\\s*#.*)?$",
+      "reason": "length is never negative (optional tails)"
+    },
+    {
+      "id": "TAUT-08",
+      "lang": ["unittest"],
+      "regex": "^\\s*self\\.assertTrue\\(\\s*True(?:\\s*,[^)]*)?\\)\\s*$",
+      "reason": "unittest form: asserts a literal truth"
+    },
+    {
+      "id": "TAUT-09",
+      "lang": ["unittest"],
+      "regex": "^\\s*self\\.assertFalse\\(\\s*False(?:\\s*,[^)]*)?\\)\\s*$",
+      "reason": "unittest form: asserts the negation of a literal falsehood"
+    },
+    {
+      "id": "TAUT-10",
+      "lang": ["unittest"],
+      "regex": "^\\s*self\\.assertEqual\\(\\s*([A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?)\\s*,\\s*\\1(?:\\s*,[^)]*)?\\)\\s*$",
+      "reason": "unittest form: compares a value to itself"
+    },
+    {
+      "id": "TAUT-11",
+      "lang": ["unittest"],
+      "regex": "^\\s*self\\.assertEqual\\(\\s*True\\s*,\\s*True(?:\\s*,[^)]*)?\\)\\s*$",
+      "reason": "unittest form: asserts two literal truths are equal"
+    },
+    {
+      "id": "TAUT-12",
+      "lang": ["javascript", "typescript"],
+      "regex": "^expect\\(\\s*true\\s*\\)\\.toBe\\(\\s*true\\s*\\)\\s*;?(?:\\s*//.*)?$",
+      "reason": "JS/TS form: expects a literal truth"
+    },
+    {
+      "id": "TAUT-13",
+      "lang": ["javascript", "typescript"],
+      "regex": "^expect\\(\\s*(.+?)\\s*\\)\\.toBe\\(\\s*\\1\\s*\\)\\s*;?(?:\\s*//.*)?$",
+      "reason": "JS/TS form: compares an expression to itself"
+    },
+    {
+      "id": "TAUT-14",
+      "lang": ["javascript", "typescript"],
+      "regex": "^assert\\s*\\(\\s*true\\s*\\)\\s*;?(?:\\s*//.*)?$",
+      "reason": "JS/TS form: asserts a literal truth"
+    },
+    {
+      "id": "TAUT-15",
+      "lang": ["javascript", "typescript"],
+      "regex": "^expect\\(\\s*(.+?)\\s*\\)\\.toEqual\\(\\s*\\1\\s*\\)\\s*;?(?:\\s*//.*)?$",
+      "reason": "JS/TS form: deep-compares an expression to itself"
+    }
+  ],
+  "oracle_provenance": {
+    "SELF_COMPARE": {
+      "patterns": [
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+([A-Za-z_][\\w.]*)\\s*==\\s*\\1(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "left and right operands are the same expression"
+        },
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+([A-Za-z_][\\w.]*)\\s*!=\\s*\\1(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "left and right operands are the same expression"
+        },
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+len\\(([^)]+)\\)\\s*==\\s*len\\(\\1\\)(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "compares a length to itself"
+        },
+        {
+          "lang": ["unittest"],
+          "regex": "^\\s*self\\.assertEqual\\(\\s*([A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?)\\s*,\\s*\\1(?:\\s*,[^)]*)?\\)\\s*$",
+          "reason": "unittest form: left and right operands are the same expression"
+        },
+        {
+          "lang": ["javascript", "typescript"],
+          "regex": "^expect\\(\\s*(.+?)\\s*\\)\\.toBe\\(\\s*\\1\\s*\\)\\s*;?(?:\\s*//.*)?$",
+          "reason": "JS/TS form: left and right operands are the same expression"
+        },
+        {
+          "lang": ["javascript", "typescript"],
+          "regex": "^expect\\(\\s*(.+?)\\s*\\)\\.toEqual\\(\\s*\\1\\s*\\)\\s*;?(?:\\s*//.*)?$",
+          "reason": "JS/TS form: left and right operands are the same expression"
+        }
+      ]
+    },
+    "ORACLE_BY_COPY": {
+      "patterns": [
+        {
+          "lang": ["python"],
+          "regex": "^expected\\s*=\\s*[A-Za-z_][\\w.]*\\(.*\\)(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "expected value is produced by the implementation's own call"
+        },
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+[^=]+\\s*==\\s*expected(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "expected value may be copied from the implementation"
+        },
+        {
+          "lang": ["unittest"],
+          "regex": "^\\s*self\\.assertEqual\\(\\s*([A-Za-z_]\\w*)\\s*,\\s*expected(?:\\s*,[^)]*)?\\)\\s*$",
+          "reason": "unittest form: expected value may be copied from the implementation"
+        },
+        {
+          "lang": ["javascript", "typescript"],
+          "regex": "^const\\s+expected\\s*=\\s*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)*\\(.*\\)\\s*;?(?:\\s*//.*)?$",
+          "reason": "JS/TS form: expected value is produced by the implementation's own call"
+        },
+        {
+          "lang": ["javascript", "typescript"],
+          "regex": "^expect\\(\\s*expected\\s*\\)\\.\\w+\\(.*\\)\\s*;?(?:\\s*//.*)?$",
+          "reason": "JS/TS form: expected value may be copied from the implementation"
+        }
+      ],
+      "semantic_rule": "flag when the expected value is the same call expression (f(x)==f(x)), or when it matches an implementation constant/value collected from the analysed file. The added-implementation-lines comparison is NOT implemented (gap recorded 2026-11-07); ORACLE-05 pins the constant case."
+    },
+    "MOCK_ECHO": {
+      "patterns": [
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+.*\\s*==\\s*[A-Za-z_]\\w*\\.return_value(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "asserts the mock's configured return value"
+        },
+        {
+          "lang": ["python"],
+          "regex": "^assert\\s+.*\\s*==\\s*mock_\\w+\\.\\w+(?:\\s*,.*|\\s*#.*)?$",
+          "reason": "asserts a value configured on a mock"
+        },
+        {
+          "lang": ["unittest"],
+          "regex": "^\\s*self\\.assertEqual\\(\\s*mock_\\w+\\.\\w+\\s*[,)]",
+          "reason": "unittest form: asserts a value configured on a mock"
+        },
+        {
+          "lang": ["javascript", "typescript"],
+          "regex": "^expect\\(\\s*(mock\\w*)\\.\\w+\\s*\\)\\.toBe\\(\\s*\\1\\.returnValue\\s*\\)\\s*;?(?:\\s*//.*)?$",
+          "reason": "JS/TS form: asserts a value configured on a mock"
+        }
+      ],
+      "semantic_rule": "asserts a value configured on a mock - not a call count, not a test-owned list"
+    }
+  },
+  "scan_scope": "added_lines",
+  "languages": [
+    "python",
+    "unittest",
+    "typescript",
+    "javascript"
+  ],
+  "tail_rule": "Python patterns accept an optional `, message` suffix and an optional `# comment` suffix; JS/TS patterns accept an optional semicolon and `// comment` suffix; unittest patterns accept an optional message argument."
+}

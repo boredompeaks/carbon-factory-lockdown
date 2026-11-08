@@ -1,0 +1,438 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auditor-verdict.json",
+  "title": "auditor-verdict",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "result_type",
+    "task_id",
+    "lineage_id",
+    "capability_id",
+    "verdict",
+    "refusal_code",
+    "inconclusive_cause",
+    "fault_code",
+    "head",
+    "tree",
+    "tier",
+    "checks",
+    "catalog",
+    "findings",
+    "residual",
+    "prior_findings_cleared",
+    "attack_log_ref",
+    "effective_on_block",
+    "policy_digest",
+    "control_set_sha",
+    "acceptance_rederived",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "auditor-verdict/1"
+    },
+    "result_type": {
+      "type": "string",
+      "enum": [
+        "VERDICT",
+        "REFUSED"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "PASS",
+        "BLOCK",
+        "INCONCLUSIVE",
+        null
+      ]
+    },
+    "refusal_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CAPABILITY_INVALID",
+        "STATE_MOVED",
+        null
+      ]
+    },
+    "inconclusive_cause": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "TOOL_FAULT",
+        "BUDGET_EXHAUSTED",
+        null
+      ]
+    },
+    "fault_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "head": {
+      "$ref": "#/$defs/git_sha"
+    },
+    "tree": {
+      "$ref": "#/$defs/git_sha"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "none",
+        "high",
+        "max"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "catalog": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/catalog_entry"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "residual": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "prior_findings_cleared": {
+      "type": "boolean"
+    },
+    "attack_log_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "effective_on_block": {
+      "type": "string",
+      "enum": [
+        "cancel_hacker",
+        "complete_hacker"
+      ]
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "control_set_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "acceptance_rederived": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/acceptance_rederived"
+      }
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "git_sha": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "outcome",
+        "evidence_ref",
+        "sha256",
+        "cached",
+        "runner"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_RUN"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cached": {
+          "type": "boolean"
+        },
+        "runner": {
+          "type": "string",
+          "enum": [
+            "builder",
+            "auditor",
+            "hacker",
+            "release-engineer",
+            "ci"
+          ]
+        }
+      }
+    },
+    "catalog_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "outcome",
+        "evidence_ref",
+        "cached"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "REFUTED",
+            "REPRODUCED",
+            "NOT_APPLICABLE",
+            "NOT_RUN"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cached": {
+          "type": "boolean"
+        },
+        "probes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/probe"
+          },
+          "description": "Hacker probe trace relayed verbatim from hacker-result (same definition). Optional for backward compatibility (pre-probe verdicts validate without it); required with minItems 1 when outcome is REFUTED or REPRODUCED. For REFUTED the auditor mechanically enforces, using policies/attack-catalog.json: >=1 probe per listed probe_class, total probes >= min_probes[variant], every counted probe outcome blocked (error/reproduced do not count); otherwise the outcome is downgraded to NOT_RUN. For REPRODUCED the auditor checks >=1 probe outcome reproduced."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "REFUTED",
+                  "REPRODUCED"
+                ]
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "probes"
+            ],
+            "properties": {
+              "probes": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "probe_class",
+        "engine",
+        "target",
+        "params",
+        "outcome"
+      ],
+      "properties": {
+        "probe_class": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Catalog probe_class (policies/attack-catalog.json items[].probe_classes). Auditor requires >=1 probe per listed probe_class for REFUTED."
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "postgres",
+            "none"
+          ],
+          "description": "Must be a member of item engines in attack-catalog.json (sqlite/postgres for DB items; none for static items such as PROMPT-INJECTION/SECRET-EXPOSURE, mirroring repro-spec engine)."
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Endpoint, tenant pair, file, or other distinct-execution discriminator; varying endpoint/tenant pair/engine makes a new probe per probe_definition."
+        },
+        "params": {
+          "type": "object",
+          "description": "Execution parameters for this distinct execution. Open object; distinct (probe_class, engine, target, params) tuples count as distinct probes."
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "reproduced",
+            "error"
+          ],
+          "description": "blocked = invariant held (supports REFUTED); reproduced = invariant broken (supports REPRODUCED); error = tool/fixture fault (does not count toward REFUTED coverage)."
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "finding_id",
+        "fingerprint",
+        "class",
+        "locus",
+        "severity",
+        "source",
+        "repro_ref",
+        "introduced"
+      ],
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "class": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]+$"
+        },
+        "locus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "P1",
+            "P2",
+            "P3"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "CHECK",
+            "HACKER"
+          ]
+        },
+        "repro_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "introduced": {
+          "type": "string",
+          "enum": [
+            "causal",
+            "proximity",
+            "preexisting"
+          ]
+        }
+      }
+    },
+    "acceptance_rederived": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "base_outcome",
+        "head_outcome",
+        "evidence_ref",
+        "reproduced_boundary"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_outcome": {
+          "type": "string",
+          "enum": [
+            "FAIL_ASSERTION",
+            "FAIL_OTHER",
+            "PASS"
+          ]
+        },
+        "head_outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reproduced_boundary": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "engine": "postgres",
+  "workers": 4,
+  "required_workers": 4,
+  "reps": 20,
+  "required_reps": 20,
+  "failures": 0,
+  "flaky": []
+}

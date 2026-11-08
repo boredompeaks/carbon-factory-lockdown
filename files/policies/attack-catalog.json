@@ -1,0 +1,486 @@
+{
+  "version": 1,
+  "catalog_ref_prefix": "policies/attack-catalog.json#/items/",
+  "variant_profiles": {
+    "high": {
+      "max_items": 12,
+      "budget_share": 0.5,
+      "stop_on_budget": true
+    },
+    "max": {
+      "max_items": 12,
+      "budget_share": 0.75,
+      "stop_on_budget": true
+    }
+  },
+  "probe_counting": {
+    "probe_definition": "One probe is one distinct execution of a probe against the runtime. Vary the endpoint, the tenant pair, or the engine to make a new probe; re-running the same execution does not add to the count.",
+    "coverage_rule": "Each item requires at least one execution in every listed probe_class, and the item's total executions must reach min_probes for the hacker variant. REFUTED is only valid when both hold.",
+    "skip_rule_none_tier": "When policies/tiers.json[tier].hacker_variant is 'none', there are no execution profiles: skip the hacker relay and the catalog entirely. No probes are run or counted.",
+    "schema_followup": "Mechanically verifying the per-class minimum needs per-probe execution records (probe_class, endpoint, tenant pair, engine, outcome, evidence ref); adding them to the hacker-result/envelope schemas is follow-up work owned by the schema owner and is intentionally not done in this document-only change."
+  },
+  "items": {
+    "AUTHZ-ROUTE": {
+      "item_id": "AUTHZ-ROUTE",
+      "class": "AUTHZ_BYPASS",
+      "applies_when": [
+        "backend/**/urls.py",
+        "backend/**/views/**",
+        "backend/**/api/**",
+        "backend/**/serializers/**"
+      ],
+      "always": true,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "unauthenticated",
+        "wrong_role",
+        "method_override",
+        "cross_tenant"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "roles": 4,
+          "requests": 60,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "roles": 6,
+          "requests": 240,
+          "mutation_rounds": 2
+        }
+      }
+    },
+    "OBJECT-IDOR": {
+      "item_id": "OBJECT-IDOR",
+      "class": "IDOR",
+      "applies_when": [
+        "backend/**/views/**",
+        "backend/**/api/**",
+        "backend/**/serializers/**"
+      ],
+      "always": true,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "id_enumeration",
+        "id_swap",
+        "deleted_object",
+        "foreign_tenant"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "ids": 40,
+          "requests": 80,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "ids": 200,
+          "requests": 320,
+          "mutation_rounds": 2
+        }
+      }
+    },
+    "TENANT-ESCAPE": {
+      "item_id": "TENANT-ESCAPE",
+      "class": "TENANT_ESCAPE",
+      "applies_when": [
+        "backend/**/accounts/**",
+        "backend/**/common/**",
+        "backend/**/api/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "tenant_header_swap",
+        "tenant_path_swap",
+        "shared_cache_key"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "tenants": 3,
+          "requests": 60,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "tenants": 6,
+          "requests": 240,
+          "mutation_rounds": 2
+        }
+      },
+      "note": "Three probe_classes but executions clear the bar: 4 (high) / 8 (max) counted probes require multiple endpoint/tenant-pair/engine executions per class, not one per class."
+    },
+    "RACE-ORDERS": {
+      "item_id": "RACE-ORDERS",
+      "class": "RACE_CONDITION",
+      "applies_when": [
+        "backend/**/orders/**",
+        "backend/**/cart/**",
+        "backend/**/shipping/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "double_spend",
+        "stock_oversell",
+        "concurrent_cancel",
+        "watermark_regression"
+      ],
+      "min_probes": {
+        "high": 5,
+        "max": 10
+      },
+      "depth": {
+        "high": {
+          "concurrency": 8,
+          "repetitions": 20,
+          "schedule_variants": 4
+        },
+        "max": {
+          "concurrency": 16,
+          "repetitions": 50,
+          "schedule_variants": 8
+        }
+      }
+    },
+    "REFUND-OVERSPEND": {
+      "item_id": "REFUND-OVERSPEND",
+      "class": "REFUND_OVERSPEND",
+      "applies_when": [
+        "backend/**/refunds/**",
+        "backend/**/payments/**",
+        "backend/**/orders/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "negative_amount",
+        "over_refund",
+        "double_refund",
+        "currency_mismatch"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "amount_cases": 6,
+          "currency_pairs": 3,
+          "repetitions": 10
+        },
+        "max": {
+          "amount_cases": 12,
+          "currency_pairs": 6,
+          "repetitions": 25
+        }
+      }
+    },
+    "MFA-REPLAY": {
+      "item_id": "MFA-REPLAY",
+      "class": "MFA_REPLAY",
+      "applies_when": [
+        "backend/**/auth/**",
+        "backend/**/mfa/**",
+        "backend/**/accounts/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "otp_replay",
+        "otp_expiry",
+        "otp_cross_user",
+        "otp_bruteforce"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "otp_windows_s": [
+            0,
+            30,
+            60,
+            300
+          ],
+          "replay_delays_s": [
+            0,
+            5,
+            30
+          ],
+          "attempts": 20
+        },
+        "max": {
+          "otp_windows_s": [
+            0,
+            15,
+            30,
+            60,
+            120,
+            300
+          ],
+          "replay_delays_s": [
+            0,
+            1,
+            5,
+            30,
+            120
+          ],
+          "attempts": 60
+        }
+      }
+    },
+    "MFA-BYPASS": {
+      "item_id": "MFA-BYPASS",
+      "class": "MFA_BYPASS",
+      "applies_when": [
+        "backend/**/auth/**",
+        "backend/**/mfa/**",
+        "backend/**/accounts/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "step_skip",
+        "challenge_reuse",
+        "recovery_code_reuse",
+        "trusted_device_spoof"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "flows": 3,
+          "requests": 50,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "flows": 6,
+          "requests": 180,
+          "mutation_rounds": 2
+        }
+      }
+    },
+    "PROMPT-INJECTION": {
+      "item_id": "PROMPT-INJECTION",
+      "class": "PROMPT_INJECTION_ATTEMPT",
+      "applies_when": [
+        "**/*"
+      ],
+      "always": true,
+      "engines": [
+        "none"
+      ],
+      "probe_classes": [
+        "file_comment",
+        "test_name",
+        "commit_message",
+        "doc_string",
+        "fixture_data"
+      ],
+      "min_probes": {
+        "high": 3,
+        "max": 6
+      },
+      "depth": {
+        "high": {
+          "files_scanned": 100,
+          "patterns": 20,
+          "max_bytes_per_file": 262144
+        },
+        "max": {
+          "files_scanned": 400,
+          "patterns": 40,
+          "max_bytes_per_file": 1048576
+        }
+      }
+    },
+    "PRICE-TAMPER": {
+      "item_id": "PRICE-TAMPER",
+      "class": "PRICE_TAMPER",
+      "applies_when": [
+        "frontend/**/checkout/**",
+        "backend/**/cart/**",
+        "backend/**/orders/**",
+        "backend/**/pricing/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "client_price_override",
+        "negative_quantity",
+        "coupon_stacking",
+        "currency_swap"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "skus": 10,
+          "requests": 60,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "skus": 30,
+          "requests": 240,
+          "mutation_rounds": 2
+        }
+      }
+    },
+    "IDEMPOTENCY": {
+      "item_id": "IDEMPOTENCY",
+      "class": "IDEMPOTENCY_VIOLATION",
+      "applies_when": [
+        "backend/**/webhooks/**",
+        "backend/**/payments/**",
+        "backend/**/orders/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "webhook_replay",
+        "duplicate_key",
+        "missing_key",
+        "key_collision"
+      ],
+      "min_probes": {
+        "high": 4,
+        "max": 8
+      },
+      "depth": {
+        "high": {
+          "repetitions": 10,
+          "delays_s": [
+            0,
+            1,
+            30
+          ],
+          "key_mutations": 3
+        },
+        "max": {
+          "repetitions": 30,
+          "delays_s": [
+            0,
+            1,
+            5,
+            30,
+            300
+          ],
+          "key_mutations": 6
+        }
+      }
+    },
+    "MASS-ASSIGNMENT": {
+      "item_id": "MASS-ASSIGNMENT",
+      "class": "MASS_ASSIGNMENT",
+      "applies_when": [
+        "backend/**/serializers/**",
+        "backend/**/api/**"
+      ],
+      "always": false,
+      "engines": [
+        "sqlite",
+        "postgres"
+      ],
+      "probe_classes": [
+        "role_field",
+        "owner_field",
+        "balance_field",
+        "tenant_field"
+      ],
+      "min_probes": {
+        "high": 3,
+        "max": 6
+      },
+      "depth": {
+        "high": {
+          "endpoints": 10,
+          "fields": 12,
+          "mutation_rounds": 1
+        },
+        "max": {
+          "endpoints": 30,
+          "fields": 30,
+          "mutation_rounds": 2
+        }
+      }
+    },
+    "SECRET-EXPOSURE": {
+      "item_id": "SECRET-EXPOSURE",
+      "class": "SECRET_LEAK",
+      "applies_when": [
+        "backend/**/config/**",
+        "backend/**/settings/**",
+        "frontend/**"
+      ],
+      "always": false,
+      "engines": [
+        "none"
+      ],
+      "probe_classes": [
+        "response_header",
+        "debug_page",
+        "source_map",
+        "error_payload"
+      ],
+      "min_probes": {
+        "high": 3,
+        "max": 6
+      },
+      "depth": {
+        "high": {
+          "routes": 30,
+          "requests": 60,
+          "payload_bytes": 65536
+        },
+        "max": {
+          "routes": 100,
+          "requests": 240,
+          "payload_bytes": 262144
+        }
+      }
+    }
+  }
+}

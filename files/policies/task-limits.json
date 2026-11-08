@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "FEATURE": {
+    "max_files": 25,
+    "max_new_models": 3
+  },
+  "FIX": {
+    "max_files": 10,
+    "max_new_models": 1
+  },
+  "SECURITY": {
+    "max_files": 12,
+    "max_new_models": 1
+  },
+  "DOC": {
+    "max_files": 8,
+    "max_new_models": 0,
+    "allowed_path_globs": [
+      "**/*.md",
+      "**/*.rst",
+      "**/*.txt",
+      "**/docs/**/*.md",
+      "**/docs/**/*.rst",
+      "**/docs/**/*.txt"
+    ],
+    "denied_path_globs": [
+      "**/*.py",
+      "policies/**",
+      "files/policies/**",
+      "tools/**",
+      "files/tools/**",
+      ".opencode/**",
+      "backend/**"
+    ],
+    "denied_extensions": [
+      ".py"
+    ],
+    "allowed_rule": "EVERY diff path MUST match an allowed_path_globs entry AND MUST NOT match denied_extensions AND MUST NOT match denied_path_globs EXCEPT the backend/docs/** docs exception (backend/docs/**/*.md|rst|txt and **/docs/**/*.md|rst|txt override the backend/** deny; **/*.py overrides everything, including backend/docs/**)",
+    "reject_code": "DOC_PATH_VIOLATION",
+    "backend_docs_note": "docs/ lives inside backend/ (backend/docs/), NOT at repo root. backend/** is denied under DOC EXCEPT backend/docs/** docs: backend/docs/** is allowed ONLY with .md/.rst/.txt extensions. A .py under backend/docs/ is REJECTED. No file list is enumerated; globs are the only allowed-path specification."
+  },
+  "INFRA": {
+    "max_files": 20,
+    "max_new_models": 0
+  },
+  "DRAIN": {
+    "max_files": 15,
+    "max_new_models": 0
+  }
+}

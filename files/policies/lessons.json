@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "window": {
+    "days": 30,
+    "min_observations": 5,
+    "min_distinct_lineages": 2
+  },
+  "threshold": {
+    "occurrences": 2,
+    "min_severity": "P3",
+    "group_by": [
+      "class",
+      "stage_missed"
+    ],
+    "require_introduced_sha": true,
+    "require_repro_ref": true
+  },
+  "stage_enum_ref": "policies/schemas/stages.json",
+  "aggregation": {
+    "emit": "factory_task",
+    "max_clusters_per_run": 5,
+    "dedupe_by": [
+      "class",
+      "stage_missed",
+      "introduced_sha"
+    ]
+  },
+  "drain_trigger": {
+    "when": "occurrences >= 2",
+    "emit": "factory_task",
+    "task_kind": "DRAIN",
+    "template_ref": "factory_task_template",
+    "dispatch": "orchestrator opens factory_task and dispatches DRAIN capability; no gate code emitted"
+  },
+  "factory_task_template": {
+    "task_kind": "DRAIN",
+    "title_template": "DRAIN: {{class}} missed at {{stage_missed}}",
+    "scope": [
+      "policies/**",
+      "tools/**",
+      "backend/**",
+      "frontend/**"
+    ],
+    "requires_acceptance_tests": true,
+    "drain_stage": "R1",
+    "drain_cluster_id": "{{cluster_id}}",
+    "acceptance_test_refs": [
+      "quality/ledger/acceptance/drain/{{cluster_id}}/"
+    ],
+    "acceptance_author_family": "google",
+    "max_rows_per_capability": 5,
+    "input_refs": [
+      "{{defect_id}}",
+      "{{repro_ref}}",
+      "{{introduced_sha}}"
+    ]
+  }
+}

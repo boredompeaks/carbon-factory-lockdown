@@ -1,0 +1,246 @@
+{
+  "version": 2,
+  "default": "P1",
+  "severity_scale": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "blocking_severities": [
+    "P1",
+    "P2"
+  ],
+  "residual_severities": [
+    "P3"
+  ],
+  "unknown_class": {
+    "action": "reject",
+    "severity": "P1",
+    "note": "Gate MUST reject any finding whose class is not defined in this policy (fail-closed). Unknown classes must never fall through silently to a residual/non-blocking severity. Wiring for gate_run.py (do not edit severity.json to wire this): unknown class => blocking P1 rejection, even though default is also P1."
+  },
+  "SCOPE_VIOLATION": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "SUITE_FAILURE": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "TEST_REMOVAL_UNCOVERED": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "TAUTOLOGICAL_ASSERTION": {
+    "none": "P2",
+    "high": "P2",
+    "max": "P1"
+  },
+  "TEST_INFRA_CHANGE": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "NON_FALSIFIABLE": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "TEST_GAP": {
+    "none": "P3",
+    "high": "P2",
+    "max": "P2"
+  },
+  "TEST_SET": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "CHANGELOG_GAP": {
+    "none": "P3",
+    "high": "P3",
+    "max": "P2"
+  },
+  "SECRET_LEAK": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "CONVENTION_VIOLATION": {
+    "none": "P3",
+    "high": "P3",
+    "max": "P2"
+  },
+  "CODE_SMELL": {
+    "none": "P3",
+    "high": "P3",
+    "max": "P2"
+  },
+  "GATE_CONTROL_FAILURE": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "CONTROL_UNDERCOUNT": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "POLICY_DRIFT": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "ARCH_VIOLATION": {
+    "none": "P2",
+    "high": "P2",
+    "max": "P1"
+  },
+  "WEAK_ORACLE": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "GUARD_REMOVED": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "AUTHZ_MATRIX_GAP": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "RACE_CONDITION": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "IDEMPOTENCY_VIOLATION": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "ERROR_HANDLING": {
+    "none": "P3",
+    "high": "P3",
+    "max": "P2"
+  },
+  "MUTABLE_DEFAULT": {
+    "none": "P3",
+    "high": "P3",
+    "max": "P2"
+  },
+  "FLAKY_TEST": {
+    "none": "P2",
+    "high": "P2",
+    "max": "P1"
+  },
+  "SCHEMA_FUZZ_FAILURE": {
+    "none": "P3",
+    "high": "P2",
+    "max": "P1"
+  },
+  "BOOT_FAIL_OPEN": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "CI_HARDENING": {
+    "none": "P3",
+    "high": "P2",
+    "max": "P1"
+  },
+  "DAST_FINDING": {
+    "none": "P3",
+    "high": "P2",
+    "max": "P1"
+  },
+  "AUTHZ_BYPASS": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "IDOR": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "TENANT_ESCAPE": {
+    "none": "P1",
+    "high": "P1",
+    "max": "P1"
+  },
+  "MFA_BYPASS": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "MFA_REPLAY": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "REFUND_OVERSPEND": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "PRICE_TAMPER": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "MASS_ASSIGNMENT": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "PROMPT_INJECTION_ATTEMPT": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "GATEWAY_IN_ATOMIC": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "LOCK_ACROSS_NETWORK": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "MISSING_IDEMPOTENCY": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "UNSAFE_RMW": {
+    "none": "P2",
+    "high": "P2",
+    "max": "P1"
+  },
+  "NONATOMIC_WATERMARK": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "BARE_EXCEPT": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "AGT_PARITY_MISMATCH": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  },
+  "AGT_AUDIT_GAP": {
+    "none": "P2",
+    "high": "P1",
+    "max": "P1"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fault-codes.json",
+  "title": "fault-codes",
+  "version": 1,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "codes"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "max_retries_default": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "codes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "TOOL_TIMEOUT": {
+          "$ref": "#/$defs/fault"
+        },
+        "TOOL_CRASH": {
+          "$ref": "#/$defs/fault"
+        },
+        "TOOL_UNAVAILABLE": {
+          "$ref": "#/$defs/fault"
+        },
+        "SANDBOX_ERROR": {
+          "$ref": "#/$defs/fault"
+        },
+        "ENGINE_UNAVAILABLE": {
+          "$ref": "#/$defs/fault"
+        },
+        "DB_CONNECTION_FAILED": {
+          "$ref": "#/$defs/fault"
+        },
+        "FIXTURE_MISSING": {
+          "$ref": "#/$defs/fault"
+        },
+        "CACHE_CORRUPT": {
+          "$ref": "#/$defs/fault"
+        },
+        "SIGNATURE_VERIFY_ERROR": {
+          "$ref": "#/$defs/fault"
+        },
+        "LEDGER_IO_ERROR": {
+          "$ref": "#/$defs/fault"
+        },
+        "OOM_KILLED": {
+          "$ref": "#/$defs/fault"
+        },
+        "NETWORK_BLOCKED": {
+          "$ref": "#/$defs/fault"
+        },
+        "UNSUPPORTED_ENGINE": {
+          "$ref": "#/$defs/fault"
+        },
+        "INTERRUPTED": {
+          "$ref": "#/$defs/fault"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "fault": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retryable",
+        "class"
+      ],
+      "properties": {
+        "retryable": {
+          "type": "boolean"
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "TOOL",
+            "INFRA",
+            "STATE"
+          ]
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

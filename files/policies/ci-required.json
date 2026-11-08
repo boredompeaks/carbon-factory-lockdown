@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "source": "files/policies/checks.json",
+  "field": "checks[required_in_ci == true]",
+  "generated": "6A-4 from checks.json; regenerate whenever checks.required_in_ci changes",
+  "required_checks": [
+    "SUITE",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "POLICY_DIGEST",
+    "AUTHZ_MATRIX",
+    "BOOTTEST",
+    "ZIZMOR",
+    "ARCH"
+  ],
+  "covers": [
+    "files/policies/ci.json",
+    "files/policies/branch-protection.json"
+  ],
+  "note": "Single source for the CI required set (F-71). release-engineer.md prose lists the same set statically and is regenerated in 6C-1c; until then this file plus checks.json is authoritative."
+}

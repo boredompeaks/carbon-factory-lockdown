@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "probe-record.json",
+  "title": "probe-record",
+  "version": 1,
+  "description": "Per-probe execution record for the attack catalog (probe_counting.schema_followup in policies/attack-catalog.json). One record = one distinct execution against the runtime. REFUTED requires >=1 probe per listed probe_class and total probes >= min_probes[variant]; only 'blocked' counts toward REFUTED coverage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "item_id",
+    "probe_class",
+    "endpoint",
+    "tenant_pair",
+    "engine",
+    "outcome",
+    "evidence_ref"
+  ],
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "enum": [
+        "AUTHZ-ROUTE",
+        "IDEMPOTENCY",
+        "MASS-ASSIGNMENT",
+        "MFA-BYPASS",
+        "MFA-REPLAY",
+        "OBJECT-IDOR",
+        "PRICE-TAMPER",
+        "PROMPT-INJECTION",
+        "RACE-ORDERS",
+        "REFUND-OVERSPEND",
+        "SECRET-EXPOSURE",
+        "TENANT-ESCAPE"
+      ]
+    },
+    "probe_class": {
+      "type": "string",
+      "enum": [
+        "balance_field",
+        "challenge_reuse",
+        "client_price_override",
+        "commit_message",
+        "concurrent_cancel",
+        "coupon_stacking",
+        "cross_tenant",
+        "currency_mismatch",
+        "currency_swap",
+        "debug_page",
+        "deleted_object",
+        "doc_string",
+        "double_refund",
+        "double_spend",
+        "duplicate_key",
+        "error_payload",
+        "file_comment",
+        "fixture_data",
+        "foreign_tenant",
+        "id_enumeration",
+        "id_swap",
+        "key_collision",
+        "method_override",
+        "missing_key",
+        "negative_amount",
+        "negative_quantity",
+        "otp_bruteforce",
+        "otp_cross_user",
+        "otp_expiry",
+        "otp_replay",
+        "over_refund",
+        "owner_field",
+        "recovery_code_reuse",
+        "response_header",
+        "role_field",
+        "shared_cache_key",
+        "source_map",
+        "step_skip",
+        "stock_oversell",
+        "tenant_field",
+        "tenant_header_swap",
+        "tenant_path_swap",
+        "test_name",
+        "trusted_device_spoof",
+        "unauthenticated",
+        "watermark_regression",
+        "webhook_replay",
+        "wrong_role"
+      ]
+    },
+    "endpoint": {
+      "type": "string",
+      "pattern": "^/[^\\s]{0,200}$",
+      "description": "Distinct-execution discriminator: varying endpoint, tenant pair, or engine makes a new probe."
+    },
+    "tenant_pair": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "none",
+        "postgres",
+        "sqlite"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "reproduced",
+        "error"
+      ]
+    },
+    "evidence_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

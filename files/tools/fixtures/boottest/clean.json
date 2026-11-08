@@ -1,0 +1,18 @@
+{
+  "configs": [
+    {
+      "name": "production",
+      "loads": true,
+      "allowed_probe": true,
+      "denied_probe": true,
+      "error": ""
+    },
+    {
+      "name": "production-missing-secret",
+      "loads": true,
+      "allowed_probe": true,
+      "denied_probe": true,
+      "error": ""
+    }
+  ]
+}

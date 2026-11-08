@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "engines": [
+    "sqlite",
+    "postgres"
+  ],
+  "test_infra_paths": [
+    "**/conftest.py",
+    "**/pytest.ini",
+    "**/tox.ini",
+    "**/.coveragerc",
+    "tests/**",
+    "backend/**/tests/**",
+    "scripts/test*",
+    "Makefile"
+  ],
+  "lint": "ruff",
+  "lint_command": "ruff check",
+  "gate_paths": [
+    "tools/**",
+    "policies/**",
+    ".github/workflows/**"
+  ],
+  "gate_checks": [
+    "SCOPE",
+    "SUITE",
+    "TEST_SET",
+    "TEST_INFRA",
+    "BASE_FAIL_HEAD_PASS",
+    "MUTATION",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "SMELL",
+    "GATE_CONTROLS",
+    "POLICY_DIGEST",
+    "ARCH",
+    "ORACLE_PROVENANCE",
+    "GUARD_DELTA",
+    "AUTHZ_MATRIX",
+    "SEMGREP",
+    "THREAD_RACE",
+    "SCHEMA_FUZZ",
+    "BOOTTEST",
+    "ZIZMOR",
+    "DAST_BASELINE",
+    "AGT_PARITY",
+    "AGT_AUDIT"
+  ],
+  "policy_digest_scope": [
+    "policies/**"
+  ],
+  "gate_control_cache_key": [
+    "gate_sha",
+    "control_set_sha",
+    "policy_digest"
+  ],
+  "gate_control_required": true
+}

@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "attack_outcome": {
+    "key": [
+      "catalog_item_id",
+      "tree",
+      "variant",
+      "closure_sha",
+      "policy_digest"
+    ],
+    "ttl_seconds": {
+      "REFUTED": 604800,
+      "REPRODUCED": 2592000,
+      "NOT_APPLICABLE": 604800,
+      "NOT_RUN": 0
+    },
+    "max_entries": 50000,
+    "invalidate_on": [
+      "tree",
+      "variant",
+      "closure_sha",
+      "policy_digest",
+      "catalog_version"
+    ],
+    "never_reuse": [
+      "NOT_RUN"
+    ],
+    "cached_flag_required": true,
+    "reuse_scope": "same_repository"
+  },
+  "check_result": {
+    "key": [
+      "tree",
+      "check_id",
+      "check_impl_sha",
+      "engine"
+    ],
+    "ttl_seconds": 604800,
+    "max_entries": 200000,
+    "invalidate_on": [
+      "tree",
+      "check_impl_sha",
+      "engine",
+      "policy_digest"
+    ]
+  },
+  "reproducer": {
+    "key": [
+      "fingerprint",
+      "tree"
+    ],
+    "ttl_seconds": 2592000,
+    "max_entries": 20000,
+    "never_delete": true
+  }
+}

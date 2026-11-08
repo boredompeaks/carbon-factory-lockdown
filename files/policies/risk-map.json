@@ -1,0 +1,513 @@
+{
+  "version": 1,
+  "precedence": "max_wins",
+  "precedence_tiebreak": "longest_path",
+  "globs": {
+    "policies/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "policies": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "policies/schemas/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    ".agt/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    ".opencode/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    ".opencode/plugins/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    ".github/workflows/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    ".github/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "tools/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/payments/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/refunds/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/auth/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/mfa/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/billing/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/money.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/accounts/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/common/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/roles/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/settings/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/settings.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/urls.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "quality/ledger/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "opencode.json": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "AGENTS.md": {
+      "tier": "high",
+      "variant": "high"
+    },
+    ".gitleaks.toml": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/payments/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/payment/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/refunds/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/refund/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/billing/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/money/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/pricing/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/auth/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/mfa/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/webhooks/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/admin/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/accounts/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/account/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/common/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/roles/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/permissions/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/settings/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/settings.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/urls.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/views/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/serializers/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/api/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/orders/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/cart/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/shipping/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "backend/**/migrations/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "frontend/**/checkout/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "frontend/**/payment/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "frontend/**/auth/**": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/*.sql": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/conftest.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/pytest.ini": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/tox.ini": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/.coveragerc": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/requirements*.txt": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/pyproject.toml": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/package.json": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/package-lock.json": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/Dockerfile": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/docker-compose*.yml": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/.env*": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/orders/refunds.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/refunds.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/**/refund*.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/orders/models.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/accounts/views.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/accounts/models.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/common/roles.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/common/fields.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/config/settings.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/common/testing.py": {
+      "tier": "high",
+      "variant": "high"
+    },
+    "**/pricing/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "**/products/**": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "**/pricing.py": {
+      "tier": "max",
+      "variant": "max"
+    },
+    "backend/products/pricing.py": {
+      "tier": "max",
+      "variant": "max"
+    }
+  },
+  "default": {
+    "tier": "high",
+    "variant": "high"
+  },
+  "keywords": [
+    {
+      "term": "refund",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "payment",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "payout",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "invoice",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "billing",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "money",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "webhook",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "auth",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "login",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "password",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "mfa",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "otp",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "session",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "token",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "admin",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "secret",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "tenant",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "idor",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "role",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "permission",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "account",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "checkout",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "price",
+      "tier": "max",
+      "variant": "max",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "settings",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "policy",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "gate",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "workflow",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "migration",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "common",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    },
+    {
+      "term": "github",
+      "tier": "high",
+      "variant": "high",
+      "match": "case_insensitive_substring"
+    }
+  ]
+}

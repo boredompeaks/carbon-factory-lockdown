@@ -1,0 +1,8 @@
+{
+  "paths": [
+    "backend/orders/views/refund.py"
+  ],
+  "scope": [
+    "backend/orders/**"
+  ]
+}

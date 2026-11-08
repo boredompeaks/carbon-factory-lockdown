@@ -1,0 +1,14 @@
+{
+  "paths": [
+    "backend/orders/views/refund.py",
+    "backend/conftest.py"
+  ],
+  "test_infra_globs": [
+    "**/conftest.py",
+    "**/pytest.ini",
+    "**/tox.ini"
+  ],
+  "scope": [
+    "backend/orders/**"
+  ]
+}

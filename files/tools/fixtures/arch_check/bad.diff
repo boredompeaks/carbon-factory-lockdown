@@ -1,0 +1,26 @@
+diff --git a/backend/orders/views/refund.py b/backend/orders/views/refund.py
+index 1111111..2222222 100644
+--- a/backend/orders/views/refund.py
++++ b/backend/orders/views/refund.py
+@@ -10,0 +11,1 @@
++from common.money import quantize_money
+diff --git a/backend/orders/refunds.py b/backend/orders/refunds.py
+index 1111111..2222222 100644
+--- a/backend/orders/refunds.py
++++ b/backend/orders/refunds.py
+@@ -10,0 +11,1 @@
++from shipping.models import Shipment
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index 5555555..6666666 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -4,0 +5,1 @@
++requests==2.32.0
+diff --git a/backend/newapp/x.py b/backend/newapp/x.py
+new file mode 100644
+index 0000000..7777777
+--- /dev/null
++++ b/backend/newapp/x.py
+@@ -0,0 +1,2 @@
++"""new app."""
++NAME = "x"

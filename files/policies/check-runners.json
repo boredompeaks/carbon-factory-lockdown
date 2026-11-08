@@ -1,0 +1,349 @@
+{
+  "version": 1,
+  "ci_self_audit": [
+    "SUITE",
+    "CHANGELOG",
+    "SECRETS",
+    "CONVENTION",
+    "POLICY_DIGEST",
+    "AUTHZ_MATRIX",
+    "BOOTTEST",
+    "ZIZMOR",
+    "ARCH"
+  ],
+  "scope_definitions": {
+    "added_lines": "only lines added by the diff",
+    "closure": "diff paths plus their harness-computed dependency closure",
+    "full": "the full repository at the audited tree"
+  },
+  "scope_by_runner_note": "When scope_by_runner is present it overrides scope per runner; every value names a scope_definitions key. A builder entry is the reduced scope for that check.",
+  "checks": {
+    "SCOPE": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "full",
+      "emits": [
+        "SCOPE_VIOLATION"
+      ],
+      "shadow": false
+    },
+    "SUITE": {
+      "runners": [
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "full",
+      "emits": [
+        "SUITE_FAILURE"
+      ],
+      "shadow": false
+    },
+    "TEST_SET": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "full",
+      "emits": [
+        "TEST_REMOVAL_UNCOVERED",
+        "TAUTOLOGICAL_ASSERTION"
+      ],
+      "shadow": false
+    },
+    "TEST_INFRA": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "TEST_INFRA_CHANGE"
+      ],
+      "shadow": false
+    },
+    "BASE_FAIL_HEAD_PASS": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "full",
+      "scope_by_runner": {
+        "builder": "closure",
+        "auditor": "closure"
+      },
+      "emits": [
+        "NON_FALSIFIABLE"
+      ],
+      "shadow": false
+    },
+    "MUTATION": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "added_lines",
+      "scope_by_runner": {
+        "builder": "closure",
+        "auditor": "closure"
+      },
+      "emits": [
+        "TEST_GAP"
+      ],
+      "shadow": false
+    },
+    "CHANGELOG": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "closure",
+      "emits": [
+        "CHANGELOG_GAP"
+      ],
+      "shadow": false
+    },
+    "SECRETS": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "added_lines",
+      "emits": [
+        "SECRET_LEAK"
+      ],
+      "shadow": false
+    },
+    "CONVENTION": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "added_lines",
+      "emits": [
+        "CONVENTION_VIOLATION"
+      ],
+      "shadow": false
+    },
+    "SMELL": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "added_lines",
+      "emits": [
+        "CODE_SMELL"
+      ],
+      "shadow": true
+    },
+    "GATE_CONTROLS": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "full",
+      "emits": [
+        "GATE_CONTROL_FAILURE",
+        "CONTROL_UNDERCOUNT"
+      ],
+      "shadow": false
+    },
+    "POLICY_DIGEST": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "full",
+      "emits": [
+        "POLICY_DRIFT"
+      ],
+      "shadow": false
+    },
+    "ARCH": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "closure",
+      "emits": [
+        "ARCH_VIOLATION"
+      ],
+      "shadow": false
+    },
+    "ORACLE_PROVENANCE": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "added_lines",
+      "emits": [
+        "WEAK_ORACLE"
+      ],
+      "shadow": true
+    },
+    "GUARD_DELTA": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "GUARD_REMOVED"
+      ],
+      "shadow": true
+    },
+    "AUTHZ_MATRIX": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "full",
+      "emits": [
+        "AUTHZ_MATRIX_GAP"
+      ],
+      "shadow": false
+    },
+    "SEMGREP": {
+      "runners": [
+        "builder",
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "added_lines",
+      "emits": [
+        "GATEWAY_IN_ATOMIC",
+        "LOCK_ACROSS_NETWORK",
+        "MISSING_IDEMPOTENCY",
+        "MUTABLE_DEFAULT",
+        "BARE_EXCEPT",
+        "UNSAFE_RMW",
+        "NONATOMIC_WATERMARK"
+      ],
+      "shadow": true
+    },
+    "THREAD_RACE": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "RACE_CONDITION",
+        "FLAKY_TEST"
+      ],
+      "shadow": true
+    },
+    "SCHEMA_FUZZ": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "SCHEMA_FUZZ_FAILURE"
+      ],
+      "shadow": true
+    },
+    "BOOTTEST": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "full",
+      "emits": [
+        "BOOT_FAIL_OPEN"
+      ],
+      "shadow": false,
+      "scope_by_runner": {
+        "builder": "closure",
+        "auditor": "closure"
+      }
+    },
+    "ZIZMOR": {
+      "runners": [
+        "builder",
+        "auditor",
+        "ci"
+      ],
+      "required_in_ci": true,
+      "scope": "closure",
+      "emits": [
+        "CI_HARDENING"
+      ],
+      "shadow": false,
+      "scope_by_runner": {
+        "builder": "closure",
+        "auditor": "closure"
+      }
+    },
+    "DAST_BASELINE": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "DAST_FINDING"
+      ],
+      "shadow": true
+    },
+    "AGT_PARITY": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "AGT_PARITY_MISMATCH"
+      ],
+      "shadow": false
+    },
+    "AGT_AUDIT": {
+      "runners": [
+        "auditor"
+      ],
+      "required_in_ci": false,
+      "scope": "closure",
+      "emits": [
+        "AGT_AUDIT_GAP"
+      ],
+      "shadow": false
+    }
+  },
+  "hacker_runtime": {
+    "runner": "hacker",
+    "required_in_ci": false,
+    "scope": "closure",
+    "catalog_ref": "policies/attack-catalog.json",
+    "ci": false
+  },
+  "release_engineer": {
+    "runs_checks": false,
+    "reads_verdict": true,
+    "required_ci_source": "policies/ci.json"
+  }
+}

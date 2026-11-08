@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stages.json",
+  "title": "stages",
+  "version": 1,
+  "type": "string",
+  "enum": [
+    "preflight",
+    "resolve",
+    "classify",
+    "capability",
+    "prebuild",
+    "build",
+    "audit",
+    "route",
+    "release",
+    "postmerge",
+    "lesson",
+    "drain"
+  ]
+}

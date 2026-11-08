@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "phase": "phase6",
+  "prompt": "6A",
+  "title": "Typed-tool lockdown — CONTRACT (no server code)",
+  "status": "PENDING_VERIFICATION",
+  "pending_tag": "phase6a-contract",
+  "tag": {
+    "name": "phase6a-contract",
+    "status": "PENDING_VERIFICATION",
+    "applied": false,
+    "commit": null,
+    "created_at": null,
+    "note": "Tag is created only after the fresh-verifier exit gate passes. Do not apply before verification."
+  },
+  "gate": {
+    "name": "phase6a-contract",
+    "status": "PENDING_VERIFICATION",
+    "verifier": null,
+    "verifier_result": null,
+    "verified_at": null,
+    "checks": [
+      {
+        "id": "GATE-1",
+        "name": "matrix complete",
+        "exit_test": "6A-2: row count equals script grant count; every row has role, grant, purpose, and non-blank disposition (TOOL:<name> | DELETE | KEEP-READ)",
+        "status": "PENDING_VERIFICATION"
+      },
+      {
+        "id": "GATE-2",
+        "name": "registry valid",
+        "exit_test": "6A-3: registry.json validates against registry.schema.json; every TOOL:x in matrix.csv exists; every checks.json check has a tool path for each runner role; every class_tag exists in severity.json",
+        "status": "PENDING_VERIFICATION"
+      },
+      {
+        "id": "GATE-3",
+        "name": "every F-id has a control",
+        "exit_test": "6A-5: every F-id (F-01..F-70, F-71..F-77) and every registry tool appears at least once in controls.json; controls.json validates against controls.schema.json; each control carries an expected REJECT code",
+        "status": "PENDING_VERIFICATION"
+      },
+      {
+        "id": "GATE-4",
+        "name": "policy lint green",
+        "exit_test": "6A-4: policy lint passes; recomputed policy_digest written to phase6/out/6A-4/digest.txt (un-sealed)",
+        "status": "PENDING_VERIFICATION"
+      },
+      {
+        "id": "GATE-5",
+        "name": "no file outside owned paths changed",
+        "exit_test": "diff check: no file outside the union of 6A-1..6A-5 owned paths changed (agent files and server code untouched in 6A)",
+        "status": "PENDING_VERIFICATION"
+      }
+    ],
+    "on_pass": "git tag phase6a-contract; update STATE.json to verified; tell human to run 6B",
+    "on_fail": "add decision note to affected WP file and respawn a fresh worker; STATE.json remains PENDING_VERIFICATION"
+  },
+  "inputs": [
+    "phase6/report.md",
+    "phase6/seed.md",
+    "phase6/spec.md"
+  ],
+  "work_packages": [
+    {
+      "wp": "6A-1",
+      "title": "Findings ingest",
+      "status": "PENDING_VERIFICATION",
+      "owner": null,
+      "owned_paths": [
+        "phase6/findings.md"
+      ],
+      "out": "phase6/findings.md",
+      "out_sha256": {
+        "phase6/findings.md": "2b15ffcc047e7487edc81165be2b2040e322e7714e502929deaea357e51bdab7"
+      },
+      "report": "phase6/out/6A-1/REPORT.md",
+      "artifact_mtime_utc": "2026-11-08T02:52:36Z",
+      "exit_test": "Every row has file:line; per-role counts over F-01..F-70 equal auditor 9, builder 8, orchestrator 9, hacker 8, compliance 7, crouton 6, release-engineer 7, factory-map 8, K1 8; F-71..F-77 present; each row judged CONFIRMED or NOT-REPRODUCIBLE from permission lines alone",
+      "summary": "Findings F-01..F-70 parsed from report.md plus F-71..F-77 seed; 77 rows",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      },
+      "dependencies": [],
+      "created_at": "2026-11-08T03:04:14Z",
+      "updated_at": "2026-11-08T03:04:14Z"
+    },
+    {
+      "wp": "6A-2",
+      "title": "Grant inventory",
+      "status": "PENDING_VERIFICATION",
+      "owner": null,
+      "owned_paths": [
+        "phase6/matrix.csv"
+      ],
+      "out": "phase6/matrix.csv",
+      "out_sha256": {
+        "phase6/matrix.csv": "70db82f52adefc13b9cae38f797150a7ef0a3412dc82d19e1451fe921713f10d"
+      },
+      "report": "phase6/out/6A-2/REPORT.md",
+      "artifact_mtime_utc": "2026-11-08T02:52:37Z",
+      "exit_test": "Row count equals script grant count (234 data rows + header = 235 lines); no blank disposition; every row has role, grant, purpose, disposition = TOOL:<name> | DELETE | KEEP-READ",
+      "summary": "Grant inventory for the 9 agent files: shell, edit, write, external_directory, question, subagent, skill grants",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      },
+      "dependencies": [],
+      "created_at": "2026-11-08T03:04:14Z",
+      "updated_at": "2026-11-08T03:04:14Z"
+    },
+    {
+      "wp": "6A-3",
+      "title": "Registry",
+      "status": "PENDING_VERIFICATION",
+      "owner": null,
+      "owned_paths": [
+        "files/tools/mcp/registry.json",
+        "files/tools/mcp/registry.schema.json"
+      ],
+      "out": "files/tools/mcp/registry.json",
+      "out_sha256": {
+        "files/tools/mcp/registry.json": "ad2b568c77fd0c9d47bcb77022df50ce44a08aa7acaf9f31d98a2fbc803a9cd3",
+        "files/tools/mcp/registry.schema.json": "335eeea8664468d18a452e0ed1ba6ae87341c7abb2f585bf700fb2bada5bf55e"
+      },
+      "report": "phase6/out/6A-3/REPORT.md",
+      "artifact_mtime_utc": "2026-11-08T02:56:03Z",
+      "exit_test": "registry.json validates against registry.schema.json; every TOOL:x in matrix.csv exists as a registry tool (30 tools incl. check.run dispatcher); every checks.json check has a tool path for each of its runner roles; every class_tag exists in severity.json; per-tool roles, args JSON-schema, exec_mode (pure|sandbox|k1), sealed + cache key, >=3 controls, redact:true",
+      "summary": "30 typed tools seeded from the required tool surface table; checks collapsed into check.run generated from checks.json runners",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      },
+      "dependencies": [
+        "6A-2"
+      ],
+      "created_at": "2026-11-08T03:04:14Z",
+      "updated_at": "2026-11-08T03:04:14Z"
+    },
+    {
+      "wp": "6A-4",
+      "title": "Policy reconciliation",
+      "status": "PENDING_VERIFICATION",
+      "owner": null,
+      "owned_paths": [
+        "files/policies/**",
+        "files/policies/schemas/probe-record.json"
+      ],
+      "out": "files/policies/schemas/probe-record.json",
+      "out_sha256": {
+        "files/policies/schemas/probe-record.json": "f37dc105f6f1743579199b1af1f7738dd9edff7757698791b06190a614f0dd21",
+        "phase6/out/6A-4/digest.txt": "ea66ff9896e138e487dd7af1f49e980544dccd43a0d4bd04b9c86760741bebab"
+      },
+      "report": "phase6/out/6A-4/REPORT.md",
+      "digest": "phase6/out/6A-4/digest.txt",
+      "digest_value": "f16a29bb0eed6dcb22a8398ef69cedae6cbfcfb42e7ba9092fb3bbf28a3d18b4",
+      "artifact_mtime_utc": "2026-11-08T02:56:21Z",
+      "exit_test": "Policy lint passes (phase6/out/6A-4/lint.py); F-71..F-75 fixed (ci-required.json single source, missing severity classes added, exact-match covered_by, assert-rules extended to message/comment tails + unittest + TS/JS, redaction allowlist + narrower phone/ipv4); probe-record schema added; recomputed policy_digest written to phase6/out/6A-4/digest.txt (un-sealed); fixtures in phase6/out/6A-4/fixtures/",
+      "summary": "Policy fixes F-71..F-75 plus probe-record schema; digest un-sealed; agent-file prose left for 6C-1c",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      },
+      "dependencies": [],
+      "notes": [
+        "release-engineer.md prose check list drift deferred to 6C-1c (agent files outside files/policies/**)",
+        "Redaction runner patch deferred to 6B-0; 6A-4 ships policy-side allowlist only",
+        "No git tag/branch applied: no .git checkout at harness root"
+      ],
+      "created_at": "2026-11-08T03:04:14Z",
+      "updated_at": "2026-11-08T03:04:14Z"
+    },
+    {
+      "wp": "6A-5",
+      "title": "Controls",
+      "status": "PENDING_VERIFICATION",
+      "owner": null,
+      "owned_paths": [
+        "files/tools/mcp/controls.json"
+      ],
+      "out": "files/tools/mcp/controls.json",
+      "out_sha256": {
+        "files/tools/mcp/controls.json": "51819ade0b5d893e816826ee783bce3d092ad637cc280de0da91a7f4157e8b49",
+        "files/tools/mcp/controls.schema.json": "6a7d1f51a5c13b7c221475795ecc101299942a2ae74d21bcaf33ebf7e179b7b6"
+      },
+      "report": "phase6/out/6A-5/REPORT.md",
+      "artifact_mtime_utc": "2026-11-08T02:56:04Z",
+      "exit_test": "controls.json validates against controls.schema.json; every F-id (F-01..F-70, F-71..F-77) and every registry tool (30) appears at least once; each control carries an expected REJECT code (167 controls)",
+      "summary": "167 known-bad calls: one per F-id and per registry tool, each with expected REJECT code",
+      "verifier_result": null,
+      "verifier": {
+        "status": "PENDING_VERIFICATION",
+        "result": null,
+        "verified_at": null,
+        "notes": []
+      },
+      "dependencies": [
+        "6A-3"
+      ],
+      "created_at": "2026-11-08T03:04:14Z",
+      "updated_at": "2026-11-08T03:04:14Z"
+    }
+  ],
+  "order": "6A-1 and 6A-2 parallel; then 6A-3 and 6A-4 parallel; then 6A-5",
+  "timestamps": {
+    "created_at": "2026-11-08T03:04:14Z",
+    "updated_at": "2026-11-08T03:04:14Z",
+    "artifacts_mtime_utc": "2026-11-08T02:52:36Z..2026-11-08T02:56:21Z",
+    "verifier_started_at": null,
+    "verifier_completed_at": null
+  },
+  "handoff": "Independent verifier: run all 6A exit tests + gate checks GATE-1..GATE-5 from STATE.json alone. On pass, tag phase6a-contract and tell human to run 6B. On fail, add a decision note to the affected WP file and respawn a fresh worker; never mark DONE without a fresh verifier pass."
+}

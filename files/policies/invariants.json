@@ -1,0 +1,391 @@
+{
+  "version": 1,
+  "invariants": [
+    {
+      "id": 1,
+      "name": "Scope containment",
+      "rule": "Every path in the diff matches a glob in capability.scope.",
+      "source": "checks.json#SCOPE",
+      "enforcement": [
+        "SCOPE"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 2,
+      "name": "Full suite green",
+      "rule": "Zero failing test ids on sqlite and on postgres.",
+      "source": "checks.json#SUITE",
+      "enforcement": [
+        "SUITE"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 3,
+      "name": "Test set integrity",
+      "rule": "Every base test id exists at head and passes, removals carry reason_code and covered_by, no skip or xfail is added, no assertion count is lowered, and no added assertion matches a tautology pattern.",
+      "source": "checks.json#TEST_SET",
+      "enforcement": [
+        "TEST_SET"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 4,
+      "name": "Test-infrastructure containment",
+      "rule": "No diff touches a path in gate.test_infra_paths unless that path is in capability.scope.",
+      "source": "checks.json#TEST_INFRA",
+      "enforcement": [
+        "TEST_INFRA"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 5,
+      "name": "Added-test falsifiability",
+      "rule": "Every added test fails on base with fail_kind ASSERTION and passes on head; a base-green test is NON_FALSIFIABLE unless named in characterization_tests; acceptance is re-derived when the acceptance author family equals the builder family.",
+      "source": "checks.json#BASE_FAIL_HEAD_PASS",
+      "enforcement": [
+        "BASE_FAIL_HEAD_PASS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 6,
+      "name": "Mutation adequacy",
+      "rule": "Kill ratio is at or above the tier threshold and every changed hunk in a high-tier path has at least one killed mutant.",
+      "source": "checks.json#MUTATION",
+      "enforcement": [
+        "MUTATION"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 7,
+      "name": "Changelog coverage",
+      "rule": "Every added row names a subset of diff paths and every non-exempt diff path appears in at least one added row.",
+      "source": "checks.json#CHANGELOG",
+      "enforcement": [
+        "CHANGELOG"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 8,
+      "name": "Secret scan",
+      "rule": "Secret scan reports zero hits on added lines beyond secrets-baseline.json.",
+      "source": "checks.json#SECRETS",
+      "enforcement": [
+        "SECRETS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 9,
+      "name": "Lint convention",
+      "rule": "The ruff rule set reports zero violations on added lines.",
+      "source": "checks.json#CONVENTION",
+      "enforcement": [
+        "CONVENTION"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 10,
+      "name": "Smell delta",
+      "rule": "No new smell appears on an added line; pre-existing smells that the diff did not increase are residual.",
+      "source": "checks.json#SMELL",
+      "enforcement": [
+        "SMELL"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 11,
+      "name": "Gate negative controls",
+      "rule": "Every known-bad fixture is rejected, controls_total meets each per-check minimum and known_bad_min (total_min is the declared-entry floor), and controls_rejected equals controls_total for the current gate_sha, control_set_sha, and policy_digest.",
+      "source": "checks.json#GATE_CONTROLS",
+      "enforcement": [
+        "GATE_CONTROLS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 12,
+      "name": "Policy digest binding",
+      "rule": "Hash all security-deciding files under policies/** listed in policy_digest.py COVERED (policies/*.json and policies/semgrep.yml except policy-manifest.json) as sorted (relative POSIX path, sha256 of raw bytes) pairs in canonical JSON; a changed digest requires a gate-control record carrying that digest, and a record with a different digest fails as POLICY_DRIFT; a missing covered file is a tool error.",
+      "source": "checks.json#POLICY_DIGEST",
+      "enforcement": [
+        "POLICY_DIGEST"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 13,
+      "name": "Architecture containment",
+      "rule": "A new cross-layer edge, dependency, public export, or unowned module path is refused unless capability.architecture_allow declares it with a reason.",
+      "source": "checks.json#ARCH",
+      "enforcement": [
+        "ARCH"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 14,
+      "name": "Oracle provenance",
+      "rule": "No added assertion line is a SELF_COMPARE, ORACLE_BY_COPY, or MOCK_ECHO according to assert-rules.json.",
+      "source": "checks.json#ORACLE_PROVENANCE",
+      "enforcement": [
+        "ORACLE_PROVENANCE"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 15,
+      "name": "Guard removal coverage",
+      "rule": "Every removed conditional or guard line in a high-tier path is named by an added test covering the changed hunk or by capability.guard_delta.",
+      "source": "checks.json#GUARD_DELTA",
+      "enforcement": [
+        "GUARD_DELTA"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 16,
+      "name": "Authorization matrix",
+      "rule": "Every URLconf route and method has a matrix row and each role client is compared with the view's declared permission classes.",
+      "source": "checks.json#AUTHZ_MATRIX",
+      "enforcement": [
+        "AUTHZ_MATRIX"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 17,
+      "name": "Semantic grep ruleset",
+      "rule": "The project ruleset in policies/semgrep.yml reports zero new findings on added lines, each with its policy class tag.",
+      "source": "checks.json#SEMGREP",
+      "enforcement": [
+        "SEMGREP"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 18,
+      "name": "Thread and process race",
+      "rule": "When the closure touches a lock, atomic block, idempotency key, or watermark, added concurrency tests run on postgres for the tier's repetitions per worker and reproduce the protected property every time.",
+      "source": "checks.json#THREAD_RACE",
+      "enforcement": [
+        "THREAD_RACE"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 19,
+      "name": "OpenAPI schema fuzz",
+      "rule": "schemathesis runs with the fixed seed on added routes and changed shapes and observes no schema violation or 5xx response.",
+      "source": "checks.json#SCHEMA_FUZZ",
+      "enforcement": [
+        "SCHEMA_FUZZ"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 20,
+      "name": "Production boot test",
+      "rule": "The app boots with production settings and DEBUG=false, answers a health probe, and exits non-zero when a required environment variable is removed.",
+      "source": "checks.json#BOOTTEST",
+      "enforcement": [
+        "BOOTTEST"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 21,
+      "name": "GitHub Actions hardening",
+      "rule": "When .github/** is in the closure, or weekly on base otherwise, zizmor reports no finding above the policy threshold.",
+      "source": "checks.json#ZIZMOR",
+      "enforcement": [
+        "ZIZMOR"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 22,
+      "name": "Dynamic application security baseline",
+      "rule": "At max only, the ZAP baseline scan against the hacker runtime has no alert above the policy threshold; informational alerts are residual.",
+      "source": "checks.json#DAST_BASELINE",
+      "enforcement": [
+        "DAST_BASELINE"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 23,
+      "name": "Record hash integrity",
+      "rule": "Every sealed ledger record carries sig_status unsigned_local and a record_hash that recomputes as sha256 over canonical JSON of the record minus record_hash.",
+      "source": "orchestrator.md#H4",
+      "enforcement": [
+        "gate_control.py --verify",
+        "validatedrain.py"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 24,
+      "name": "Hash chain continuity",
+      "rule": "Each record's prev_hash equals the previous record's record_hash; the first record uses 64 zeroes.",
+      "source": "orchestrator.md#H3",
+      "enforcement": [
+        "gate_control.py --verify-chain",
+        "validatedrain.py"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 25,
+      "name": "Unsigned-local sealing",
+      "rule": "No signing key exists on the host; every sealed record carries sig_status unsigned_local set by the harness, never by a subagent.",
+      "source": "orchestrator.md#H4",
+      "enforcement": [
+        "gate_control.py --verify"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 26,
+      "name": "Append-only ledger",
+      "rule": "Verdict, status, finding, risk-acceptance, gate-control, and release records are append-only and hash-chained; a write is accepted only with a matching expected_prev_hash and is never retried unchanged after LEDGER_CONFLICT.",
+      "source": "orchestrator.md#H3",
+      "enforcement": [
+        "ledger write guard"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 27,
+      "name": "Control total exactness",
+      "rule": "controls_total equals the count of controls whose expected_outcome is FAIL; PASS controls discriminate but are not counted.",
+      "source": "negative-controls.json#enforcement",
+      "enforcement": [
+        "GATE_CONTROLS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 28,
+      "name": "Control rejection completeness",
+      "rule": "controls_rejected equals controls_total and every known-bad control is rejected; a single survivor is GATE_CONTROL_FAILURE.",
+      "source": "negative-controls.json#enforcement",
+      "enforcement": [
+        "GATE_CONTROLS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 29,
+      "name": "Control minima",
+      "rule": "controls_total is at or above known_bad_min and at or above each per-check min_count; pending controls never count, and an under-count is CONTROL_UNDERCOUNT. total_min is the declared-entry floor, not the known-bad comparison.",
+      "source": "negative-controls.json#enforcement",
+      "enforcement": [
+        "GATE_CONTROLS"
+      ],
+      "owner": "auditor"
+    },
+    {
+      "id": 30,
+      "name": "Policy digest scope",
+      "rule": "The gate-control policy digest hashes all security-deciding files under policies/** listed in policy_digest.py COVERED (policies/*.json and policies/semgrep.yml except policy-manifest.json) as sorted (relative POSIX path, sha256 of raw bytes) pairs in canonical JSON; a missing covered file is a tool error.",
+      "source": "policy_digest.py#COVERED",
+      "enforcement": [
+        "POLICY_DIGEST",
+        "policy_digest.py"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 31,
+      "name": "Permission semantics last-match-wins",
+      "rule": "OpenCode V2 evaluates the ordered rule list and the last matching rule wins; every role starts from a blanket deny and adds narrow allows and later denies.",
+      "source": "orchestrator.md#H1",
+      "enforcement": [
+        "permission rule evaluation"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 32,
+      "name": "Tier monotonic non-lower",
+      "rule": "Within a lineage, tier may be raised by the orchestrator or auditor and may not be lowered by anyone; factory paths map to tier max and variant max, and counters never reset.",
+      "source": "orchestrator.md#R5",
+      "enforcement": [
+        "P-TIER",
+        "tiers.json"
+      ],
+      "owner": "orchestrator"
+    },
+    {
+      "id": 33,
+      "name": "AGT narrows only",
+      "rule": "Deny in either layer wins; a conjunction control proves a tool denied by permissions stays denied when AGT allows, and a tool allowed by permissions stays denied when AGT denies",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "AGT_PARITY",
+        "AGT_AUDIT"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 34,
+      "name": "AGT policy path",
+      "rule": "resolved AGT policy path == repo .agt/policy.json; env override absent or equal",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "AGT_PARITY"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 35,
+      "name": "AGT factory paths",
+      "rule": ".agt/**, .opencode/plugins/**, opencode.json plugin entry and the lockfile are factory paths, tier max, hashed",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "ARCH",
+        "gate_impl_digest"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 36,
+      "name": "AGT pin",
+      "rule": "AGT plugin version pinned exactly; lockfile committed; no caret range",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "AGT_PARITY"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 37,
+      "name": "AGT audit",
+      "rule": "every denied tool call has an AGT audit entry, else finding",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "AGT_AUDIT"
+      ],
+      "owner": "platform"
+    },
+    {
+      "id": 38,
+      "name": "AGT mode",
+      "rule": "mode=enforce, denyOnPolicyError=true, defaultEffect=deny",
+      "source": "user mandate 2026-11-06",
+      "enforcement": [
+        "AGT_PARITY"
+      ],
+      "owner": "platform"
+    }
+  ]
+}

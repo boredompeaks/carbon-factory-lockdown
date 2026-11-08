@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "builder-result.json",
+  "title": "builder-result",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "result_type",
+    "task_id",
+    "lineage_id",
+    "capability_id",
+    "blocked_code",
+    "refusal_code",
+    "needed_paths",
+    "split_groups",
+    "failing_checks",
+    "base",
+    "head",
+    "tree",
+    "files",
+    "changelog_row_ref",
+    "added_tests",
+    "removed_tests",
+    "guard_delta",
+    "architecture_allow",
+    "oracle_findings",
+    "acceptance",
+    "precheck",
+    "precheck_rounds",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "builder-result/1"
+    },
+    "result_type": {
+      "type": "string",
+      "enum": [
+        "RESULT",
+        "BLOCKED",
+        "REFUSED"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocked_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SPLIT_REQUIRED",
+        "SCOPE_INSUFFICIENT",
+        "ACCEPTANCE_NOT_RED",
+        "ADDED_TEST_NOT_RED",
+        "PRECHECK_UNRESOLVED",
+        "WEAK_ORACLE",
+        "GUARD_UNCOVERED",
+        "ARCH_VIOLATION",
+        null
+      ]
+    },
+    "refusal_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CAPABILITY_INVALID",
+        "STATE_MOVED",
+        null
+      ]
+    },
+    "needed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "split_groups": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "failing_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "base": {
+      "$ref": "#/$defs/git_sha"
+    },
+    "head": {
+      "$ref": "#/$defs/git_sha"
+    },
+    "tree": {
+      "$ref": "#/$defs/git_sha"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "changelog_row_ref": {
+      "type": "string"
+    },
+    "added_tests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/added_test"
+      }
+    },
+    "removed_tests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/removed_test"
+      }
+    },
+    "guard_delta": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/guard_delta"
+      }
+    },
+    "architecture_allow": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/architecture_allow"
+      }
+    },
+    "oracle_findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/oracle_finding"
+      }
+    },
+    "acceptance": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/acceptance"
+      }
+    },
+    "precheck": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/precheck"
+      }
+    },
+    "precheck_rounds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "git_sha": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "added_test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "kind",
+        "fail_kind",
+        "reason",
+        "base_outcome",
+        "head_outcome",
+        "evidence_ref"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "acceptance",
+            "characterization",
+            "supporting"
+          ]
+        },
+        "fail_kind": {
+          "type": "string",
+          "enum": [
+            "ASSERTION",
+            "OTHER",
+            "PASS"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_outcome": {
+          "type": "string",
+          "enum": [
+            "FAIL_ASSERTION",
+            "FAIL_OTHER",
+            "PASS"
+          ]
+        },
+        "head_outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "removed_test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "test_id",
+        "reason_code",
+        "covered_by"
+      ],
+      "properties": {
+        "test_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "enum": [
+            "DUPLICATE_COVERAGE",
+            "OBSOLETE_BEHAVIOUR",
+            "RENAMED_TEST",
+            "MERGED_TEST",
+            "FIXTURE_ONLY",
+            "FLAKY_QUARANTINE",
+            "POLICY_PROHIBITED",
+            "SECURITY_REGRESSION"
+          ]
+        },
+        "covered_by": {
+          "type": "string"
+        }
+      }
+    },
+    "guard_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "line",
+        "covered_by"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "covered_by": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "architecture_allow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "from",
+        "to",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "edge",
+            "dependency",
+            "public_surface",
+            "unowned_module"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "oracle_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "locus",
+        "evidence_ref"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "SELF_COMPARE",
+            "ORACLE_BY_COPY",
+            "MOCK_ECHO"
+          ]
+        },
+        "locus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "base_outcome",
+        "head_outcome",
+        "evidence_ref"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_outcome": {
+          "type": "string",
+          "enum": [
+            "FAIL_ASSERTION",
+            "FAIL_OTHER",
+            "PASS"
+          ]
+        },
+        "head_outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "precheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "outcome",
+        "evidence_ref",
+        "cached"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cached": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

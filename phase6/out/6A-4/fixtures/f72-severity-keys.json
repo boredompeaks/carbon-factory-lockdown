@@ -1,0 +1,15 @@
+{
+  "finding": "F-72",
+  "keys_added": [
+    "BARE_EXCEPT",
+    "AGT_PARITY_MISMATCH",
+    "AGT_AUDIT_GAP"
+  ],
+  "previously_emitted_unknown_classes": [
+    "BARE_EXCEPT",
+    "AGT_PARITY_MISMATCH",
+    "AGT_AUDIT_GAP"
+  ],
+  "expected_lint": "PASS",
+  "note": "Every class_tag in checks.json now resolves in severity.json; fail-closed check passes."
+}

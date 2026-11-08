@@ -1,0 +1,292 @@
+# Single-source: semgrep.yml and files/tools/semgrep_runner.py fallback both
+# derive from ONE canonical list defined in semgrep_runner.py (MONEY_MODELS,
+# WATERMARK_FIELDS, GATEWAY_PREFIXES, GATEWAY_CALL_SUFFIXES). The tokens below
+# must match that list exactly; control_envelopes asserts the match.
+# Canonical money models (lowercase): refund, payment, payout, ledgerentry,
+# wallettransaction, moneytransfer, invoice, charge.
+# Canonical watermark fields: last_used_counter, watermark, last_seq,
+# last_processed_id (+ update()/F() writes).
+# Canonical gateway prefixes: requests., httpx., aiohttp., stripe., http.client,
+# urllib., razorpay., urlopen; plus $CLIENT.refund(...)/charge/capture and
+# gateway_refund/process_refund/issue_refund and *refund*/*charge*/*capture*
+# suffix family.
+rules:
+  - id: gateway-call-inside-atomic
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Gateway call (Razorpay refund/create, requests, httpx, aiohttp, stripe,
+      http.client or urllib) runs inside a transaction.atomic() block, holding a
+      database transaction open across the network round-trip.
+    metadata:
+      class: GATEWAY_IN_ATOMIC
+      tier: high
+    patterns:
+      - pattern-inside: |
+          with transaction.atomic():
+            ...
+      - pattern-either:
+          - pattern: requests.$METHOD(...)
+          - pattern: httpx.$METHOD(...)
+          - pattern: aiohttp.$METHOD(...)
+          - pattern: stripe.$METHOD(...)
+          - pattern: http.client.$METHOD(...)
+          - pattern: urllib.request.urlopen(...)
+          - pattern: urllib.urlopen(...)
+          - pattern: urlopen(...)
+          - pattern: razorpay.Client(...)
+          - pattern: razorpay.$METHOD(...)
+          - pattern: $CLIENT.refund.create(...)
+          - pattern: $CLIENT.refunds.create(...)
+          - pattern: $CLIENT.refund(...)
+          - pattern: $CLIENT.charge(...)
+          - pattern: $CLIENT.capture(...)
+          - pattern: $CLIENT.payments.create(...)
+          - pattern: $CLIENT.payouts.create(...)
+          - pattern: refund_payment(...)
+          - pattern: create_refund(...)
+          - pattern: refund_create(...)
+          - pattern: capture_payment(...)
+          - pattern: create_payment(...)
+          - pattern: create_charge(...)
+          - pattern: capture_charge(...)
+          - pattern: gateway_refund(...)
+          - pattern: process_refund(...)
+          - pattern: issue_refund(...)
+          - patterns:
+              - pattern: $FUNC(...)
+              - metavariable-regex:
+                  metavariable: $FUNC
+                  regex: '(?i).*(refund|charge|capture).*'
+
+  - id: lock-held-across-network-call
+    languages: [python]
+    severity: ERROR
+    message: >-
+      A network call happens while a select_for_update() row lock is held.
+      Release the lock before calling the gateway.
+    metadata:
+      class: LOCK_ACROSS_NETWORK
+      tier: high
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern-inside: |
+                  with transaction.atomic():
+                    ...
+                    $MODEL.objects.select_for_update(...)
+                    ...
+              - pattern-either:
+                  - pattern: requests.$METHOD(...)
+                  - pattern: httpx.$METHOD(...)
+                  - pattern: aiohttp.$METHOD(...)
+                  - pattern: stripe.$METHOD(...)
+                  - pattern: http.client.$METHOD(...)
+                  - pattern: urllib.request.urlopen(...)
+                  - pattern: urllib.urlopen(...)
+                  - pattern: urlopen(...)
+                  - pattern: razorpay.$METHOD(...)
+                  - pattern: $CLIENT.refund.create(...)
+                  - pattern: $CLIENT.refunds.create(...)
+                  - pattern: $CLIENT.refund(...)
+                  - pattern: $CLIENT.charge(...)
+                  - pattern: $CLIENT.capture(...)
+                  - pattern: $CLIENT.payments.create(...)
+                  - pattern: $CLIENT.payouts.create(...)
+                  - pattern: refund_payment(...)
+                  - pattern: create_refund(...)
+                  - pattern: refund_create(...)
+                  - pattern: capture_payment(...)
+                  - pattern: create_payment(...)
+                  - pattern: create_charge(...)
+                  - pattern: capture_charge(...)
+                  - pattern: gateway_refund(...)
+                  - pattern: process_refund(...)
+                  - pattern: issue_refund(...)
+                  - patterns:
+                      - pattern: $FUNC(...)
+                      - metavariable-regex:
+                          metavariable: $FUNC
+                          regex: '(?i).*(refund|charge|capture).*'
+          - patterns:
+              - pattern-inside: |
+                  def $FUNC(...):
+                    ...
+                    $MODEL.objects.select_for_update(...)
+                    ...
+              - pattern-either:
+                  - pattern: requests.$METHOD(...)
+                  - pattern: httpx.$METHOD(...)
+                  - pattern: aiohttp.$METHOD(...)
+                  - pattern: stripe.$METHOD(...)
+                  - pattern: http.client.$METHOD(...)
+                  - pattern: urllib.request.urlopen(...)
+                  - pattern: urllib.urlopen(...)
+                  - pattern: urlopen(...)
+                  - pattern: razorpay.$METHOD(...)
+                  - pattern: $CLIENT.refund.create(...)
+                  - pattern: $CLIENT.refunds.create(...)
+                  - pattern: $CLIENT.refund(...)
+                  - pattern: $CLIENT.charge(...)
+                  - pattern: $CLIENT.capture(...)
+                  - pattern: $CLIENT.payments.create(...)
+                  - pattern: $CLIENT.payouts.create(...)
+                  - pattern: refund_payment(...)
+                  - pattern: create_refund(...)
+                  - pattern: refund_create(...)
+                  - pattern: capture_payment(...)
+                  - pattern: create_payment(...)
+                  - pattern: create_charge(...)
+                  - pattern: capture_charge(...)
+                  - pattern: gateway_refund(...)
+                  - pattern: process_refund(...)
+                  - pattern: issue_refund(...)
+                  - patterns:
+                      - pattern: $FUNC(...)
+                      - metavariable-regex:
+                          metavariable: $FUNC
+                          regex: '(?i).*(refund|charge|capture).*'
+
+  - id: missing-idempotency-key
+    languages: [python]
+    severity: ERROR
+    message: >-
+      A write to a money model is missing an idempotency_key, so a retry can
+      double-charge or double-refund.
+    metadata:
+      class: MISSING_IDEMPOTENCY
+      tier: high
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: Refund.objects.create(...)
+              - pattern-not: Refund.objects.create(..., idempotency_key=..., ...)
+          - patterns:
+              - pattern: $MODEL.objects.create(...)
+              - metavariable-regex:
+                  metavariable: $MODEL
+                  regex: (?i)^(refund|payment|payout|ledgerentry|wallettransaction|moneytransfer|invoice|charge)$
+              - pattern-not: $MODEL.objects.create(..., idempotency_key=..., ...)
+          - patterns:
+              - pattern: $MODEL.objects.update_or_create(...)
+              - metavariable-regex:
+                  metavariable: $MODEL
+                  regex: (?i)^(refund|payment|payout|ledgerentry|wallettransaction|moneytransfer|invoice|charge)$
+              - pattern-not: $MODEL.objects.update_or_create(..., idempotency_key=..., ...)
+          - patterns:
+              - pattern: $MODEL.objects.get_or_create(...)
+              - metavariable-regex:
+                  metavariable: $MODEL
+                  regex: (?i)^(refund|payment|payout|ledgerentry|wallettransaction|moneytransfer|invoice|charge)$
+              - pattern-not: $MODEL.objects.get_or_create(..., idempotency_key=..., ...)
+          - patterns:
+              - pattern: $MODEL.objects.bulk_create(...)
+              - metavariable-regex:
+                  metavariable: $MODEL
+                  regex: (?i)^(refund|payment|payout|ledgerentry|wallettransaction|moneytransfer|invoice|charge)$
+              - pattern-not: $MODEL.objects.bulk_create(..., idempotency_key=..., ...)
+
+  - id: mutable-default-argument
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Mutable default argument: the same list/dict/set object is shared across
+      every call.
+    metadata:
+      class: MUTABLE_DEFAULT
+      tier: high
+    patterns:
+      - pattern-regex: '(?m)^\s*(?:async\s+)?def\s+\w+\s*\([^)]*=\s*(?:\[\]|\{\}|set\(\))'
+
+  - id: bare-except
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Bare except catches everything, including KeyboardInterrupt and
+      SystemExit, and hides real failures.
+    metadata:
+      class: BARE_EXCEPT
+      tier: high
+    patterns:
+      - pattern-regex: '(?m)^\s*except\s*:'
+
+  - id: read-modify-write-without-select-for-update
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Read-modify-write on an attribute followed by save() without
+      select_for_update() can lose concurrent updates.
+    metadata:
+      class: UNSAFE_RMW
+      tier: high
+    patterns:
+      - pattern: |
+          $OBJ.$ATTR = $OBJ.$ATTR + $VAL
+          ...
+          $OBJ.save(...)
+      - pattern-not-inside: |
+          def $FUNC(...):
+            ...
+            $MODEL.objects.select_for_update(...)
+            ...
+
+  - id: non-atomic-watermark-update
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Watermark column is assigned and saved, updated via update(), or written
+      with F() without an atomic compare-and-swap, so concurrent workers can move
+      it backwards.
+    metadata:
+      class: NONATOMIC_WATERMARK
+      tier: high
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $DEVICE.last_used_counter = $VAL
+              ...
+              $DEVICE.save(update_fields=[...])
+          - pattern: |
+              $DEVICE.watermark = $VAL
+              ...
+              $DEVICE.save(update_fields=[...])
+          - pattern: |
+              $DEVICE.last_seq = $VAL
+              ...
+              $DEVICE.save(update_fields=[...])
+          - pattern: |
+              $DEVICE.last_processed_id = $VAL
+              ...
+              $DEVICE.save(update_fields=[...])
+          - pattern: $DEVICE.last_used_counter = F(...)
+          - pattern: $DEVICE.watermark = F(...)
+          - pattern: $DEVICE.last_seq = F(...)
+          - pattern: $DEVICE.last_processed_id = F(...)
+          - pattern: $DEVICE.last_used_counter = F(...) + $VAL
+          - pattern: $DEVICE.watermark = F(...) + $VAL
+          - pattern: $DEVICE.last_seq = F(...) + $VAL
+          - pattern: $DEVICE.last_processed_id = F(...) + $VAL
+          - pattern: $MODEL.objects.filter(...).update(last_used_counter=...)
+          - pattern: $MODEL.objects.filter(...).update(watermark=...)
+          - pattern: $MODEL.objects.filter(...).update(last_seq=...)
+          - pattern: $MODEL.objects.filter(...).update(last_processed_id=...)
+          - pattern: $MODEL.objects.filter(...).update(last_used_counter=F(...))
+          - pattern: $MODEL.objects.filter(...).update(watermark=F(...))
+          - pattern: $MODEL.objects.filter(...).update(last_seq=F(...))
+          - pattern: $MODEL.objects.filter(...).update(last_processed_id=F(...))
+          - pattern: $MODEL.objects.filter(...).update(last_used_counter=F(...) + $VAL)
+          - pattern: $MODEL.objects.filter(...).update(watermark=F(...) + $VAL)
+          - pattern: $MODEL.objects.filter(...).update(last_seq=F(...) + $VAL)
+          - pattern: $MODEL.objects.filter(...).update(last_processed_id=F(...) + $VAL)
+          - pattern: $QS.update(last_used_counter=...)
+          - pattern: $QS.update(watermark=...)
+          - pattern: $QS.update(last_seq=...)
+          - pattern: $QS.update(last_processed_id=...)
+          - pattern: $QS.update(last_used_counter=F(...))
+          - pattern: $QS.update(watermark=F(...))
+          - pattern: $QS.update(last_seq=F(...))
+          - pattern: $QS.update(last_processed_id=F(...))
+          - pattern: $QS.update(last_used_counter=F(...) + $VAL)
+          - pattern: $QS.update(watermark=F(...) + $VAL)
+          - pattern: $QS.update(last_seq=F(...) + $VAL)
+          - pattern: $QS.update(last_processed_id=F(...) + $VAL)

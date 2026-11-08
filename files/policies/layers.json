@@ -1,0 +1,331 @@
+{
+  "version": 1,
+  "layers": {
+    "config": {
+      "globs": [
+        "backend/config/**",
+        "backend/settings/**",
+        "backend/**/settings.py"
+      ],
+      "public_surface": [
+        "backend/config/urls.py"
+      ],
+      "owner": "platform"
+    },
+    "common": {
+      "globs": [
+        "backend/common/**"
+      ],
+      "public_surface": [
+        "backend/common/api.py"
+      ],
+      "owner": "platform"
+    },
+    "accounts": {
+      "globs": [
+        "backend/accounts/**"
+      ],
+      "public_surface": [
+        "backend/accounts/urls.py",
+        "backend/accounts/api/**"
+      ],
+      "owner": "identity"
+    },
+    "products": {
+      "globs": [
+        "backend/products/**"
+      ],
+      "public_surface": [
+        "backend/products/urls.py",
+        "backend/products/api/**"
+      ],
+      "owner": "catalog"
+    },
+    "cart": {
+      "globs": [
+        "backend/cart/**"
+      ],
+      "public_surface": [
+        "backend/cart/urls.py",
+        "backend/cart/api/**"
+      ],
+      "owner": "commerce"
+    },
+    "orders": {
+      "globs": [
+        "backend/orders/**"
+      ],
+      "public_surface": [
+        "backend/orders/urls.py",
+        "backend/orders/api/**"
+      ],
+      "owner": "commerce"
+    },
+    "shipping": {
+      "globs": [
+        "backend/shipping/**"
+      ],
+      "public_surface": [
+        "backend/shipping/urls.py",
+        "backend/shipping/api/**"
+      ],
+      "owner": "fulfillment"
+    },
+    "ops": {
+      "globs": [
+        "backend/ops/**"
+      ],
+      "public_surface": [
+        "backend/ops/urls.py",
+        "backend/ops/api/**"
+      ],
+      "owner": "operations"
+    },
+    "tests": {
+      "globs": [
+        "backend/tests/**",
+        "backend/**/tests/**",
+        "tests/**"
+      ],
+      "public_surface": [],
+      "owner": "quality"
+    },
+    "frontend": {
+      "globs": [
+        "frontend/**"
+      ],
+      "public_surface": [
+        "frontend/src/api/**",
+        "frontend/src/app/**"
+      ],
+      "owner": "web"
+    }
+  },
+  "allowed_edges": [
+    {
+      "from": "config",
+      "to": "common"
+    },
+    {
+      "from": "accounts",
+      "to": "common"
+    },
+    {
+      "from": "products",
+      "to": "common"
+    },
+    {
+      "from": "cart",
+      "to": "products"
+    },
+    {
+      "from": "cart",
+      "to": "common"
+    },
+    {
+      "from": "orders",
+      "to": "cart"
+    },
+    {
+      "from": "orders",
+      "to": "products"
+    },
+    {
+      "from": "orders",
+      "to": "accounts"
+    },
+    {
+      "from": "orders",
+      "to": "common"
+    },
+    {
+      "from": "shipping",
+      "to": "orders"
+    },
+    {
+      "from": "shipping",
+      "to": "common"
+    },
+    {
+      "from": "ops",
+      "to": "orders"
+    },
+    {
+      "from": "ops",
+      "to": "accounts"
+    },
+    {
+      "from": "ops",
+      "to": "products"
+    },
+    {
+      "from": "ops",
+      "to": "common"
+    },
+    {
+      "from": "tests",
+      "to": "config"
+    },
+    {
+      "from": "tests",
+      "to": "common"
+    },
+    {
+      "from": "tests",
+      "to": "accounts"
+    },
+    {
+      "from": "tests",
+      "to": "products"
+    },
+    {
+      "from": "tests",
+      "to": "cart"
+    },
+    {
+      "from": "tests",
+      "to": "orders"
+    },
+    {
+      "from": "tests",
+      "to": "shipping"
+    },
+    {
+      "from": "tests",
+      "to": "ops"
+    },
+    {
+      "from": "tests",
+      "to": "tests"
+    },
+    {
+      "from": "frontend",
+      "to": "frontend"
+    },
+    {
+      "from": "tests",
+      "to": "frontend"
+    }
+  ],
+  "public_surface": [
+    "backend/config/urls.py",
+    "backend/**/urls.py",
+    "backend/**/api/**",
+    "backend/**/views/**",
+    "backend/**/serializers.py",
+    "frontend/src/api/**",
+    "policies/**",
+    ".opencode/**"
+  ],
+  "dependency_manifests": [
+    "backend/requirements.txt",
+    "backend/requirements-dev.txt",
+    "backend/pyproject.toml",
+    "backend/poetry.lock",
+    "backend/uv.lock",
+    "frontend/package.json",
+    "frontend/package-lock.json",
+    "package.json",
+    "package-lock.json"
+  ],
+  "module_owner_precedence": "longest_glob_wins",
+  "module_owners": {
+    "policies/**": "policy-steward",
+    "policies/schemas/**": "policy-steward",
+    "tools/**": "platform-tooling",
+    ".agt/**": "agent-platform",
+    ".opencode/**": "agent-platform",
+    ".opencode/plugins/**": "agent-platform",
+    "opencode.json": "agent-platform",
+    ".github/workflows/**": "release-engineering",
+    "backend/config/**": "platform",
+    "backend/**/settings.py": "platform",
+    "backend/common/**": "platform",
+    "backend/accounts/**": "identity",
+    "backend/products/**": "catalog",
+    "backend/cart/**": "commerce",
+    "backend/orders/**": "commerce",
+    "backend/shipping/**": "fulfillment",
+    "backend/ops/**": "operations",
+    "backend/**/tests/**": "quality",
+    "tests/**": "quality",
+    "frontend/**": "web",
+    "frontend/src/api/**": "web",
+    "frontend/src/app/**": "web"
+  },
+  "factory_paths": {
+    "policies/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "policy-steward"
+    },
+    ".agt/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    ".opencode/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    ".opencode/plugins/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    ".opencode/package.json": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    ".opencode/package-lock.json": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    "opencode.json": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "agent-platform"
+    },
+    "tools/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "platform-tooling"
+    },
+    ".github/workflows/**": {
+      "tier": "max",
+      "variant": "max",
+      "owner": "release-engineering"
+    }
+  },
+  "factory_rules": {
+    "globs": [
+      "policies/**",
+      ".opencode/**",
+      "tools/**",
+      ".github/workflows/**"
+    ],
+    "inbound_edges_allowed": [],
+    "outbound_edges_allowed": [],
+    "readable_layers": [
+      "config",
+      "common",
+      "accounts",
+      "products",
+      "cart",
+      "orders",
+      "shipping",
+      "ops",
+      "tests"
+    ],
+    "requires_architecture_allow": true,
+    "gate_paths": [
+      "tools/**",
+      "policies/**",
+      ".github/workflows/**"
+    ],
+    "unknown_path_policy": "ARCH_VIOLATION"
+  }
+}

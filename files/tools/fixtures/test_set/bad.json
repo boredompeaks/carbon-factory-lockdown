@@ -1,0 +1,11 @@
+{
+  "base": [
+    {"id": "orders.tests.test_refund.test_one", "assertions": 2, "markers": []},
+    {"id": "orders.tests.test_refund.test_two", "assertions": 1, "markers": []}
+  ],
+  "head": [
+    {"id": "orders.tests.test_refund.test_one", "assertions": 2, "markers": []}
+  ],
+  "allowed_removals": [],
+  "tautology_patterns": []
+}

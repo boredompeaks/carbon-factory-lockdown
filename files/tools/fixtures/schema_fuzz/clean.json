@@ -1,0 +1,7 @@
+{
+  "engine": "schemathesis",
+  "spec": "openapi/openapi.yaml",
+  "cases": 36,
+  "failures": [],
+  "errors": []
+}

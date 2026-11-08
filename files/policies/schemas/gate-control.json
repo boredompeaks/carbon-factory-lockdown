@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gate-control.json",
+  "title": "gate-control",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "gate_sha",
+    "gate_impl_digest",
+    "policy_digest",
+    "control_set_sha",
+    "controls_total",
+    "controls_rejected",
+    "all_rejected",
+    "result",
+    "controls",
+    "engine",
+    "created_at",
+    "sig_status",
+    "prev_hash",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "gate-control/1"
+    },
+    "gate_sha": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "gate_impl_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "control_set_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "controls_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "controls_rejected": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "all_rejected": {
+      "type": "boolean"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "SUPERSEDED"
+      ],
+      "default": "PASS"
+    },
+    "superseded_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/control"
+      }
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "sqlite",
+        "postgres",
+        "both",
+        "none"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "prev_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "control_id",
+        "fixture_ref",
+        "expected_outcome",
+        "observed_outcome",
+        "rejected"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "control_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixture_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "observed_outcome": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "ERROR"
+          ]
+        },
+        "rejected": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

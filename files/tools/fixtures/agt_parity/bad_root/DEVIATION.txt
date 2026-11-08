@@ -1,0 +1,4 @@
+Deliberate deviation: .agt/policy.json has "toolPolicies.defaultEffect":"allow"
+instead of the mandated "deny". Mode stays "enforce" and every other parity
+input matches good_root. This is the known-bad case for AGT_PARITY; it must fail
+with AGT_PARITY_MISMATCH.

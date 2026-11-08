@@ -1,0 +1,20 @@
+{
+  "added_tests": [
+    {
+      "id": "orders.tests.test_refund.test_refund_refused_when_reserved",
+      "base_outcome": "FAILED",
+      "head_outcome": "OK",
+      "fail_kind": "ASSERTION",
+      "characterization": false,
+      "reason": ""
+    },
+    {
+      "id": "orders.tests.test_refund.test_refund_updates_balance",
+      "base_outcome": "OK",
+      "head_outcome": "OK",
+      "fail_kind": "ASSERTION",
+      "characterization": false,
+      "reason": ""
+    }
+  ]
+}

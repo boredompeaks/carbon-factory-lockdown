@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "release-result.json",
+  "title": "release-result",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "result_type",
+    "task_id",
+    "lineage_id",
+    "capability_id",
+    "outcome",
+    "refusal_code",
+    "pr_number",
+    "head",
+    "merge_sha",
+    "merged_tree",
+    "guard_ref",
+    "policy_digest",
+    "control_set_sha",
+    "checks",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "release-result/1"
+    },
+    "result_type": {
+      "type": "string",
+      "enum": [
+        "RESULT",
+        "REFUSED"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "MERGED",
+        null
+      ]
+    },
+    "refusal_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SIG_INVALID",
+        "POLICY_DRIFT",
+        "VERDICT_NOT_PASS",
+        "STATE_MISMATCH",
+        "DIRTY_TREE",
+        "BASE_MOVED",
+        "PROTECTION_UNVERIFIED",
+        "GUARD_REMOVED",
+        "CHECKS_FAILED",
+        "CHECKS_TIMEOUT",
+        "MERGE_REJECTED",
+        null
+      ]
+    },
+    "pr_number": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "head": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "merge_sha": {
+      "type": "string"
+    },
+    "merged_tree": {
+      "type": "string"
+    },
+    "guard_ref": {
+      "$ref": "#/$defs/guard_ref"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "control_set_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "guard_ref": {
+      "description": "Permanent guard reference: capability.guard_ref for DRAIN, null otherwise. Node id plus SHA-256 of the guard node.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "sha256"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "conclusion",
+        "head_sha",
+        "runner"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conclusion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+        },
+        "runner": {
+          "type": "string",
+          "enum": [
+            "release-engineer",
+            "ci"
+          ]
+        }
+      }
+    }
+  }
+}

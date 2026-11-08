@@ -1,0 +1,223 @@
+{
+  "tool": "authz_matrix",
+  "repo": "C:\\Users\\Admin\\Documents\\umairnlp\\files\\tools\\fixtures\\authz_control",
+  "settings": "authz_control.urls",
+  "mode": "fixture",
+  "django_version": "6.1.1",
+  "generated_at": "2026-11-06T07:17:08.241959+00:00",
+  "filters": {
+    "include": [],
+    "exclude": [
+      "admin/**",
+      "__debug__/**",
+      "media/**",
+      "static/**"
+    ]
+  },
+  "summary": {
+    "routes": 6,
+    "rows": 7,
+    "missing_rows": 0,
+    "derivations": {
+      "PUBLIC": 3,
+      "AUTHENTICATED": 2,
+      "STAFF": 1,
+      "CAPABILITY": 1,
+      "OWNER": 0,
+      "UNKNOWN": 0
+    },
+    "sources": {
+      "resolver": 4,
+      "router": 1,
+      "viewset_action": 1,
+      "function": 1
+    },
+    "required_routes_missing": [
+      "/missing/"
+    ],
+    "required_derivations_missing": [],
+    "excluded_routes": 0,
+    "roles_source": "roles-file",
+    "all_routes_before_filters": 6
+  },
+  "rows": [
+    {
+      "route": "/public/",
+      "name": "public",
+      "view": "authz_control.views.PublicView",
+      "module": "authz_control.views",
+      "methods": [
+        "get"
+      ],
+      "permission_classes": [
+        "AllowAny"
+      ],
+      "gate": [
+        "as_view"
+      ],
+      "derivation": "PUBLIC",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "resolver"
+    },
+    {
+      "route": "/gated/",
+      "name": "gated",
+      "view": "authz_control.views.GatedView",
+      "module": "authz_control.views",
+      "methods": [
+        "get"
+      ],
+      "permission_classes": [
+        "IsAuthenticated"
+      ],
+      "gate": [
+        "as_view"
+      ],
+      "derivation": "AUTHENTICATED",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "resolver"
+    },
+    {
+      "route": "/gated/",
+      "name": "gated",
+      "view": "authz_control.views.GatedView",
+      "module": "authz_control.views",
+      "methods": [
+        "post"
+      ],
+      "permission_classes": [
+        "IsAuthenticated"
+      ],
+      "gate": [
+        "as_view"
+      ],
+      "derivation": "AUTHENTICATED",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "resolver"
+    },
+    {
+      "route": "/cap/",
+      "name": "cap",
+      "view": "authz_control.views.CapView",
+      "module": "authz_control.views",
+      "methods": [
+        "get"
+      ],
+      "permission_classes": [
+        "HasWidgetWrite"
+      ],
+      "gate": [
+        "as_view"
+      ],
+      "derivation": "CAPABILITY",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "deny"
+      },
+      "missing_row": false,
+      "source": "resolver"
+    },
+    {
+      "route": "/decorated/",
+      "name": "decorated",
+      "view": "authz_control.views.staff_only.<locals>.guarded",
+      "module": "authz_control.views",
+      "methods": [
+        "*"
+      ],
+      "permission_classes": [],
+      "gate": [
+        "staff_only",
+        "user.is_staff",
+        "login_required"
+      ],
+      "derivation": "STAFF",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "function"
+    },
+    {
+      "route": "/widgets/",
+      "name": "widget-list",
+      "view": "authz_control.views.WidgetViewSet.list",
+      "module": "authz_control.views",
+      "methods": [
+        "get"
+      ],
+      "permission_classes": [
+        "AllowAny"
+      ],
+      "gate": [],
+      "derivation": "PUBLIC",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "router"
+    },
+    {
+      "route": "/widgets/(?P<pk>[^/.]+)/poke/",
+      "name": "widget-poke",
+      "view": "authz_control.views.WidgetViewSet.poke",
+      "module": "authz_control.views",
+      "methods": [
+        "post"
+      ],
+      "permission_classes": [
+        "AllowAny"
+      ],
+      "gate": [],
+      "derivation": "PUBLIC",
+      "roles": [
+        "admin",
+        "viewer"
+      ],
+      "expected": {
+        "admin": "allow",
+        "viewer": "allow"
+      },
+      "missing_row": false,
+      "source": "viewset_action"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "roles": {
+    "orchestrator": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "variant": "max",
+      "family": "deepseek"
+    },
+    "builder": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "variant": "max",
+      "family": "deepseek"
+    },
+    "auditor": {
+      "provider": "opencode-go",
+      "model": "glm-5.3-flash",
+      "variant": "high",
+      "family": "glm"
+    },
+    "hacker-high": {
+      "provider": "nous-direct",
+      "model": "minimax/minimax-m3.1-flash",
+      "variant": "high",
+      "family": "minimax"
+    },
+    "hacker-max": {
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "variant": "max",
+      "family": "openai"
+    },
+    "release-engineer": {
+      "provider": "opencode-go",
+      "model": "glm-5.3-flash",
+      "variant": "high",
+      "family": "glm"
+    }
+  },
+  "independence": {
+    "orchestrator": {
+      "family_not_in": [
+        "builder"
+      ],
+      "enforced": false,
+      "intentional_cost_grouping": true,
+      "reason": "orchestrator==builder (opencode-go deepseek-v4.1-flash#max) by design: orchestrator routes, builder implements; no independence claim between them. Independence claim applies only to builder<->auditor<->hacker triangle."
+    },
+    "auditor": {
+      "family_not_in": [
+        "builder",
+        "hacker-high",
+        "hacker-max"
+      ]
+    },
+    "builder": {
+      "family_not_in": [
+        "auditor",
+        "hacker-high",
+        "hacker-max"
+      ]
+    },
+    "hacker-high": {
+      "family_not_in": [
+        "builder",
+        "auditor",
+        "hacker-max"
+      ]
+    },
+    "hacker-max": {
+      "family_not_in": [
+        "builder",
+        "auditor",
+        "hacker-high"
+      ]
+    },
+    "release-engineer": {
+      "family_not_in": [
+        "builder",
+        "auditor",
+        "hacker-high",
+        "hacker-max"
+      ],
+      "exempt_edges": [
+        "auditor"
+      ],
+      "intentional_cost_grouping": true,
+      "reason": "auditor/release-engineer share opencode-go glm-5.3-flash#high by design (verifier/deployer cost grouping); independence claim applies only to builder<->auditor<->hacker triangle; release-engineer vs auditor is intentionally allowed, hacker edges are enforced (families differ)."
+    }
+  },
+  "independence_scope": {
+    "triangle": [
+      "builder",
+      "auditor",
+      "hacker-high",
+      "hacker-max"
+    ],
+    "independence_claim": "Enforced claim is builder<->auditor<->hacker triangle only: builder family != auditor, hacker-high, hacker-max; auditor != hacker-high, hacker-max; hacker-high != hacker-max (mutual, families minimax vs openai, enforced because cost allows).",
+    "intentional_cost_groupings": [
+      {
+        "group": [
+          "orchestrator",
+          "builder"
+        ],
+        "family": "deepseek",
+        "model": "opencode-go/deepseek-v4.1-flash#max",
+        "reason": "orchestrator routes, builder implements; same model saves cost, no independence claim"
+      },
+      {
+        "group": [
+          "auditor",
+          "release-engineer"
+        ],
+        "family": "glm",
+        "model": "opencode-go/glm-5.3-flash#high",
+        "reason": "verifier/deployer share cheap glm flash tier; independence claim applies only to builder<->auditor<->hacker triangle"
+      }
+    ],
+    "note": "orchestrator/builder same-model is intentional cost grouping (chosen over hard forbid); hacker-high vs hacker-max mutual forbid is enforced (chosen over document-allowed because families already differ, no extra cost)."
+  },
+  "enforcement": {
+    "load_time": true,
+    "dispatch_time": true,
+    "on_violation": "LOAD_REJECTED",
+    "comparison": "provider_family_string_equality",
+    "exempt_policy": "skip edges listed in independence[role].exempt_edges; skip whole role when independence[role].enforced is false; enforced edges must be family-distinct"
+  },
+  "acceptance_author_role": "hacker-high",
+  "acceptance_author_role_enum": [
+    "hacker-high",
+    "hacker-max",
+    "human",
+    "builder",
+    "auditor",
+    "orchestrator",
+    "release-engineer"
+  ],
+  "acceptance_author_role_aliases": {
+    "hacker": "hacker-high"
+  },
+  "acceptance_author_role_note": "Legacy singular 'hacker' is a deprecated alias for 'hacker-high' (backward compat). New capabilities must use a canonical enum value. 'human' means hand-authored outside the factory (family sentinel 'human'). Otherwise family is models.roles[canonical_role].family.",
+  "acceptance_author_family_note": "capability.acceptance_author_family is derived as models.roles[canonical acceptance_author_role].family (human -> 'human'), never free text. If a capability records a non-default author (e.g. hand-authored deepseek), capability.acceptance_author_policy must name that canonical role and family must equal that role's family; auditor re-derives when family == builder family (deepseek). Default derived family for hacker-high is 'minimax'.",
+  "acceptance_author_family_derived": "minimax",
+  "fallback_provider": "opencode-go",
+  "provider_notes": {
+    "auditor/release-engineer": "opencode-go glm-5.3-flash, variant high (reversed 2026-11-07; was nous-direct z-ai/glm-5.3-flash); auditor/release-engineer same glm is an intentional cost grouping, independence claim applies only to builder<->auditor<->hacker triangle",
+    "compliance": "nous-direct portal, mimo-v2.6-flash",
+    "hacker-high": "nous-direct portal minimax/minimax-m3.1-flash, variant high (reversed 2026-11-07; was opencode-go; the built-in nous provider rejected the id at runtime, the direct portal accepts it); hacker-high != hacker-max mutual forbid is enforced (minimax vs openai, cost allows)",
+    "hacker-max": "openai gpt-6-luna directly (variant max); hacker-max != hacker-high mutual forbid is enforced",
+    "orchestrator/builder": "opencode-go deepseek (opencode-go/deepseek-v4.1-flash#max); orchestrator==builder is an intentional cost grouping (chosen over hard forbid), independence claim applies only to builder<->auditor<->hacker triangle",
+    "acceptance": "default author hacker-high (minimax, derived family minimax); legacy 'hacker' aliases to hacker-high, deprecated; capability family is derived from roles, never free text",
+    "fallback": "opencode-go is the fallback provider (minimax-m3.1-flash, glm-5.3-flash, mimo-v2.6-pro)",
+    "not_used": "nous x402 proxy (127.0.0.1:8890) and bedrock luna were unavailable; not used"
+  }
+}

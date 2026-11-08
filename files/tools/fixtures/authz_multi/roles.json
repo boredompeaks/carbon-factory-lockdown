@@ -1,0 +1,6 @@
+{
+  "roles": ["admin", "editor", "viewer"],
+  "capabilities": {
+    "widget.write": ["admin", "editor"]
+  }
+}

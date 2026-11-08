@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hacker-envelope.json",
+  "title": "hacker-envelope",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability",
+    "attack_plan",
+    "closure_ref",
+    "nonce",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "capability": {
+      "$ref": "capability.json"
+    },
+    "attack_plan": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/plan_item"
+      }
+    },
+    "closure_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authz_matrix_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "drain_stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        null
+      ]
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 16
+    },
+    "sig_status": {
+      "type": "string",
+      "enum": [
+        "unsigned_local",
+        "INVALID",
+        "ABSENT"
+      ]
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "plan_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "class",
+        "catalog_ref"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]+$"
+        },
+        "catalog_ref": {
+          "type": "string",
+          "pattern": "^policies/attack-catalog.json#/items/"
+        }
+      }
+    }
+  }
+}
