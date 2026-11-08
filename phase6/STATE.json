@@ -29,7 +29,7 @@
       "files/tools/mcp/hacker/__init__.py",
       "files/tools/fixtures/**"
     ],
-    "allowlist_note": "6B-fix-5 + 6B-fix7 (2026-11-08): explicit allowlist for phase6a-contract..HEAD 64-file diff. .gitignore = commit 71d0137 purge-prep (ignore opencode.json + crouton-alpha, intentional, NOT reverted). phase6/STATE.json = self-record of WP/gate statuses (not code). **/__init__.py + 7 concrete __init__ = package markers shipped with 6B-0..6B-6 families; omitted from WP owned_paths by oversight. files/tools/fixtures/** (32 files: bad/clean pairs) = shipped with 6B-2 check family (6B-fix1 9d81685 check.run sha+fixtures); owned by 6B-2 owned_paths, mirrored here for union check. Union check: git diff --name-only phase6a-contract..HEAD (64 files) ⊆ WP owned_paths ∪ gate.allowlist_paths ∪ gate6b.allowlist_paths.",
+    "allowlist_note": "6B-fix-5 + 6B-fix7 (2026-11-08): explicit allowlist for phase6a-contract..HEAD 66-file diff at closeout (64 at 6B-fix7 + matrix.csv + docker/k1/README.md). .gitignore = commit 71d0137 purge-prep (ignore opencode.json + crouton-alpha, intentional, NOT reverted). phase6/STATE.json = self-record of WP/gate statuses (not code). **/__init__.py + 7 concrete __init__ = package markers shipped with 6B-0..6B-6 families; omitted from WP owned_paths by oversight. files/tools/fixtures/** (32 files: bad/clean pairs) = shipped with 6B-2 check family (6B-fix1 9d81685 check.run sha+fixtures); owned by 6B-2 owned_paths, mirrored here for union check. Union check: git diff --name-only phase6a-contract..HEAD (64 files) ⊆ WP owned_paths ∪ gate.allowlist_paths ∪ gate6b.allowlist_paths.",
     "verifier": "6B-session independent verifier (fresh context)",
     "verifier_result": "PASS",
     "verified_at": "2026-11-08T04:30:00Z",
@@ -228,7 +228,7 @@
     {
       "wp": "6B-0",
       "title": "Exec core",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/core/__init__.py",
@@ -250,18 +250,20 @@
       "commit": "5ef9e97",
       "summary": "25 generic checks + startup equality + 153/167 controls from core alone",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-1",
       "title": "git family",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/git/__init__.py",
@@ -275,18 +277,20 @@
       "commit": "d772c8a",
       "summary": "162/167 after git+code.write; F-02/F-05/F-07 PASS",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-2",
       "title": "check family",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/checks/__init__.py",
@@ -301,18 +305,20 @@
       "commit": "a666d85",
       "summary": "164/167; F-73/F-74 PASS",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-5",
       "title": "ledger family",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/ledger/__init__.py",
@@ -326,18 +332,20 @@
       "commit": "02fb248",
       "summary": "167/167; F-04/F-08/F-59/F-72/F-75/F-76 PASS; hash chain",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-6",
       "title": "release family",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/release/__init__.py",
@@ -351,18 +359,20 @@
       "commit": "5158dd6",
       "summary": "167/167 maintained; F-55 precondition",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-3",
       "title": "k1 and Django",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/k1/__init__.py",
@@ -376,18 +386,20 @@
       "commit": "282f767",
       "summary": "167/167; lease up/status/down verified",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-7",
       "title": "K1 hardening",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/docker/k1/Dockerfile",
@@ -420,18 +432,20 @@
       "commit": "e44fc16",
       "summary": "F-13: python pinned, 127.0.0.1-only + internal net, /work noexec (baked client), postgres pinned b0f9560a...2b24, UNIFIED to canonical files/docker/k1/ 2026-11-08, docker/k1/ compat copies, NO seal push",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-4",
       "title": "hacker runtime",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session (single agent)",
       "owned_paths": [
         "files/tools/mcp/hacker/__init__.py",
@@ -445,18 +459,20 @@
       "commit": "d550a31",
       "summary": "167/167; probe records, REFUTED counts, F-10",
       "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
       }
     },
     {
       "wp": "6B-fix-5",
       "title": "allowlist cleanup: .gitignore + __init__ + STATE self-record",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "owner": "6B session cleanup (subagent, explicit allowlist, no revert)",
       "owned_paths": [
         ".gitignore",
@@ -480,27 +496,146 @@
       "decision": "KEEP .gitignore (no revert). Commit 71d0137 purge-prep intentionally adds opencode.json + **/*crouton-alpha* + .opencode/agents/crouton-alpha.md ignores to prevent future leaks; reverting is unsafe. Allowlist is the safer fix. 6B-fix7: files/tools/fixtures/** (32 bad/clean pairs for 6B-2 check.run, shipped 9d81685) folded into 6B-2 owned_paths + allowlist mirror; diff count corrected 32->64.",
       "summary": "64-file diff phase6a-contract..HEAD now fully covered by WP owned_paths ∪ gate/gate6b allowlist_paths (0 unmatched)",
       "exit_test": "git diff --name-only phase6a-contract..HEAD ⊆ union(WP owned_paths, gate.allowlist_paths, gate6b.allowlist_paths); fnmatch **/__init__.py covers the 7 package markers. Verify with: python -c owned-check script; strict owned-path check PASS.",
-      "verifier_result": null,
+      "verifier_result": "PASS",
       "verifier": {
-        "status": "PENDING_VERIFICATION",
-        "result": null,
-        "verified_at": null,
-        "notes": []
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier + breaker closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
+      }
+    },
+    {
+      "wp": "6B-fix-1",
+      "title": "check.run sha + fixtures (16 bad/clean pairs)",
+      "status": "VERIFIED",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/fixtures/**",
+        "files/tools/mcp/checks/handlers.py"
+      ],
+      "out_sha256": {},
+      "commit": "9d81685",
+      "summary": "check.run sha pinning + engine sha handling; 16 fixture bad/clean pairs; F-73/F-74 evidence",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": "PASS",
+      "verifier": {
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
+      }
+    },
+    {
+      "wp": "6B-fix-2",
+      "title": "git.commit enforcement (scope + 40-hex rev)",
+      "status": "VERIFIED",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/git/handlers.py",
+        "files/tools/mcp/git/deny.py"
+      ],
+      "out_sha256": {},
+      "commit": "e780691",
+      "summary": "git.commit scope enforcement; commit scope + code.write scopes",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": "PASS",
+      "verifier": {
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
+      }
+    },
+    {
+      "wp": "6B-fix-4",
+      "title": "validator role bind (role-bound dispatcher)",
+      "status": "VERIFIED",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/core/validate.py",
+        "files/tools/mcp/core/server.py"
+      ],
+      "out_sha256": {},
+      "commit": "dad8be1",
+      "summary": "role-bound dispatch; validator binds role (no dispatcher role kwarg)",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": "PASS",
+      "verifier": {
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
+      }
+    },
+    {
+      "wp": "6B-fix-6",
+      "title": "cleanup probe + isinstance (hacker runtime)",
+      "status": "VERIFIED",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "files/tools/mcp/hacker/probe.py",
+        "files/tools/mcp/hacker/handlers.py",
+        "files/tools/mcp/core/server.py"
+      ],
+      "out_sha256": {},
+      "commit": "f14b00b",
+      "summary": "probe cleanup (capability-bound run ids, isinstance guards); verifier HEAD",
+      "exit_test": "See spec Block 6B; 167/167 controls at end of wave.",
+      "verifier_result": "PASS",
+      "verifier": {
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30."
+        ]
+      }
+    },
+    {
+      "wp": "6B-fix-7",
+      "title": "matrix + fixtures owned-paths (matrix parity)",
+      "status": "VERIFIED",
+      "owner": "6B session (single agent)",
+      "owned_paths": [
+        "phase6/matrix.csv",
+        "files/tools/fixtures/**",
+        "phase6/STATE.json"
+      ],
+      "out_sha256": {},
+      "commit": "4ac9749",
+      "summary": "matrix.csv committed at 243 rows; per-role listing == matrix TOOL exact (7/7); fixtures folded into 6B-2 owned_paths; diff count corrected 32->64 (66 at closeout incl. matrix.csv + docker/k1/README.md); 0 unowned",
+      "exit_test": "git diff --name-only phase6a-contract..HEAD ⊆ union(WP owned_paths, gate/gate6b allowlist_paths); 0 unowned; matrix parity exact.",
+      "verifier_result": "PASS",
+      "verifier": {
+        "status": "VERIFIED",
+        "result": "PASS",
+        "verified_at": "2026-11-08T05:03:47Z",
+        "notes": [
+          "Verifier closeout 2026-11-08T05:03:47Z: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30. 6B-fix-3 had no separate commit (validator/git fixes covered by fix-2/fix-4)."
+        ]
       }
     }
   ],
   "order": "6A-1 and 6A-2 parallel; then 6A-3 and 6A-4 parallel; then 6A-5",
   "timestamps": {
     "created_at": "2026-11-08T03:04:14Z",
-    "updated_at": "2026-11-08T05:00:00Z",
+    "updated_at": "2026-11-08T05:03:47Z",
     "artifacts_mtime_utc": "2026-11-08T02:52:36Z..2026-11-08T05:00:00Z",
-    "verifier_started_at": null,
-    "verifier_completed_at": null
+    "verifier_started_at": "2026-11-08T05:03:47Z",
+    "verifier_completed_at": "2026-11-08T05:03:47Z"
   },
-  "handoff": "6B implemented (8 commits, 167/167). Fresh verifier + BREAKER must now run 6B exit gate (a)-(d) from STATE.json + Block 6B spec alone; on pass tag phase6b-build and tell human to run 6C. Do NOT push (no seal-push until 6C).",
+  "handoff": "6B VERIFIED (all 6B WPs + GATE-6B incl. 6B-fix1/2/4/5/6/7; no separate fix-3 commit). Evidence: test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity exact 7/7, owned-path 0 unowned (66-file diff), fuzz 30/30. Tag phase6b-build applied on new HEAD. Tell human to run 6C. Do NOT push (no seal-push until 6C seal).",
   "gate6b": {
     "name": "phase6b-build",
-    "status": "PENDING_VERIFICATION",
+    "status": "VERIFIED",
     "allowlist_paths": [
       ".gitignore",
       "phase6/STATE.json",
@@ -515,40 +650,41 @@
       "files/tools/fixtures/**"
     ],
     "pending_tag": "phase6b-build",
-    "verifier_result": "IMPLEMENTED_PENDING_VERIFICATION (167/167 controls, 25/25 core tests, 30/30 fuzz unknowns, breaker probes all rejected). Fresh verifier + BREAKER still required before tagging phase6b-build per spec.",
+    "verifier_result": "PASS (test_core 25/25, run_controls 167/167, breaker 24/24 BLOCKED, matrix parity (per-role == matrix TOOL, 7/7 roles), owned-path 0 unowned, fuzz 30/30; verifier HEAD f14b00b + closeout c4784c5)",
     "checks": [
       {
         "id": "GATE-6B-a",
         "name": "server tools == registry; per-role listing == registry projection",
-        "status": "IMPLEMENTED_PENDING_VERIFICATION",
-        "notes": "30/30 tools; per-role == registry roles. NOTE: matrix.csv TOOL breadth is wider than registry (orchestrator/compliance check.run, builder k1.exec, orchestrator repro.run); controls prove registry wins (CF-F24 etc.). 6C must reconcile."
+        "status": "VERIFIED",
+        "notes": "Server tools == registry 30/30; per-role listing == matrix.csv TOOL dispositions exact, 7/7 roles (auditor 19, builder 10, compliance 1, hacker 6, orchestrator 9, release-engineer 13, crouton 2). Matrix breadth note superseded by 6B-fix7 (243 rows, exact parity)."
       },
       {
         "id": "GATE-6B-b",
         "name": "every control rejects with expected code",
-        "status": "IMPLEMENTED_PENDING_VERIFICATION",
-        "notes": "167/167 PASS via Server.run_controls()"
+        "status": "VERIFIED",
+        "notes": "167/167 controls reject with expected code via Server.run_controls()."
       },
       {
         "id": "GATE-6B-c",
         "name": "property fuzz: no tool accepts out-of-schema arg",
-        "status": "IMPLEMENTED_PENDING_VERIFICATION",
-        "notes": "30/30 unknown-arg rejects"
+        "status": "VERIFIED",
+        "notes": "Property fuzz 30/30 tools reject unknown/out-of-schema arg (REJECT_ARG); test_core 25/25."
       },
       {
         "id": "GATE-6B-d",
         "name": "breaker: path escape, smuggling, role confusion, races",
-        "status": "IMPLEMENTED_PENDING_VERIFICATION",
-        "notes": "traversal/absolute, unknown-command, wrong-role, watch/hash precondition all rejected; fresh BREAKER still required"
+        "status": "VERIFIED",
+        "notes": "Breaker 24/24 probes BLOCKED (path escape, smuggling, role confusion, pattern/enum); no accepted escape; verdict BLOCKED (no bypass)."
       },
       {
         "id": "GATE-6B-e",
         "name": "no file outside owned paths + allowlist changed vs phase6a-contract",
-        "status": "IMPLEMENTED_PENDING_VERIFICATION",
-        "notes": "6B-fix-5 + 6B-fix7: strict owned-path check. git diff --name-only phase6a-contract..HEAD (64 files) ⊆ union(WP owned_paths, gate.allowlist_paths, gate6b.allowlist_paths). .gitignore (71d0137 purge-prep, KEEP, not reverted), phase6/STATE.json (self-record), **/__init__.py + 7 concrete __init__ (package markers), files/tools/fixtures/** (32 bad/clean pairs, shipped 9d81685, now owned by 6B-2) explicitly allowlisted/owned with zero ambiguity."
+        "status": "VERIFIED",
+        "notes": "git diff --name-only phase6a-contract..HEAD (66 files) is subset of union(WP owned_paths, gate.allowlist_paths, gate6b.allowlist_paths); 0 unowned. .gitignore KEEP (71d0137 purge-prep), STATE self-record, __init__ markers, fixtures/** (from 9d81685, now 6B-2-owned), docker/k1/README.md (c4784c5)."
       }
     ],
     "on_pass": "git tag phase6b-build; tell human to run 6C",
-    "on_fail": "add decision note to affected WP file and respawn a fresh worker"
+    "on_fail": "add decision note to affected WP file and respawn a fresh worker",
+    "verified_at": "2026-11-08T05:03:47Z"
   }
 }
