@@ -1,6 +1,8 @@
 # K1 runtime shape — HARDENED (6B-7). Internal network, no published ports.
+# Canonical path: files/docker/k1/compose.yaml (see files/K1-CONTAINER-PLAN.md).
 # Bind: 127.0.0.1 only (fake provider inside the container).
 # /work: noexec (probe client is baked into the image, not run from /work).
+# Pins: see image-pins.json. Offline build: --pull=false, no pull to obtain pins.
 name: k1
 
 services:
@@ -34,7 +36,7 @@ services:
           pids: 256
 
   pg:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     read_only: true
     networks: ["k1-internal"]
     tmpfs:
