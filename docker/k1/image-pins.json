@@ -1,0 +1,11 @@
+{
+  "version": "6B-7",
+  "note": "F-13 evidence. python is pinned; postgres pin is pending owner recording (UNSEALED).",
+  "pins": {
+    "python:3.14-slim": "sha256:0514bc76712d64f8bb48adcb95b1ab0d88c69fee95d62fe4c18ee948bee9b1e1",
+    "postgres:17-alpine": null
+  },
+  "pending": [
+    "Record postgres:17-alpine digest from the owner's local image (docker inspect --format '{{.Id}}' postgres:17-alpine) and write it here and into policy-manifest.json gate_impl_digest before sealing. Do not pull to obtain it (offline build)."
+  ]
+}
