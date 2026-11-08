@@ -39,15 +39,45 @@ def is_path_field(tool: str, field: str) -> bool:
     return field in _PATH_FIELDS
 
 
+def _has_nul_or_control(value: str) -> bool:
+    """True if value contains NUL or any control character (incl. tab).
+
+    Covers ``\\x00`` explicitly and all C0 controls plus DEL, so tab,
+    newline, carriage return and other control characters are rejected
+    across all string/path args.
+    """
+    if "\x00" in value:
+        return True
+    for ch in value:
+        o = ord(ch)
+        if o < 0x20 or o == 0x7F:
+            return True
+    return False
+
+
+def _is_whitespace_dash(arg: str) -> bool:
+    """True if arg starts with ``-`` after ignoring leading whitespace."""
+    return arg.lstrip().startswith("-")
+
+
 def is_traversal_or_absolute(tool: str, field: str, value: str) -> bool:
     """True if a path value escapes the repo root or is absolute.
 
     Checked BEFORE regex validation so out-of-tree absolute paths and
     traversals report REJECT_PATH (F-34, F-37, F-48) rather than
     REJECT_PATTERN.
+
+    Hardened (6B-fix4): also rejects NUL/control characters, whitespace-
+    prefixed dashes and path segments ending in space/dot.
     """
     if not isinstance(value, str):
         return False
+    # NUL / control characters anywhere (includes tab).
+    if _has_nul_or_control(value):
+        return True
+    # Whitespace-prefixed dash injection (e.g. "  -x" or " \t -flag").
+    if value.lstrip().startswith("-"):
+        return True
     # Windows drive absolute: C:/... or C:\\...
     if re.match(r"^[A-Za-z]:[\\/]", value):
         return True
@@ -64,9 +94,11 @@ def is_traversal_or_absolute(tool: str, field: str, value: str) -> bool:
     parts = re.split(r"[/\\]+", value)
     if any(p == ".." for p in parts):
         return True
-    # Trailing dot or space in any segment (Windows normalization).
+    # Trailing dot or space in any segment (Windows normalization):
+    # segment.rstrip(" .") != segment catches "file.", "file ", "file. "
+    # and similar combinations.
     for part in parts:
-        if part.endswith(".") or part.endswith(" "):
+        if part.rstrip(" .") != part:
             return True
         if part != part.strip(" ") and part.strip(" ") != "":
             # interior leading/trailing spaces already covered by the loop.
@@ -142,12 +174,49 @@ def _matches_type(value, t: str) -> bool:
     return py is not None and isinstance(value, py)
 
 
+def _reject_string_hygiene(key: str, arg: str) -> None:
+    """Reject NUL/control characters and whitespace-prefixed dashes.
+
+    Applies to every string value (and every array-item / nested
+    string) across all string/path args:
+    ``arg.lstrip().startswith("-")`` for whitespace-dash.
+    """
+    if _has_nul_or_control(arg):
+        raise Reject("REJECT_PATTERN", f"{key} contains NUL or control characters")
+    if arg.lstrip().startswith("-"):
+        raise Reject("REJECT_PATTERN", f"{key} must not start with a dash")
+
+
+def _reject_path_segments(key: str, arg: str) -> None:
+    """Reject path segments ending in space/dot (Windows normalization)."""
+    parts = re.split(r"[/\\]+", arg)
+    for segment in parts:
+        if segment.rstrip(" .") != segment:
+            raise Reject("REJECT_PATH", f"{key}: path segment ends in space/dot")
+
+
+def _reject_recursive_hygiene(key: str, value) -> None:
+    """Recursively reject NUL/control/dash in nested strings (dict/list)."""
+    if isinstance(value, str):
+        _reject_string_hygiene(key, value)
+    elif isinstance(value, list):
+        for item in value:
+            _reject_recursive_hygiene(key, item)
+    elif isinstance(value, dict):
+        for nested in value.values():
+            _reject_recursive_hygiene(key, nested)
+
+
 def check_types_patterns_bounds(tool: str, tool_def: dict, args: dict) -> None:
     """Validate types, anchored patterns, and numeric/length bounds.
 
     Pattern failures raise REJECT_PATTERN (F-01, F-13, F-36, F-69);
     pure bound failures (content size, integer ranges, item counts)
     raise REJECT_ARG.
+
+    Hardened (6B-fix4): NUL/tab/control characters, whitespace-prefixed
+    dashes and path segments ending in space/dot are rejected across
+    every string/path arg (values, array items and nested record values).
     """
     arg_schema = tool_def.get("args", {})
     props = arg_schema.get("properties", {}) or {}
@@ -165,6 +234,27 @@ def check_types_patterns_bounds(tool: str, tool_def: dict, args: dict) -> None:
         t = schema.get("type")
         if t is not None and not _matches_type(value, t):
             raise Reject("REJECT_ARG", f"{key}: expected type {t}, got {type(value).__name__}")
+        # --- NUL/control + whitespace-dash hygiene (all string args) ---
+        # Runs before pattern so permissive patterns (e.g. [^\r\n])
+        # cannot smuggle \x00 or \t through. Also covers array items.
+        if isinstance(value, str):
+            _reject_string_hygiene(key, value)
+        elif isinstance(value, list):
+            for _item in value:
+                if isinstance(_item, str):
+                    _reject_string_hygiene(key, _item)
+        elif isinstance(value, dict):
+            _reject_recursive_hygiene(key, value)
+        # --- path segment trailing space/dot (belt-and-braces) ---
+        # is_traversal_or_absolute enforces this as REJECT_PATH before
+        # unknown-arg checks; repeat here so array items are covered too.
+        if is_path_field(tool, key):
+            if isinstance(value, str):
+                _reject_path_segments(key, value)
+            elif isinstance(value, list):
+                for _item in value:
+                    if isinstance(_item, str):
+                        _reject_path_segments(key, _item)
         # --- pattern ---
         pattern = schema.get("pattern")
         if pattern is not None and isinstance(value, str):
@@ -175,7 +265,9 @@ def check_types_patterns_bounds(tool: str, tool_def: dict, args: dict) -> None:
                 # A broken registry pattern must fail closed as ARG.
                 raise Reject("REJECT_ARG", f"{key}: invalid registry pattern")
         # --- leading dash on any string value (belt-and-braces) ---
-        if isinstance(value, str) and value.startswith("-"):
+        # Retained for clarity; whitespace variant is enforced above via
+        # arg.lstrip().startswith("-").
+        if isinstance(value, str) and value.lstrip().startswith("-"):
             raise Reject("REJECT_PATTERN", f"{key} must not start with a dash")
         # --- numeric bounds ---
         if isinstance(value, int) and not isinstance(value, bool):

@@ -85,9 +85,13 @@ class Server:
 
     # -- dispatch ---------------------------------------------------------
 
-    def dispatch(self, tool: str, args: dict, *, role: str | None = None) -> dict:
-        """Dispatch one typed call. Raises Reject(code) on any refusal."""
-        effective_role = role if role is not None else self.role
+    def dispatch(self, tool: str, args: dict) -> dict:
+        """Dispatch one typed call. Raises Reject(code) on any refusal.
+
+        The active role is bound exclusively at server initialization
+        (per-role instance); callers cannot override it.
+        """
+        effective_role = self.role
         # Caller-supplied role smuggling is an unknown-arg reject, but the
         # role gate runs first so a wrong-role caller still sees ROLE.
         if tool not in self.tools:
@@ -258,8 +262,7 @@ class Server:
         for ctl in data.get("controls", []):
             probe = Server(ctl.get("role", self.role), registry=self.registry, config=self.config)
             try:
-                probe.dispatch(ctl["tool"], copy.deepcopy(ctl.get("args", {})),
-                               role=ctl.get("role", probe.role))
+                probe.dispatch(ctl["tool"], copy.deepcopy(ctl.get("args", {})))
                 got = "ACCEPT"
             except Reject as r:
                 got = r.code
