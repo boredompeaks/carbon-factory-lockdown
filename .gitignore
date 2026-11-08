@@ -64,3 +64,8 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+
+# Purge: harness config and crouton-alpha agent — never commit
+opencode.json
+**/*crouton-alpha*
+.opencode/agents/crouton-alpha.md
