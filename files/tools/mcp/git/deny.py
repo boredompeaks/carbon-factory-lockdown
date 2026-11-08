@@ -1,4 +1,4 @@
-"""Path deny globs and code.write scopes. 6B-1.
+"""Path deny globs and code.write scopes. 6B-1, hardened 6B-fix2.
 
 Deny globs apply to every path argument (F-02, F-03, F-05, F-15, F-17,
 F-18, F-19, F-44, F-60, F-76):
@@ -28,6 +28,11 @@ _GIT_PATH_TOOLS = frozenset({"git.read_file", "git.log", "git.state", "evidence.
 
 def _segments(path: str) -> list[str]:
     return [seg for seg in path.replace("\\", "/").split("/") if seg not in ("", ".")]
+
+
+def _norm(path: str) -> str:
+    """Normalize to lowercased forward-slash repo-relative form."""
+    return "/".join(_segments(path)).lower()
 
 
 def is_denied_path(path: str) -> bool:
@@ -80,6 +85,91 @@ def _is_test_infra_path(path: str) -> bool:
     return False
 
 
+def is_test_infra_path(path: str) -> bool:
+    """Public alias for test-infra predicate (F-05). Case-insensitive."""
+    if not isinstance(path, str):
+        return True
+    return _is_test_infra_path(path)
+
+
+def is_commit_denied(path: str) -> bool:
+    """True if a staged path must be rejected for git.commit (F-05/F-07).
+
+    Covers the union deny globs (.env*, *.pem, *.key, secrets/**,
+    policy-manifest.json, .opencode/**, scratch, ledger verdicts,
+    attack-catalog, hacker skills) plus test-infra (pytest.ini,
+    tox.ini, .coveragerc, .gitleaks.toml, .github/**, tests_gate*.py,
+    conftest.py). Case-insensitive on Windows.
+    """
+    if not isinstance(path, str):
+        return True
+    if is_denied_path(path):
+        return True
+    return _is_test_infra_path(path)
+
+
+def get_capability(server) -> dict | None:
+    """Return capability bound to the Server instance, if any.
+
+    Capability is harness-injected config, never a caller arg. The
+    handler checks, in order, server.capability, server._capability,
+    server.config.capability and server.config._capability; the first
+    dict found is returned. Returns None when no capability is bound
+    (e.g. offline controls harness).
+    """
+    for obj, attr in (
+        (server, "capability"),
+        (server, "_capability"),
+        (getattr(server, "config", None), "capability"),
+        (getattr(server, "config", None), "_capability"),
+    ):
+        if obj is None:
+            continue
+        val = getattr(obj, attr, None)
+        if isinstance(val, dict):
+            return val
+    return None
+
+
+def is_in_scope(path: str, scope: list | tuple | None) -> bool:
+    """True if repo-relative path matches capability.scope.
+
+    Scope entries are capability-relative globs: exact file paths,
+    directory prefixes ending with '/', and fnmatch globs such as
+    'backend/**' or 'backend/tests/**'. Comparison is case-insensitive
+    (Windows). Empty/missing scope means "no allowlist"; caller must
+    handle that case separately.
+    """
+    if not scope:
+        return False
+    low = _norm(path)
+    for raw in scope:
+        if not isinstance(raw, str):
+            continue
+        entry = raw.replace("\\", "/").strip().lower()
+        while entry.startswith("./"):
+            entry = entry[2:]
+        if not entry:
+            continue
+        # Exact file.
+        if entry == low:
+            return True
+        # Directory prefix.
+        if entry.endswith("/") and low.startswith(entry):
+            return True
+        # Glob (** / * / ?). fnmatch on the full path.
+        if any(c in entry for c in ("*", "?", "[")):
+            if fnmatch.fnmatch(low, entry):
+                return True
+            # '**' suffix without trailing handling: 'backend/**' already
+            # covers via fnmatch? fnmatch treats ** like * so 'backend/**'
+            # matches 'backend/x' as fnmatch('backend/x','backend/**')
+            # True. Also allow prefix match for '**' without slash.
+            if entry.endswith("/**") and low.startswith(entry[:-3]):
+                return True
+    return False
+
+
 def check_code_write(role: str, path: str) -> None:
     """Enforce per-role write scope; raises REJECT_PATH when out of scope."""
     low = path.lower()
@@ -101,18 +191,41 @@ def check_code_write(role: str, path: str) -> None:
         raise Reject("REJECT_PATH", f"path denied for code.write: {path!r}")
 
 
+def check_commit_paths(server, args: dict) -> None:
+    """Validate caller-declared commit paths against deny/scope globs.
+
+    Runs in _check_family_extra (before execute). Live staged-diff
+    validation runs later in handlers.execute; this check rejects
+    declared paths that already match deny/test-infra/scope globs so
+    F-05/F-07 have a deterministic REJECT_PATH before any git spawn.
+    """
+    capability = get_capability(server)
+    scope = capability.get("scope") if isinstance(capability, dict) else None
+    for item in args.get("paths", []) or []:
+        if not isinstance(item, str):
+            continue
+        if item.startswith("-"):
+            raise Reject("REJECT_PATH", f"commit path denied: {item!r}")
+        if is_commit_denied(item):
+            raise Reject("REJECT_PATH", f"commit path denied: {item!r}")
+        # Scope allowlist when capability is bound (evil-staged
+        # declared-path variant). Without a bound capability there is
+        # no allowlist to enforce here; the handler enforces denies
+        # on the live staged diff.
+        if scope and not is_in_scope(item, scope):
+            raise Reject("REJECT_PATH", f"commit path outside capability.scope: {item!r}")
+
+
 def check_extra(server, tool: str, role: str, args: dict) -> None:
     """Family hook invoked by core.server after generic validation."""
+    if tool == "git.commit":
+        check_commit_paths(server, args)
+        return
     if tool in _GIT_PATH_TOOLS:
         for field in ("path", "spec"):
             value = args.get(field)
             if isinstance(value, str) and is_denied_path(value):
                 raise Reject("REJECT_PATH", f"{field} denied: {value!r}")
-        # git.log / git.state carry an optional path; git.read_file requires it.
-        if tool == "git.commit":
-            for item in args.get("paths", []) or []:
-                if isinstance(item, str) and (is_denied_path(item) or _is_test_infra_path(item)):
-                    raise Reject("REJECT_PATH", f"commit path denied: {item!r}")
     elif tool == "code.write":
         check_code_write(role, args.get("path", ""))
     elif tool == "acceptance.materialize":
