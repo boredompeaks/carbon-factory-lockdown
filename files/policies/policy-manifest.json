@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T08:04:45Z",
+  "created_at": "2026-11-09T08:10:33Z",
   "file_count": 265,
   "files": [
     {
@@ -1073,17 +1073,15 @@
     "gate_impl_digest": "05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74"
   },
   "gate_control": {
-    "record": "0012-c4ed57abfb44.json",
-    "record_hash": "63cec314dce43549d93a4b93cc56f398969d41681c74b42114a1198dde21be25",
-    "gate_sha": "c4ed57abfb4453eac35f2aece045b1b3575339bd",
+    "record": "0013-e453478fbae6.json",
+    "record_hash": "6107149efa3ea4d897838b203a4887d64fbd9291b137ead7cf5088f2040fc985",
+    "gate_sha": "e453478fbae66f24cced3e64dd4ae05f36691a22",
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "f210569c1f70b1e93bc41f474de2274b5a2c920bd13a23d9ac4eb9f67161492d",
+    "gate_impl_digest": "05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74",
     "result": "PASS"
   },
-  "drift": [
-    "gate_impl_digest: live 05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74 != record f210569c1f70b1e93bc41f474de2274b5a2c920bd13a23d9ac4eb9f67161492d"
-  ],
+  "drift": [],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1175,5 +1173,5 @@
       ]
     }
   },
-  "manifest_sha": "354aae138110fe20565f933eed3457f38cb86f42537068941e72a9c9ecae77c9"
+  "manifest_sha": "88746cb0f1180ec0beef5fd75d434443baa81aecff48f0dae5779859164d92fc"
 }
