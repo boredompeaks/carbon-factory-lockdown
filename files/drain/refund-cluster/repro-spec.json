@@ -1,0 +1,22 @@
+{
+  "schema": "repro-spec/1",
+  "repro_id": "repro_refund_pending_reservation",
+  "kind": "pytest",
+  "engine": "postgres",
+  "ref": "backend/orders/tests_gate0_refund_race.py::PendingReservationTests::test_a_pending_refund_reserves_balance_against_a_second_attempt",
+  "command": [
+    "backend/venv/Scripts/python.exe",
+    "manage.py",
+    "test",
+    "orders.tests_gate0_refund_race.PendingReservationTests.test_a_pending_refund_reserves_balance_against_a_second_attempt",
+    "--verbosity",
+    "1"
+  ],
+  "runs": 5,
+  "timeout_s": 180,
+  "expected": {
+    "base": "REPRODUCED",
+    "head": "NOT_REPRODUCED"
+  },
+  "fixture_ref": "backend/orders/tests_gate0_refund_race.py"
+}

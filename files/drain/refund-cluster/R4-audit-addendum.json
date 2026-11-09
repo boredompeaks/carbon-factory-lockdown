@@ -1,0 +1,148 @@
+{
+  "FINAL_VERDICT": "SHIP",
+  "FINAL_VERDICT_REASONS": [
+    "The R4.2 extraction is behaviour-preserving by direct diff reading (1 hunk pair; settlement block verbatim; same returns and savepoints) and by the suites: 133/133 sqlite and 60/60 PG race runs are green at 12c96d1.",
+    "The previously BLOCKED semgrep leg now runs its canonical engine: semgrep 1.184.0, 0 findings on refunds.py - which also statically corroborates the extraction claim (lock-held-across-network rule stays silent).",
+    "ORACLE_PROVENANCE now passes the real scan (exit 0, 0 findings over 97 scanned assertions) and the alignment is adjudicated ALIGNMENT with the weakening probe both negative and positive legs recorded, plus a permanent ORACLE-04 guard.",
+    "Ticket invariants untouched: tests_gate0_refund_race.py sha256 unchanged, migrations unchanged, 'makemigrations --check' clean; no other file moved in R4.2."
+  ],
+  "audited_tree": "12c96d1",
+  "branch": "spec-comp",
+  "capability_id": "cap_refund_integrity_01",
+  "checks": [
+    {
+      "command": "git show --stat 12c96d1; git show 12c96d1 -- backend/orders/refunds.py; git diff 3080646..HEAD --stat -- backend/orders/migrations backend/orders/models.py backend/orders/admin.py backend/orders/views/refund.py backend/orders/tests_gate0_refund_race.py; manage.py makemigrations --check --dry-run",
+      "evidence": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/r42-diff.txt",
+        "sha256": "81178bcd5f08b5d534fe5daa9ca58d6b355fdf19d04b0ae8c622259789aa7c6b"
+      },
+      "exit": 0,
+      "name": "R4.2 DIFF REVIEW",
+      "parsed": "12c96d1 changes exactly 1 file (backend/orders/refunds.py, +30/-5). The settlement atomic block moved verbatim from issue_refund into the new _settle_refund (refund/amount rebound from the reservation; _run_on_settled SAVEPOINT hook and both refusal-arm audit savepoints stay untouched in issue_refund); the deferred 'return RefundReceipt(refund=refund, order=order, replayed=False)' now sits at _settle_refund's end and issue_refund returns its call. Sibling diffs (migrations, models, admin, views/refund.py, ticket file) are EMPTY; ticket file sha256 still 92B2B42AF619381C764ED5ED0771D56D17C4CB7CCFD6F7DEABE407CA5F3298BB; 'makemigrations --check --dry-run' prints 'No changes detected', exit 0.",
+      "verdict": "PASS"
+    },
+    {
+      "command": "python files/tools/semgrep_runner.py --paths backend/orders/refunds.py --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt (semgrep 1.184.0 installed)",
+      "evidence": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/semgrep-r42.json",
+        "sha256": "05c02e3cf9da09427c0f53ff8a118a84f79d9fedd8ad22c96d8d9cede19aa9b2"
+      },
+      "exit": 0,
+      "name": "A. SEMGREP",
+      "parsed": "engine=\"semgrep\" files_scanned=1 findings=[] preexisting_suppressed=0 exit_code=0",
+      "verdict": "PASS"
+    },
+    {
+      "command": "python files/tools/oracle_provenance.py --control",
+      "evidence": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/oracle-control-r42.json",
+        "sha256": "1cf9d520c0f6ee65a93467cf80d6858292a3a401c6b823b2f11e4f2e05a24f94"
+      },
+      "exit": 0,
+      "name": "B. ORACLE CONTROL",
+      "parsed": "4/4 cases pass: bad_test.py -> exactly {SELF_COMPARE, ORACLE_BY_COPY, MOCK_ECHO}; clean_test.py -> 0; mirror_refund_race.py -> exactly ['MOCK_ECHO'] (1 finding); call_count_test.py -> 0 (new ORACLE-04)",
+      "verdict": "PASS"
+    },
+    {
+      "command": "python files/tools/oracle_provenance.py --diff tests.diff --repo ...\\comp-wt (same 9b10e00..HEAD added-tests roster as the R4 audit)",
+      "evidence": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/oracle-scan-r42.json",
+        "sha256": "9216b3f5a4fc11c6fb9f34e001425b02601e3f616cfa818546fae4ba5a62229c"
+      },
+      "exit": 0,
+      "name": "B. ORACLE REAL SCAN",
+      "parsed": "exit_code=0 assertions_scanned=97 findings=[]",
+      "verdict": "PASS"
+    },
+    {
+      "command": "TEMP probe file (outside repo) with (i) assert compute(x) == compute(x), (ii) configured return_value 'rfnd_X' + assert faux() == 'rfnd_X', (iii) clean pair len(calls)==1 + Decimal('600.00'); run --file --added-lines 1-60 AND --diff probe.diff; probe files DELETED after the runs",
+      "evidence_diff": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/oracle-probe-diff.json",
+        "sha256": "4076a88567b9bc02c98d8c25085b8e43c6f29753c0f1016853fe58adbd98ef46"
+      },
+      "evidence_file": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/oracle-probe-file.json",
+        "sha256": "45ec38f6ca24892203e5d913a997dfaacbe6249c65c7c2db581a56fc8515510e"
+      },
+      "exit": 1,
+      "name": "B. ORACLE WEAKENING PROBE",
+      "parsed": "both modes: exit 1, assertions_scanned=4, findings exactly [ORACLE_BY_COPY (identical call), MOCK_ECHO (configured value echo)]; the len(calls)/Decimal pair NOT flagged in either mode. (First --file attempt used 1-24 which excluded the clean asserts at lines 35-36 - conservatively re-run with 1-60 before concluding; recorded both envelopes.)",
+      "verdict": "PASS"
+    },
+    {
+      "command": "manage.py test orders.tests_gate0_refund_race orders.tests_refunds orders.tests_refund_requests -v 1 --noinput (dist sqlite, cwd comp-wt/backend)",
+      "evidence": {
+        "evidence_ref": "TEMP:/opencode/r4audit-glm/suite-r42-sqlite.log",
+        "sha256": "86a6de5167992179c8f45e2d2cf2da51d781963d598b077256e4e5953693cc6f"
+      },
+      "exit": 0,
+      "name": "C. SUITE SQLITE",
+      "parsed": "Ran 133 tests in 22.753s OK (the OperationalError lines in the log are the savepoint tests' deliberate SQL failures)",
+      "verdict": "PASS"
+    },
+    {
+      "command": "3 parallel worker processes (ps1) x 20 sequential runs; per run: DATABASE_URL=<lane> venv\\Scripts\\python.exe manage.py test orders.tests_gate0_refund_race.ConcurrentPartialRefundTests --keepdb -v 2 --noinput; lanes: specified perfume_store + fresh perfume_store_r4audit2/3 (disclosed deviation: repo's one-suite-per-DB lock)",
+      "evidence": [
+        {
+          "evidence_ref": "TEMP:/opencode/r4audit-glm/lane-r42-1.log",
+          "sha256": "be148c1d15159893d338a995e7b37b2aa2c14c51dafcbac04ddc1ce6dd6ab703"
+        },
+        {
+          "evidence_ref": "TEMP:/opencode/r4audit-glm/lane-r42-2.log",
+          "sha256": "5671c0ced3f416c7f2538f09eef6c7c14a9e0c8e81294dd78d92863803f628b3"
+        },
+        {
+          "evidence_ref": "TEMP:/opencode/r4audit-glm/lane-r42-3.log",
+          "sha256": "0f7b2c3f272927d06eb8f055235f088c309c9b4aeb6e2075cb5740cdd5bf3f0b"
+        }
+      ],
+      "exit": 0,
+      "name": "C. THREAD_RACE 3-lane x 20",
+      "parsed": "lane-r42-1 20/20 OK; lane-r42-2 20/20 OK; lane-r42-3 20/20 OK; every run 'Ran 1 test ... OK' with exit 0 - FAILURES=0 ERRORS=0 everywhere",
+      "verdict": "PASS"
+    }
+  ],
+  "gate": "verified: git rev-parse HEAD == 12c96d1117c1a581eafe4a5c780a12f45808e30c, branch spec-comp, status limited to the two pre-existing saved_filters WIP files; no product/policy edit, no merge performed",
+  "head": "12c96d1117c1a581eafe4a5c780a12f45808e30c",
+  "lineage_id": "lin_refund_integrity",
+  "model": "glm-5.3-flash",
+  "model_family_match": true,
+  "model_provider": "opencode-go",
+  "oracle_change_adjudication": {
+    "limits_noted": [
+      "The written semantic rule ('appears in the added implementation lines' of the PRODUCT) is still not literally implemented: impl_constants/impl_values derive from the test file's own module, and no product-diff comparison exists. This gap predates the request; the alignment narrows classes to policy semantics without closing the product-line check. Flagged for Gate 6 scope so it is not mistaken for new tool authority.",
+      "Tool VERSION stayed '1.0.0' despite the body change (cosmetic; the body is hashed into gate_impl_digest, which per the R05-02 FDE note must be re-sealed after Gate 6).",
+      "policy_digest moved from 2d34342d... (negative-controls.json bytes changed; the four other gated files are byte-identical) to 355c339f... The old gate-control seal 0004 cites the old digest - expected and explicitly non-rewriting per R05-02's own text; the next gate-control record must be produced by the gate-owner, not by this addendum."
+    ],
+    "reasons": [
+      "assert-rules.json (the written rule) defines ORACLE_BY_COPY as 'flag when the expected constant or expression also appears in the added implementation lines'. The deleted branch had NO implementation-side requirement at all - it fired when the literal merely appeared as a TEST INPUT (including fixture helpers like total='900.00'). It was the tool contradicting its own policy text, on this repo's money assertions in all 33 R4 findings, including 3 on the ticket's frozen gate-0 mirror fixtures via ORACLE-03-as-written.",
+      "The written MOCK_ECHO semantic_rule reads 'asserts a value configured on a mock - not a call count, not a test-owned list'. The deleted container branch flagged exactly what the written rule excludes. Mirror control ORACLE-03 was rebuilt as a REAL configured-value echo and STILL FAILS (exactly ['MOCK_ECHO']), so the class keeps a permanent detector.",
+      "No real detection power lost, proven live: the probe's (i) identical-call assertion and (ii) configured return_value echo are flagged in BOTH --file and --diff modes (assertions_scanned=4 covers every assertion), while the (iii) call-count + money-literal pair is clean in both modes. ORACLE-04 (call_count_test.py, min_count 4 in negative-controls.json) now permanently pins the narrowed classes; a Gate-6c mutant that re-broadens them will break ORACLE-04.",
+      "The three branches that catch real self-referential oracles (identical call, captured implementation constant/value, configured-value echo) are intact in the tool body; verified by reading is_oracle_by_copy / is_mock_echo post-change, not only by controls."
+    ],
+    "result": "ALIGNMENT"
+  },
+  "parent_record_hash": "c7f4e48ff86f00dc01ce8380072e1526500ecd3f5566c8e7feecb41181ac300b",
+  "parent_verdict_ref": "drain/refund-cluster/R4-audit.json (audited_tree 3080646)",
+  "race_totals": {
+    "engine": "postgresql-17.11 / psycopg 3.3.6",
+    "failed": 0,
+    "lane_deviation_disclosed": true,
+    "passed": 60,
+    "total_runs": 60,
+    "worker_repetitions": 20,
+    "workers": 3
+  },
+  "record_hash": "1e7245535c58cfdf00dddc75b0a36bcc282ba626c3b1aa1e3282d22259db66dd",
+  "record_id": "dr_refund_R4_addendum",
+  "rederivation_note": "not re-run in this addendum; the reservation boundary is still exercised 60/60 times on PG by the ticket oracle, and --infra remains unchanged outside refunds.py",
+  "residual": [
+    "The R4-audit.json SEMGREP check stays NOT_RUN for the tree it audited (3080646): the real binary became available only for this addendum; the addendum's clean engine=semgrep run is scoped to 12c96d1.",
+    "The two lane DBs for the compliant race exist only during the run and were dropped after; the specified-URL suite DB (test_perfume_store) returns to its pre-audit state (kept, migrated to HEAD schema)."
+  ],
+  "schema": "R4-audit-addendum/1",
+  "schema_note": "Plain JSON object by design: auditor-verdict.json v2 is additionalProperties=false and cannot carry the requested addendum fields (oracle_change_adjudication, addendum-style checks, parent_verdict linkage). This record does NOT override or amend R4-audit.json. record_hash is sha256 over canonical JSON (sort_keys, compact separators) with the record_hash field removed - the same convention files/drain/refund-cluster/SIGNING.md.",
+  "semgrep_result": "engine=\"semgrep\" (binary 1.184.0) files_scanned=1 findings=[] exit 0 on backend/orders/refunds.py at 12c96d1",
+  "task_id": "refund-integrity-01",
+  "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8"
+}

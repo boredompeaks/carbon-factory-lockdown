@@ -1,0 +1,30 @@
+{
+  "schema": "drain-record/1",
+  "task_id": "refund-integrity-01",
+  "lineage_id": "lin_refund_integrity",
+  "cluster_id": "cluster_refund_integrity",
+  "class": "REFUND_OVERSPEND",
+  "tree_sha": "8e401e5c53689ed7a341c8d8bad0ca99d40a4bfb",
+  "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8",
+  "defect_ids": [
+    "QC-022",
+    "NEW-P1-1b",
+    "R12",
+    "R15"
+  ],
+  "row_count": 4,
+  "created_at": "2026-11-06T00:00:00Z",
+  "deleted": false,
+  "record_id": "dr_refund_R1",
+  "stage": "R1",
+  "state": "OPEN",
+  "attempt_log_ref": null,
+  "attempts": 1,
+  "repro_ref": null,
+  "capability_id": null,
+  "verdict_ref": null,
+  "next_stage": "R2",
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "record_hash": "33345ec26f55a62d9c458a3ef65e0166b380e2012167e68e90d76108af4d5690",
+  "sig_status": "unsigned_local"
+}

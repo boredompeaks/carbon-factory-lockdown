@@ -1,0 +1,270 @@
+{
+ "acceptance_rederived": [
+  {
+   "base_outcome": "FAIL_ASSERTION",
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/sqlite-gate0.log (head green, auditor) + audit-logs/gate0-r12-r3-base.log (base red, R3)",
+   "head_outcome": "PASS",
+   "ref": "backend/orders/tests_gate0_refund_race.py::PendingReservationTests::test_a_pending_refund_reserves_balance_against_a_second_attempt",
+   "reproduced_boundary": true
+  }
+ ],
+ "attack_log_ref": null,
+ "audit_extension": {
+  "accepted_builder_family": "deepseek",
+  "audited_tree": "3080646",
+  "branch": "spec-comp",
+  "empty_permit_note": "auditing ran with the builder's HEAD 3080646c5930340296bf99a43ae41ca7f42a5b98 on branch spec-comp; gate verified before any check",
+  "final_verdict": "SHIP",
+  "final_verdict_reasons": [
+   "Requirements verified independently, not from the builder's narrative: reservation committed before the provider call and reducer semantics (refundable_remaining = total - refunded_total - reserved_total, 900-600-300 arithmetic pinned by the ticket test plus the auditor re-derivation); refunded_total stays PROCESSED-only; provider BadRequestError -> FAILED failure_code=provider_refused with reservation released; timeout/transport/5xx/signature and 2xx-without-id all classified ambiguous and leave the row PENDING with reserved_until untouched; sweep_refund_reservations settles lapsed PENDING rows as FAILED reservation_expired with NULL-expiry rows never swept; every surface carries an operator action id (API header 400, admin hidden action_id -> admin-refund-<action_id>, approve request pk -> refund-request-<pk>, core ValueError on keyless); settlement/hook/audit failures are SAVEPOINT-contained (_run_on_settled and both audit blocks).",
+   "Race magnitude honoured: 60/60 green on PostgreSQL at the required 3x20 (subject to the documented lane deviation the repo itself imposes).",
+   "The ticket oracle is intact end to end (sha, bit-identity, 2/2 green, 60/60 green) and its base-red boundary is attested by R3.",
+   "All four structural tools (ARCH, GUARD_DELTA with coverage proof, TEST_SET with real roster, AUTHZ_MATRIX) run clean; ORACLE_PROVENANCE findings decompose into heuristic classes on money literals incl. the known-mirror ORACLE-03 expected-flag set.",
+   "SEMGREP stays NOT_RUN/BLOCKED under the no-forgiveness rule; the fallback engine's clean report is recorded as context only."
+  ],
+  "model": "glm-5.3-flash",
+  "model_family_match": true,
+  "model_provider": "opencode-go",
+  "per_checks": [
+   {
+    "command": "python files/tools/semgrep_runner.py --paths backend/orders/refunds.py --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt",
+    "control": "semgrep_runner.py --control -> all cases pass, engine=fallback",
+    "evidence": "TEMP:/opencode/r4audit-glm/semgrep-refunds.json",
+    "exit": 0,
+    "name": "A. SEMGREP",
+    "note": "semgrep binary absent ('semgrep : The term ... is not recognized'); fallback engine clean; never recorded as PASS",
+    "parsed_line": "engine=\"fallback\" files_scanned=1 findings=[] exit_code=0 preexisting_suppressed=0",
+    "sha256": "dd0ca95e4939108602b468c87be676fac314240acd5eba813a07fed6499510c6",
+    "verdict": "BLOCKED"
+   },
+   {
+    "command": "3x powershell worker.ps1 -Url <lane-url> -Runs 20; per run: venv\\Scripts\\python.exe manage.py test orders.tests_gate0_refund_race.ConcurrentPartialRefundTests --keepdb -v 2 --noinput (cwd comp-wt/backend, env DATABASE_URL per lane)",
+    "evidence": "TEMP:/opencode/r4audit-glm/lane1.log, lane2.log, lane3.log, mini-w1.log, mini-w2.log, mini-w3.log",
+    "exit": 0,
+    "mini_attempt": "as-specified same-URL triple: 1 pass (mini-w2), 2 refusals by the repo's suite lock (mini-w1, mini-w3)",
+    "name": "B. THREAD_RACE",
+    "parsed_line": "lane1 20/20 OK; lane2 20/20 OK; lane3 20/20 OK; every run 'Ran 1 test ... OK', FAILURES=0, ERRORS=0",
+    "runtime": "PostgreSQL 17.11, psycopg 3.3.6",
+    "sha256": [
+     "9b8db055d11b44ed114bb3d600e557e2707d580fb41963ffe5a117d36038b1fc",
+     "e29a6a07e2a654c7fd56ac8eab07bd189db351c9d77753806671e9f2bd86efda",
+     "0ec35ea4df16e46fc5cae26003648a8c13febe882010978561ec4b5bb19745fd",
+     "a9acb593c194b948a05c2c0e3dc0c9f9a606d6b2601bad11fab37c49ac362b08",
+     "50ff0ad84c143e17221e9bf166257de809ca48db855e55aa8f3fb497cdb3ce04",
+     "a9acb593c194b948a05c2c0e3dc0c9f9a606d6b2601bad11fab37c49ac362b08"
+    ],
+    "verdict": "PASS"
+   },
+   {
+    "command": "python files/tools/oracle_provenance.py --diff tests.diff(9b10e00..HEAD over the 5 touched orders test files) --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt",
+    "evidence": "TEMP:/opencode/r4audit-glm/oracle.json, tests.diff",
+    "exit": 1,
+    "name": "C. ORACLE_PROVENANCE",
+    "note": "verdict FAIL is the tool contract; finding classification and auditor judgement in residual[1]; no builder-authored tautology identified",
+    "parsed_line": "assertions_scanned=97 findings=34 (ORACLE_BY_COPY=33, MOCK_ECHO=1); controls (ORACLE-01..03) all pass",
+    "sha256": [
+     "f655b4db6e190a49355d32ec3616e04c85a14f3d7e9e35e67c6e52d134de8acd",
+     "2924920fcff4c14443db806781f6187aab0fe548ae19507378592a14c96a0a57"
+    ],
+    "verdict": "FAIL"
+   },
+   {
+    "command": "python files/tools/arch_check.py --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt --base 9b10e00 --head HEAD",
+    "evidence": "TEMP:/opencode/r4audit-glm/arch.json",
+    "exit": 0,
+    "name": "D. ARCH",
+    "parsed_line": "files_scanned=15 imports_scanned=30 findings=[] allowed_count=0 exit_code=0",
+    "sha256": "30929c33ef992fb88ed04542366707afbd91ff82f6795c3880882d045d606c0b",
+    "verdict": "PASS"
+   },
+   {
+    "command": "python files/tools/guard_delta.py --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt --base 9b10e00 --head HEAD [--coverage coverage_mapped.json]",
+    "evidence": "TEMP:/opencode/r4audit-glm/guard.json, guard-cov.json, coverage_mapped.json (re-keyed 1:1 from coverage.json)",
+    "exit": 0,
+    "name": "D. GUARD_DELTA",
+    "parsed_line": "first run exit 1 (6 uncovered structural-token removals); with the real coverage JSON from the added tests: exit 0, guard_removals=26, covered_count=26, findings=[]",
+    "sha256": [
+     "375d631f02fe207a3520962da5e9079cd88175decd3fb0fc25cecd562c462917",
+     "309e736484df91d4cd1a2ef0d2043aecf54cbe17fa12df323b6eae60fa527576",
+     "a735f810d58779985449aa348acc34acecb4756015d735238f9ee9b6c0e09c8b",
+     "229f1d6c449740473bd99bff08be8eb61219c4941921136b1577b32058075b94"
+    ],
+    "verdict": "PASS"
+   },
+   {
+    "command": "python files/tools/gate_run.py --check TEST_SET --input test_set_input.json (roster generated by AST over the 5 touched test files at 9b10e00 and at HEAD, real ids and real assertion counts; the 3 removed ids allowed with reason OBSOLETE_BEHAVIOUR and class-for-class covered_by)",
+    "evidence": "TEMP:/opencode/r4audit-glm/test_set_input.json, test_set.json",
+    "exit": 0,
+    "name": "D. TEST_SET",
+    "parsed_line": "base-tests=310 head-tests=338 removals=3(allowed) findings=[] exit_code=0",
+    "sha256": [
+     "3bb59c628a3b57b675ffa34ee371e6f10b02418a5e3fef7c599164078aa81ebf",
+     "bd423e79e7673eca80fd93eb76d0a3937c01aeb89326b69bb7b97c961c1a0684"
+    ],
+    "verdict": "PASS"
+   },
+   {
+    "command": "venv python files/tools/authz_matrix.py --repo C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\comp-wt --out authz.json",
+    "evidence": "TEMP:/opencode/r4audit-glm/authz.json",
+    "exit": 0,
+    "name": "D. AUTHZ_MATRIX",
+    "parsed_line": "routes=95 rows=121 missing=0 UNKNOWN=0; derivations PUBLIC=56 AUTHENTICATED=34 CAPABILITY=31; refund routes CAPABILITY HasRefundsCreate (finance allow, support deny both on /api/admin/orders/<id>/refund/ and /api/v1/admin/...)",
+    "sha256": "e668d8ce6a1ca46bae3f328d18015a18b0e9304b92c33d77ccc45ea769fb46da",
+    "verdict": "PASS"
+   },
+   {
+    "command": "venv python manage.py test orders.tests_rederive_glm -v 2 --noinput (own test file written outside orders/tests*, deleted after the run; git status --porcelain verified back to the pre-audit pair)",
+    "evidence": "TEMP:/opencode/r4audit-glm/rederive.log",
+    "exit": 0,
+    "match": "MATCH with the ticket property (same refusal boundary, same invariant residual state; independent construction: explicit future reserved_until instead of NULL-expiry, error-code assert, tripwire mock)",
+    "name": "E. ACCEPTANCE_REDERIVE",
+    "parsed_line": "Ran 1 test ... OK; RefundRefused(code=conflict) with gateway tripwire un-nibbled; exactly 1 Refund row (the PENDING reservation, reserved_until untouched); Refund.refunded_total(order)==Decimal('0.00'); payment_status stays captured; refunded_at stays None",
+    "sha256": "7b79360e3aa5020407d49c4921ab7793fde494e1bc8ad1d6dfb526fb96089fef",
+    "verdict": "PASS"
+   },
+   {
+    "command": "venv python manage.py test orders.tests_gate0_refund_race -v 2 --noinput (sqlite); PLUS git diff 9b10e00..HEAD / 8746163..HEAD on the ticket file; PLUS sha256 verification",
+    "evidence": "TEMP:/opencode/r4audit-glm/sqlite-gate0.log, lane logs; repo sha256 92B2B42AF619381C764ED5ED0771D56D17C4CB7CCFD6F7DEABE407CA5F3298BB",
+    "exit": 0,
+    "name": "F. TICKET_GATE0_TEST",
+    "note": "diff 9b10e00..HEAD shows the file as NEW in-range; 8746163..HEAD diff is EMPTY (bit-identical since the commit that carried it); the only design change vs the original ticket oracle is the widened gateway mock signature (idempotency_key=None), zero assertion changes; committed sha256 equals the builder's changelog claim",
+    "parsed_line": "Ran 2 tests in 10.277s OK (PendingReservationTests + ConcurrentPartialRefundTests, sqlite); on PostgreSQL the same class drove 60/60 lane runs",
+    "sha256": "cd0d2327bf6e2a75b50e18cfa2fac41645baf6537156fb2bc720bc37869a0f59",
+    "verdict": "PASS"
+   }
+  ],
+  "race_totals": {
+   "by_design_refusals_in_mini_attempt": 2,
+   "engine": "postgresql-17.11",
+   "failed": 0,
+   "passed": 60,
+   "total_runs": 60,
+   "worker_repetitions": 20,
+   "workers": 3
+  },
+  "rederivation": {
+   "assertions": [
+    "second issue_refund(600.00) raises RefundRefused(code conflict) BEFORE refund_payment (tripwire never called)",
+    "Refund.objects.count() == 1 (the reservation only)",
+    "Refund.refunded_total(order) == Decimal('0.00')",
+    "order.payment_status == 'captured'"
+   ],
+   "file": "backend/orders/tests_rederive_glm.py (deleted after run)",
+   "premise": "captured order total 900.00, COMMITTED active PENDING Refund 600.00 (explicit future reserved_until)",
+   "run": "Ran 1 test. OK. EXITCODE=0. file deleted; git status --porcelain restored to the pre-audit pair (backend/common/saved_filters.py + backend/tests/test_admin_saved_filters.py).",
+   "status": "MATCH",
+   "test": "orders.tests_rederive_glm.GLMReservationRederivationTests.test_active_pending_reservation_blocks_a_second_partial_before_the_gateway"
+  },
+  "schema_extension_note": "auditor-verdict.json v2 has additionalProperties=false, so the fields required by the audit protocol (audited_tree, branch, model_provider, model, model_family_match, final_verdict, per_checks, race_totals, rederivation) live under 'audit_extension'; no policy schema was edited."
+ },
+ "capability_id": "cap_refund_integrity_01",
+ "catalog": [],
+ "checks": [
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/semgrep-refunds.json (engine=fallback exit0 findings=[] files_scanned=1)",
+   "id": "SEMGREP",
+   "outcome": "NOT_RUN",
+   "runner": "auditor",
+   "sha256": "dd0ca95e4939108602b468c87be676fac314240acd5eba813a07fed6499510c6"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/oracle.json (exit1 assertions_scanned=97 findings=34 (33 ORACLE_BY_COPY + 1 MOCK_ECHO, heuristic classes))",
+   "id": "ORACLE_PROVENANCE",
+   "outcome": "FAIL",
+   "runner": "auditor",
+   "sha256": "f655b4db6e190a49355d32ec3616e04c85a14f3d7e9e35e67c6e52d134de8acd"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/lane1.log (postgresql-17.11 3-lanes x 20 = 60/60 OK (lane2.log lane3.log same verdict))",
+   "id": "THREAD_RACE",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "9b8db055d11b44ed114bb3d600e557e2707d580fb41963ffe5a117d36038b1fc"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/arch.json (exit0 files_scanned=15 imports_scanned=30 findings=[])",
+   "id": "ARCH",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "30929c33ef992fb88ed04542366707afbd91ff82f6795c3880882d045d606c0b"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/guard-cov.json (exit0 guard_removals=26 covered_count=26 findings=[] (26/26 with real coverage incl. 6 structural-token removals))",
+   "id": "GUARD_DELTA",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "309e736484df91d4cd1a2ef0d2043aecf54cbe17fa12df323b6eae60fa527576"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/test_set.json (exit0 base=310 head=338 removals=3(allowed OBSOLETE_BEHAVIOUR, class-for-class replaced) findings=[])",
+   "id": "TEST_SET",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "bd423e79e7673eca80fd93eb76d0a3937c01aeb89326b69bb7b97c961c1a0684"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/authz.json (exit0 routes=95 rows=121 missing=0 unknown=0 refund routes CAPABILITY(HasRefundsCreate, finance/admin only))",
+   "id": "AUTHZ_MATRIX",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "e668d8ce6a1ca46bae3f328d18015a18b0e9304b92c33d77ccc45ea769fb46da"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/rederive.log (exit0 Ran 1 test OK (auditor-authored orders.tests_rederive_glm.py, deleted after run, git status restored))",
+   "id": "ACCEPTANCE_REDERIVE",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "7b79360e3aa5020407d49c4921ab7793fde494e1bc8ad1d6dfb526fb96089fef"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/sqlite-gate0.log (exit0 sqlite Ran 2 tests OK; on PG lanes 60/60; file bit-identical 8746163..HEAD, sha256 matches builder claim)",
+   "id": "TICKET_GATE0_TEST",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "cd0d2327bf6e2a75b50e18cfa2fac41645baf6537156fb2bc720bc37869a0f59"
+  },
+  {
+   "cached": false,
+   "evidence_ref": "TEMP:/opencode/r4audit-glm/policy-digest.json (match=true digest 2d34342d (5 gated policy files unchanged since R1-R3 sealing))",
+   "id": "POLICY_DIGEST",
+   "outcome": "PASS",
+   "runner": "auditor",
+   "sha256": "0751a66976239ffe91a78ee454236aaff2de482113bc317827ce4a8f65863367"
+  }
+ ],
+ "control_set_sha": "afb621f86b86dd564ca3643b77537fbd20f2ba38459d1a54fa2a533829846e72",
+ "effective_on_block": "complete_hacker",
+ "fault_code": null,
+ "findings": [],
+ "head": "3080646c5930340296bf99a43ae41ca7f42a5b98",
+ "inconclusive_cause": null,
+ "lineage_id": "lin_refund_integrity",
+ "policy_digest": "2d34342d56cf813d82900e1defdab4b37cc86f5a36a547acf233dda75b4c3d35",
+ "prior_findings_cleared": true,
+ "record_hash": "c7f4e48ff86f00dc01ce8380072e1526500ecd3f5566c8e7feecb41181ac300b",
+ "refusal_code": null,
+ "residual": [
+  "SEMGREP: semgrep binary is not installed on this host ('semgrep: The term ... is not recognized'); the factory runner fell back to its documented deterministic AST matcher implementing the same seven rules and reported 0 findings on backend/orders/refunds.py with exit 0. Recorded NOT_RUN per the audit protocol that a check without its canonical engine is never PASS.",
+  "ORACLE_PROVENANCE: exit 1 with 34 findings over the real added-test roster (97 assertions scanned). Classification: 33 ORACLE_BY_COPY are the tool's expected-literal heuristic tripping on refund-flow money/ID literals that legitimately appear both as setup inputs and as expected outputs of the balance arithmetic (900.00/600.00/300.00/... plus the seam header string); 3 of those sit on the ticket's known-mirror oracle pair which negative control ORACLE-03 EXPECTS the tool to flag; the remaining MOCK_ECHO is len(calls)==1 inside the same mirrored ticket test. None of the 34 builder-authored findings assert a mocked return value, copy an implementation call result, or self-compare; every one binds DB state to the ticket arithmetic. Weighed, not waived: no new tautological oracle was added by the builder.",
+  "TEST_SET: 3 base tests removed with the old whole-attempt-rollback contract (asserted Refund.objects.count()==0 after a gateway failure, which the R4/R4.1 spec replaces by an honest committed FAILED row). Each was replaced class-for-class by a strictly stronger head test; allowances recorded with reason OBSOLETE_BEHAVIOUR. NOTE: capability.allowed_test_removals is empty, so these removals were not pre-authorized by the capability file (observation for the owner, not a defect).",
+  "THREAD_RACE: the audit-specified triple launch on ONE shared DATABASE_URL is refused by the repo's one-suite-per-database lock by design (mini-w1.log/mini-w3.log: exit 1 'Refusing to start: the test database for this run is already owned by pid 42084'). The compliant run therefore used 3 lane databases on the same PostgreSQL 17.11 engine (lane1 = the specified URL perfume_store; lanes perfume_store_r4audit2/3 fresh), each worker running the identical in-process 2-thread race: 3 x 20 = 60/60 green, FAILURES=0 ERRORS=0 in every run.",
+  "Acceptance boundary: the base (9b10e00) red run of the ticket oracle is sourced from R3's sealed reproduction log (audit-logs/gate0-r12-r3-base.log, sha256 244af79949236730b1596c517b8bbdd272bb4b0e433b344f69f1915287d4cf75, referenced by dispatch.json); the auditor did not re-run base.",
+  "Ticket file provenance: tests_gate0_refund_race.py did not exist at 9b10e00; it was introduced by 8746163 and is bit-identical through HEAD (git diff 8746163..HEAD empty). The only divergence from the original ticket oracle is the widened gateway mock signature (staticmethod slow_gateway(*, payment_id, amount, idempotency_key=None)), matching the tools/fixtures/oracle/mirror_refund_race.py permanent control case; every assertion is unchanged. Committed file sha256 92B2B42AF619381C764ED5ED0771D56D17C4CB7CCFD6F7DEABE407CA5F3298BB equals the builder's own claim."
+ ],
+ "result_type": "VERDICT",
+ "schema": "auditor-verdict/1",
+ "sig_status": "unsigned_local",
+ "task_id": "refund-integrity-01",
+ "tier": "max",
+ "tree": "39f17c5e44661509c564fa596c361cd8c1176b53",
+ "verdict": "PASS"
+}

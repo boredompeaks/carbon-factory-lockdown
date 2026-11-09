@@ -1,0 +1,52 @@
+{
+  "schema": "orchestrator-decision/1",
+  "task_id": "refund-integrity-01",
+  "lineage_id": "lin_refund_integrity",
+  "step": "drain",
+  "action": "DISPATCH",
+  "target": "builder",
+  "reason_code": "OK",
+  "predicate_ids": [
+    "P-CTRL",
+    "P-HEAD",
+    "P-SCOPE",
+    "P-TIER",
+    "P-BUDGET"
+  ],
+  "evidence_refs": [
+    {
+      "ref": "drain/refund-cluster/R1-confirm.json",
+      "sha256": "33345ec26f55a62d9c458a3ef65e0166b380e2012167e68e90d76108af4d5690"
+    },
+    {
+      "ref": "drain/refund-cluster/R2-exploit-spec.json",
+      "sha256": "884a4636c1914a437bcf1b8c8fe670144094c9f15c6f29c58c37212d8e0c7e02"
+    },
+    {
+      "ref": "drain/refund-cluster/R3-red.json",
+      "sha256": "96e91a5edba1cb61f0678ccdc99bb9d34228dfbf20d28487d3e9f06092fb8c85"
+    },
+    {
+      "ref": "C:/Users/Admin/AppData/Local/Temp/opencode/audit-logs/gate0-r12-r3-base.log",
+      "sha256": "244af79949236730b1596c517b8bbdd272bb4b0e433b344f69f1915287d4cf75"
+    },
+    {
+      "ref": "policies",
+      "sha256": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8"
+    },
+    {
+      "ref": "quality/ledger/gate-control/0008-7567ce1902de.json",
+      "sha256": "3722fb8964d0fc4910d59e4084b1b29f4831f41489cc6e237239c686c2602afe"
+    }
+  ],
+  "state": {
+    "base": "9b10e00078e0ad9a151ae8d1c4b9fbbcf1450644",
+    "head": "12c96d1117c1a581eafe4a5c780a12f45808e30c",
+    "tree": "2b9a36e189da1ebb77afab63b6245353f38ee7bc"
+  },
+  "capability_id": "cap_refund_integrity_01",
+  "drain_cluster_id": "cluster_refund_integrity",
+  "drain_stage": "R4",
+  "sig_status": "unsigned_local",
+  "record_hash": "332abb210b6d61c76763f67290c3a9500ce730e8dbae89c9763fc3e7abffae73"
+}

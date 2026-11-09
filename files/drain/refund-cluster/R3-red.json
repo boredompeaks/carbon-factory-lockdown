@@ -1,0 +1,30 @@
+{
+  "schema": "drain-record/1",
+  "task_id": "refund-integrity-01",
+  "lineage_id": "lin_refund_integrity",
+  "cluster_id": "cluster_refund_integrity",
+  "class": "REFUND_OVERSPEND",
+  "tree_sha": "8e401e5c53689ed7a341c8d8bad0ca99d40a4bfb",
+  "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8",
+  "defect_ids": [
+    "QC-022",
+    "NEW-P1-1b",
+    "R12",
+    "R15"
+  ],
+  "row_count": 4,
+  "created_at": "2026-11-06T00:00:00Z",
+  "deleted": false,
+  "record_id": "dr_refund_R3",
+  "stage": "R3",
+  "state": "REPRODUCED",
+  "attempt_log_ref": "C:/Users/Admin/AppData/Local/Temp/opencode/audit-logs/gate0-r12-r3-base.log",
+  "attempts": 1,
+  "repro_ref": "backend/orders/tests_gate0_refund_race.py::PendingReservationTests::test_a_pending_refund_reserves_balance_against_a_second_attempt",
+  "capability_id": "cap_refund_integrity_01",
+  "verdict_ref": null,
+  "next_stage": "R4",
+  "prev_hash": "884a4636c1914a437bcf1b8c8fe670144094c9f15c6f29c58c37212d8e0c7e02",
+  "record_hash": "96e91a5edba1cb61f0678ccdc99bb9d34228dfbf20d28487d3e9f06092fb8c85",
+  "sig_status": "unsigned_local"
+}

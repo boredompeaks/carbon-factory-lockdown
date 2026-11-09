@@ -1,0 +1,73 @@
+{
+  "schema": "capability/1",
+  "capability_id": "cap_refund_integrity_01",
+  "parent_capability_id": null,
+  "lineage_id": "lin_refund_integrity",
+  "base": "9b10e00078e0ad9a151ae8d1c4b9fbbcf1450644",
+  "head": "12c96d1117c1a581eafe4a5c780a12f45808e30c",
+  "tree": "2b9a36e189da1ebb77afab63b6245353f38ee7bc",
+  "scope": [
+    "backend/.env.example",
+    "backend/docs/api-contract.md",
+    "backend/docs/changes.md",
+    "backend/orders/admin.py",
+    "backend/orders/management/commands/sweep_refund_reservations.py",
+    "backend/orders/migrations/0023_refund_reservation.py",
+    "backend/orders/migrations/0024_refund_failure_code.py",
+    "backend/orders/models.py",
+    "backend/orders/refunds.py",
+    "backend/orders/tests_gate0_refund_race.py",
+    "backend/orders/tests_guest.py",
+    "backend/orders/tests_refund_requests.py",
+    "backend/orders/tests_refunds.py",
+    "backend/orders/tests_returns.py",
+    "backend/orders/views/refund.py"
+  ],
+  "tier": "max",
+  "hacker_variant": "max",
+  "budget": {
+    "wall_clock_s": 7200,
+    "tool_calls": 800,
+    "tokens": 2000000
+  },
+  "acceptance_test_refs": [
+    "backend/orders/tests_gate0_refund_race.py::PendingReservationTests::test_a_pending_refund_reserves_balance_against_a_second_attempt"
+  ],
+  "acceptance_author_family": "deepseek",
+  "characterization_tests": [],
+  "architecture_allow": [],
+  "guard_delta": [],
+  "guard_ref": {
+    "node_id": "backend/orders/tests_gate0_refund_race.py::PendingReservationTests::test_a_pending_refund_reserves_balance_against_a_second_attempt",
+    "sha256": "92b2b42af619381c764ed5ed0771d56d17c4cb7ccfd6f7deabe407ca5f3298bb"
+  },
+  "allowed_test_removals": [
+    {
+      "test_id": "backend/orders/tests_refunds.py::GatewayFailureTests::test_a_gateway_failure_rolls_the_whole_attempt_back",
+      "reason_code": "OBSOLETE_BEHAVIOUR",
+      "covered_by": "backend/orders/tests_refunds.py::GatewayFailureTests::test_a_gateway_failure_is_recorded_as_failed_and_releases_the_reservation"
+    },
+    {
+      "test_id": "backend/orders/tests_refunds.py::GatewayFailureTests::test_a_gateway_response_without_a_refund_id_also_rolls_back",
+      "reason_code": "OBSOLETE_BEHAVIOUR",
+      "covered_by": "backend/orders/tests_refunds.py::GatewayFailureTests::test_a_gateway_response_without_a_refund_id_is_ambiguous"
+    },
+    {
+      "test_id": "backend/orders/tests_refunds.py::RefundAdminActionTests::test_a_gateway_failure_rolls_the_admin_attempt_back",
+      "reason_code": "OBSOLETE_BEHAVIOUR",
+      "covered_by": "backend/orders/tests_refunds.py::RefundAdminActionTests::test_a_gateway_failure_leaves_a_failed_refund_row"
+    }
+  ],
+  "task_kind": "DRAIN",
+  "task_branch": "spec-comp",
+  "output_schema_ref": "policies/schemas/builder-result.json",
+  "policy_digest": "c847118644fa18d704773ba3f9a8892b13b756f9c67afb322607d6f927f631a8",
+  "drain_cluster_id": "cluster_refund_integrity",
+  "drain_stage": "R4",
+  "sig_status": "unsigned_local",
+  "record_hash": "1ab9b74dac4809ad2d6797e3d378efbcffbb59f3914205c16fb501b9e8d7615d",
+  "acceptance_author_policy": "hacker",
+  "acceptance_author_note": "New capabilities take their acceptance test from the hacker's exploit. R05's ticket test was hand-authored on deepseek; re-derivation by the auditor stays mandatory for this capability.",
+  "branch": "spec-comp",
+  "base_branch": "spec-comp"
+}
