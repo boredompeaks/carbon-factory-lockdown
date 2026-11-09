@@ -40,13 +40,11 @@ Status: PROVEN = ran in this lineage; UNPROVEN = no successful execution yet.
    `reconciled tree: <40-hex>`, `reconcile complete: ... (no push)`; exit 0.
    Parse: every merge SHA plus `$RECON_HEAD` and `$RECON_TREE`.
    Gate: each `origin/lane/*` tip equals its sealed PASS verdict head/tree, with live
-   `policy_digest` `c8471186…` / `control_set_sha` `971f1fda…` /
-   `gate_impl_digest` `224cbf99…` per gate-control `0008-7567ce1902de`
-   (`record_hash` `3722fb89…`, lineage `0005 862407a5 -> 0006 0fe32eea ->
-   0007 34ffd85b -> 0008 224cbf99` in SIGNING.md); a moved lane or drift is
-   STATE_MISMATCH/POLICY_DRIFT — stop. The live tree has drifted past `0008`
-   (live verify FAIL); do not treat the historical `0008` PASS as live —
-   **UNPROVEN** until re-seal + verify, see SIGNING.md seal->verify->declare order.
+   `policy_digest` / `control_set_sha` / `gate_impl_digest` per the newest
+   gate-control record (see SIGNING.md); a moved lane or drift is
+   STATE_MISMATCH/POLICY_DRIFT — stop. A live verify FAIL stops promotion;
+   do not treat a historical PASS as live — **UNPROVEN** until re-seal +
+   verify, see SIGNING.md seal->verify->declare order.
    Failure: exit 3 = conflict => REFUSED MERGE_REJECTED (leave worktree; no resolve/force);
    exit 2 = dirty/branch => DIRTY_TREE/STATE_MISMATCH; other exit => stop; no push. UNPROVEN.
 

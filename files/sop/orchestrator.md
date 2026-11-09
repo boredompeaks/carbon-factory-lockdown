@@ -11,12 +11,12 @@ does not merge.
 
 2. **Lineage check.** `python files\tools\validatedrain.py`.
    Expected: PASS with the newest gate-control seal named. Parse: the summary +
-   `problems:[]`. PROVEN at seal time — PASS at record `0008-7567ce1902de`
-   (`policy_digest` `c8471186…`, `gate_impl_digest` `224cbf99…`,
-   `control_set_sha` `971f1fda…`, `record_hash` `3722fb89…`). Live PASS is
-   **UNPROVEN** until a re-seal verifies PASS against the live tree (seal->
-   verify->declare, SIGNING.md): the live tree has drifted past `0008`, so a
-   live FAIL stops dispatch; do not treat the historical PASS as live.
+   `problems:[]`. PROVEN at seal time — PASS against the newest gate-control
+   record (live `policy_digest` / `gate_impl_digest` / `control_set_sha` per
+   the newest record; see SIGNING.md). Live PASS is **UNPROVEN** until a
+   re-seal verifies PASS against the live tree (seal->verify->declare,
+   SIGNING.md): a live FAIL stops dispatch; do not treat a historical PASS
+   as live.
    Stop on FAIL.
 
 3. **Policy-change intake (owner authority only).** The factory writes a request
@@ -63,12 +63,11 @@ does not merge.
   path is untested).
 - `subagent` permission on the orchestrator: no permission block authorises it
   yet; dispatch of child sessions is unproven from inside the factory.
-- Gate-control re-seal after a policy byte changes; record `0008` seals the
-  `c8471186` lineage through `0005` (`2d34342d -> c8471186`) plus the
-  `gate_impl_digest` lineage `862407a5 -> 0fe32eea -> 34ffd85b -> 224cbf99`
-  (SIGNING.md re-seals 0005-0008). A further policy or gate-impl byte
-  requires a new seal; the live tree has drifted past `0008`, so re-seal and
-  re-verify before claiming PASS.
+- Gate-control re-seal after a policy byte changes; the newest gate-control
+  record names the live `policy_digest` / `gate_impl_digest` /
+  `control_set_sha` (see SIGNING.md). A further policy or gate-impl byte
+  requires a new seal; a live verify FAIL stops dispatch until re-seal and
+  re-verify PASS.
 
 ## Lane / integration topology (permanent)
 
