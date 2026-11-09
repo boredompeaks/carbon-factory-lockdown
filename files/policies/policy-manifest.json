@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T08:10:33Z",
+  "created_at": "2026-11-09T08:54:40Z",
   "file_count": 265,
   "files": [
     {
@@ -112,7 +112,7 @@
     },
     {
       "path": "files/tools/mcp/controls.json",
-      "sha256": "d081ffd35d3283b68704766933b9aad3caa14b02410e8f34e53701bb3b10fa89"
+      "sha256": "c8000d711457769bb44c7aaab1a347a78e9f5caa31eb1bf49ac7ca993ec85f5a"
     },
     {
       "path": "files/tools/mcp/controls.schema.json",
@@ -172,7 +172,7 @@
     },
     {
       "path": "files/tools/mcp/hacker/probe.py",
-      "sha256": "8a0bb9c41682a10b4690f49b0b16e2d0b587898c2c3abf142ab59af1578b4667"
+      "sha256": "f6b6a46b11de3ec34bca03ea82cd5c4e44f261d263b2dc6708d4fa1aa366c5c6"
     },
     {
       "path": "files/tools/mcp/k1/__init__.py",
@@ -196,7 +196,7 @@
     },
     {
       "path": "files/tools/mcp/ledger/handlers.py",
-      "sha256": "b9efd5fab9fc5e819625d7ada3d0197c1aa8c064a94b1a067f691e0ff6be041f"
+      "sha256": "37449ec488f846871fa150cbf3c9f96cfa0b0ac073eacdbd5c9fbab5bf202a8f"
     },
     {
       "path": "files/tools/mcp/ledger/store.py",
@@ -204,7 +204,7 @@
     },
     {
       "path": "files/tools/mcp/registry.json",
-      "sha256": "62de3a3854e1546cf2525bae2601d6ff2d9591275ef01839bf445f282b85e0d9"
+      "sha256": "a0c1700a90f69e225074ddca757572579a3084d912cfba997de6a80e2de63c12"
     },
     {
       "path": "files/tools/mcp/registry.schema.json",
@@ -1070,15 +1070,15 @@
   "digests": {
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74"
+    "gate_impl_digest": "28f37e3afef3c02baf9afe8f22c12169ad6bc588b5ece154d9708614527182ad"
   },
   "gate_control": {
-    "record": "0013-e453478fbae6.json",
-    "record_hash": "6107149efa3ea4d897838b203a4887d64fbd9291b137ead7cf5088f2040fc985",
-    "gate_sha": "e453478fbae66f24cced3e64dd4ae05f36691a22",
+    "record": "0015-57de7b8572e9.json",
+    "record_hash": "b4c809674962d147ef83fec47fbbc340141de6e38513c13357e6f586f89f8137",
+    "gate_sha": "57de7b8572e9191ea6adeeb77bfee37d0226e2c4",
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74",
+    "gate_impl_digest": "28f37e3afef3c02baf9afe8f22c12169ad6bc588b5ece154d9708614527182ad",
     "result": "PASS"
   },
   "drift": [],
@@ -1173,5 +1173,5 @@
       ]
     }
   },
-  "manifest_sha": "88746cb0f1180ec0beef5fd75d434443baa81aecff48f0dae5779859164d92fc"
+  "manifest_sha": "a8316fa2b50783f9b4d0c987dac832bfb5e67ccbddde4a74007e16631775ffab"
 }
