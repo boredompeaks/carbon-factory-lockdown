@@ -74,6 +74,7 @@
               "ASK_ONLY",
               "NOT_GRANTED",
               "ROLE_MATRIX",
+              "ROLE_ALLOWED",
               "EMPTY"
             ]
           },

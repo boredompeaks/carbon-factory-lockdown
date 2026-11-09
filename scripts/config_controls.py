@@ -4,9 +4,9 @@
 Evaluates the declarative controls in files/tools/mcp/controls.json that
 Server.run_controls() cannot evaluate -- entries whose ``expect`` is NOT
 ``REJECT_*`` and NOT ``ACCEPT`` (currently ASK_ONLY, NOT_GRANTED,
-ROLE_MATRIX, EMPTY). Without this evaluator, ``Server.run_controls()``
-reports only the dispatchable subset (196/221) and the remaining 25 would
-be silently skipped.
+ROLE_MATRIX, EMPTY, ROLE_ALLOWED). Without this evaluator,
+``Server.run_controls()`` reports only the dispatchable subset (196/221)
+and the remaining 25 would be silently skipped.
 
 Sources (read-only, no edits to server.py / controls.json / registry.json
 / agent files):
@@ -56,7 +56,7 @@ PRIMARY_AGENTS_DIR = HARNESS_ROOT / ".opencode" / "agents"
 TWIN_AGENTS_DIR = HARNESS_ROOT / "files"
 MCP_DISCOVER_PATH = HARNESS_ROOT / "scripts" / "mcp_discover.py"
 
-DECLARATIVE_EXPECTS = ("ASK_ONLY", "NOT_GRANTED", "ROLE_MATRIX", "EMPTY")
+DECLARATIVE_EXPECTS = ("ASK_ONLY", "NOT_GRANTED", "ROLE_MATRIX", "EMPTY", "ROLE_ALLOWED")
 
 
 def is_dispatchable(expect: str | None) -> bool:
@@ -194,6 +194,21 @@ def load_registry_roles() -> dict[str, list[str]]:
         if isinstance(tool, dict) and isinstance(tool.get("name"), str):
             roles = tool.get("roles") or []
             out[tool["name"]] = [r for r in roles if isinstance(r, str)]
+    return out
+
+
+def load_registry() -> dict[str, dict]:
+    """Tool -> {roles, scopes} from registry.json (for ROLE_ALLOWED)."""
+    reg = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+    out: dict[str, dict] = {}
+    for tool in reg.get("tools", []):
+        if isinstance(tool, dict) and isinstance(tool.get("name"), str):
+            roles = tool.get("roles") or []
+            scopes = tool.get("scopes")
+            out[tool["name"]] = {
+                "roles": [r for r in roles if isinstance(r, str)],
+                "scopes": scopes if isinstance(scopes, dict) else None,
+            }
     return out
 
 
@@ -396,6 +411,52 @@ def eval_role_matrix(ctl: dict, agents: dict[str, dict]) -> tuple[bool, str, str
         )
         return False, f"holders={sorted(holders)}", detail
     return True, "ROLE_MATRIX", f"holders={sorted(holders)} == allowed"
+
+
+def eval_role_allowed(ctl: dict, registry: dict[str, dict]) -> tuple[bool, str, str]:
+    """ROLE_ALLOWED: role may use ``mode`` for ``tool`` per registry scope.
+
+    Evaluated against registry scope only -- never executes the tool
+    (V1/F3: controls must be side-effect free; e.g. gate.control run
+    would otherwise --write the ledger). Mirrors
+    Server._check_subpolicy_role: roles[] is the coarse gate; a present
+    ``scopes`` map adds a (role, mode) check where ``run`` implies
+    ``verify`` and a role absent from scopes is verify-only.
+    """
+    tool = str(ctl.get("tool") or "")
+    role = str(ctl.get("role") or "")
+    args = ctl.get("args") if isinstance(ctl.get("args"), dict) else {}
+    mode = str(args.get("mode") or ctl.get("mode") or "verify")
+    if mode not in ("run", "verify"):
+        return False, "BAD_MODE", f"mode must be run/verify, got {mode!r}"
+    if tool not in registry:
+        return False, "UNKNOWN_TOOL", f"tool {tool!r} not in registry.json"
+    entry = registry[tool]
+    roles = entry.get("roles") or []
+    if role not in roles:
+        return False, "ROLE_NOT_IN_ROLES", f"{role!r} not in {tool}.roles {roles!r}"
+    scopes = entry.get("scopes")
+    if isinstance(scopes, dict):
+        if role in scopes:
+            raw = scopes[role]
+            if isinstance(raw, str):
+                allowed = {raw}
+            elif isinstance(raw, (list, tuple, set)):
+                allowed = set(raw)
+            elif raw is None:
+                allowed = set()
+            else:
+                allowed = {raw}
+            if "run" in allowed:
+                allowed.add("verify")
+        else:
+            allowed = {"verify"}
+        if mode not in allowed:
+            return False, "ROLE_NOT_ALLOWED", (
+                f"{tool} mode {mode!r} not permitted for role {role!r} (allowed={sorted(allowed)})"
+            )
+        return True, "ROLE_ALLOWED", f"{tool} mode {mode!r} allowed for {role!r} per registry scope"
+    return True, "ROLE_ALLOWED", f"{tool} allowed for {role!r} (no scope limit)"
 
 
 # --- basemind runtime (EMPTY) ------------------------------------------------
@@ -601,6 +662,7 @@ def evaluate() -> tuple[dict, int]:
     selected = [c for c in control_list if is_declarative(c.get("expect"))]
     agents = load_agents()
     registry_roles = load_registry_roles()
+    registry = load_registry()
     excludes = load_bxm_excludes()
 
     # One basemind session for all EMPTY controls (lazy, only if needed).
@@ -642,6 +704,8 @@ def evaluate() -> tuple[dict, int]:
                     passed, got, detail = eval_not_granted(ctl, agents, registry_roles)
                 elif expect == "ROLE_MATRIX":
                     passed, got, detail = eval_role_matrix(ctl, agents)
+                elif expect == "ROLE_ALLOWED":
+                    passed, got, detail = eval_role_allowed(ctl, registry)
                 elif expect == "EMPTY":
                     passed, got, detail = eval_empty(ctl, session, session_error, excludes)
                 else:

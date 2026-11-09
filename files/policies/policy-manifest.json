@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T07:23:56Z",
+  "created_at": "2026-11-09T08:04:45Z",
   "file_count": 265,
   "files": [
     {
@@ -112,11 +112,11 @@
     },
     {
       "path": "files/tools/mcp/controls.json",
-      "sha256": "c4a50f80c8fbbc2f6eeb9354ffd6958b9c6f37f1080e37ccc57e9f2e5f782eaa"
+      "sha256": "d081ffd35d3283b68704766933b9aad3caa14b02410e8f34e53701bb3b10fa89"
     },
     {
       "path": "files/tools/mcp/controls.schema.json",
-      "sha256": "ad238698f9caf3f3822013124ec2f97b70e54808608410d0e743e8f20b309167"
+      "sha256": "fef9ac2845be3c820c164595fca3e4f994c9a0f2edafa044d73a981981a4357f"
     },
     {
       "path": "files/tools/mcp/core/__init__.py",
@@ -124,7 +124,7 @@
     },
     {
       "path": "files/tools/mcp/core/config.py",
-      "sha256": "fc9e275706c9046176db0be9ea99bd2e69fe45309e174ff5570df67a6562b873"
+      "sha256": "3d11af3e9fd67b769b8d672a75a09214e2fa393845877af0b89cb2e677c3cbeb"
     },
     {
       "path": "files/tools/mcp/core/redact.py",
@@ -132,7 +132,7 @@
     },
     {
       "path": "files/tools/mcp/core/server.py",
-      "sha256": "7cf729e521dd941233a409fe0180b6c256ada2baec445db42603c7654c38da45"
+      "sha256": "a4d7aa0c72b23b0030d93461dd3bfdd303a53ed27111d145fdc73a5153b2a138"
     },
     {
       "path": "files/tools/mcp/core/test_core.py",
@@ -904,7 +904,7 @@
     },
     {
       "path": "script:scripts/config_controls.py",
-      "sha256": "6030c11ed961722584e878e61472d6e8e28c90657700a7bbc8390648d474e579"
+      "sha256": "d10fca2246bea481e3159893bb1039146f20c421bcb90baa894768fbffdf475b"
     },
     {
       "path": "script:scripts/control_mutation.py",
@@ -912,7 +912,7 @@
     },
     {
       "path": "script:scripts/gate_all_controls.py",
-      "sha256": "249130821600c9f323f8d432b9ae455c3578071b456526fdfe045d91478f98ec"
+      "sha256": "2f590022c2027837f94ecdf2a03ab868c8cb7f083a1296f8470b28b5bfad6140"
     },
     {
       "path": "script:scripts/generate_policies.py",
@@ -1070,18 +1070,20 @@
   "digests": {
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "458daa97a8d374b2204fe5ad77f4720868808b248001bb51b2a72ca445f9894d"
+    "gate_impl_digest": "05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74"
   },
   "gate_control": {
-    "record": "0011-54d8bd6ab60e.json",
-    "record_hash": "86e9ec71f6b7331d235e8fb28356887ecf808694e9107f9ddd153b438d7a0301",
-    "gate_sha": "54d8bd6ab60e1c4be721d19a440a7514c3044f86",
+    "record": "0012-c4ed57abfb44.json",
+    "record_hash": "63cec314dce43549d93a4b93cc56f398969d41681c74b42114a1198dde21be25",
+    "gate_sha": "c4ed57abfb4453eac35f2aece045b1b3575339bd",
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "458daa97a8d374b2204fe5ad77f4720868808b248001bb51b2a72ca445f9894d",
+    "gate_impl_digest": "f210569c1f70b1e93bc41f474de2274b5a2c920bd13a23d9ac4eb9f67161492d",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "gate_impl_digest: live 05fdaf0210491f5685368c94f202a1157d03519dd650dcd08f8e64ca3f94ae74 != record f210569c1f70b1e93bc41f474de2274b5a2c920bd13a23d9ac4eb9f67161492d"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1173,5 +1175,5 @@
       ]
     }
   },
-  "manifest_sha": "4b623ed73986f0bafbf3ae4b5e11486cdf88aafd85b7f90e1be5bb81e3a0d8a7"
+  "manifest_sha": "354aae138110fe20565f933eed3457f38cb86f42537068941e72a9c9ecae77c9"
 }

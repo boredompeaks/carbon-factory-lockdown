@@ -1513,10 +1513,10 @@
       "role": "auditor",
       "args": {
         "target": "gate",
-        "mode": "run"
+        "mode": "verify"
       },
       "expect": "ACCEPT",
-      "note": "auditor run passes the role gate; dispatch ok true even if the sealed digest result is FAIL"
+      "note": "auditor verify passes the role gate (read-only; controls must be side-effect free — mode run is covered declaratively by CTRL-GC-5)"
     },
     {
       "id": "CTRL-GC-4",
@@ -1528,6 +1528,17 @@
       },
       "expect": "ACCEPT",
       "note": "orchestrator verify passes the role gate (read-only)"
+    },
+    {
+      "id": "CTRL-GC-5",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "target": "gate",
+        "mode": "run"
+      },
+      "expect": "ROLE_ALLOWED",
+      "note": "auditor is allowed gate.control mode run per registry scopes; evaluated declaratively by config_controls.py with no execution"
     },
     {
       "id": "CTRL-k1.up-1",
