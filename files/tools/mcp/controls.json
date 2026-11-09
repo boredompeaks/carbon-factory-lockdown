@@ -1486,6 +1486,50 @@
       "note": "leading-dash values are rejected"
     },
     {
+      "id": "CTRL-GC-1",
+      "tool": "gate.control",
+      "role": "orchestrator",
+      "args": {
+        "target": "gate",
+        "mode": "run"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "orchestrator is verify-only; gate.control run is REJECT_ROLE via registry scope"
+    },
+    {
+      "id": "CTRL-GC-2",
+      "tool": "gate.control",
+      "role": "compliance",
+      "args": {
+        "target": "gate",
+        "mode": "run"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "compliance is verify-only; gate.control run is REJECT_ROLE via registry scope"
+    },
+    {
+      "id": "CTRL-GC-3",
+      "tool": "gate.control",
+      "role": "auditor",
+      "args": {
+        "target": "gate",
+        "mode": "run"
+      },
+      "expect": "ACCEPT",
+      "note": "auditor run passes the role gate; dispatch ok true even if the sealed digest result is FAIL"
+    },
+    {
+      "id": "CTRL-GC-4",
+      "tool": "gate.control",
+      "role": "orchestrator",
+      "args": {
+        "target": "gate",
+        "mode": "verify"
+      },
+      "expect": "ACCEPT",
+      "note": "orchestrator verify passes the role gate (read-only)"
+    },
+    {
       "id": "CTRL-k1.up-1",
       "tool": "k1.up",
       "role": "builder",

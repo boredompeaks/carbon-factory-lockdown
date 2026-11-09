@@ -193,7 +193,43 @@ class Server:
 
     def _check_subpolicy_role(self, tool: str, role: str, args: dict) -> None:
         """REJECT_ROLE subpolicies that run before generic arg checks."""
-        if tool == "ledger.append":
+        if tool == "gate.control":
+            # gate.control (role,mode) scope from the registry (IMP-06 redteam).
+            # Registry declares scopes as role -> mode ("run" / "verify");
+            # e.g. auditor: run, orchestrator: verify. No target scoping is
+            # declared (scopes values are modes, not targets), so target is
+            # NOT enforced here (do not invent).
+            # Missing mode defaults to verify (read-only).
+            # "run" includes "verify" (verify is the read-only subset; a role
+            # allowed to run may also verify). Roles present in roles[] but
+            # absent from scopes[] (compliance in the current registry) are
+            # verify-only (least privilege) rather than fail-open.
+            scopes = self.tools.get(tool, {}).get("scopes")
+            if isinstance(scopes, dict):
+                mode_val = args.get("mode") or "verify"
+                # Invalid modes fall through to REJECT_ENUM below; only
+                # enforce the scope for the known modes run/verify.
+                if mode_val in ("run", "verify"):
+                    if role in scopes:
+                        raw = scopes[role]
+                        if isinstance(raw, str):
+                            allowed = {raw}
+                        elif isinstance(raw, (list, tuple, set)):
+                            allowed = set(raw)
+                        elif raw is None:
+                            allowed = set()
+                        else:
+                            allowed = {raw}
+                        if "run" in allowed:
+                            allowed.add("verify")
+                    else:
+                        allowed = {"verify"}
+                    if mode_val not in allowed:
+                        raise Reject(
+                            "REJECT_ROLE",
+                            f"gate.control mode '{mode_val}' not permitted for role '{role}'",
+                        )
+        elif tool == "ledger.append":
             # Per-role record-type allowlist (6B-5).
             allowed = {
                 "orchestrator": {"dispatch", "capability"},
@@ -325,7 +361,9 @@ class Server:
         harness = _harness_root()
         script = _gate_control_script()
         repo = harness
-        mode = str(args.get("mode") or "run")
+        # Missing mode defaults to verify (read-only), matching the
+        # subpolicy check above; an omitted mode must never seal (--write).
+        mode = str(args.get("mode") or "verify")
         target = str(args.get("target") or "gate")
         argv: list[str] = [sys.executable, str(script), "--repo", str(repo)]
         if mode == "verify":
