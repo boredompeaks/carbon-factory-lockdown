@@ -588,7 +588,8 @@
       "roles": [
         "auditor",
         "builder",
-        "hacker"
+        "hacker",
+        "compliance"
       ],
       "args": {
         "type": "object",
@@ -843,7 +844,8 @@
       "description": "Gate/invariant control run; orchestrator is verify-only.",
       "roles": [
         "auditor",
-        "orchestrator"
+        "orchestrator",
+        "compliance"
       ],
       "args": {
         "type": "object",
@@ -1592,7 +1594,8 @@
       "roles": [
         "auditor",
         "orchestrator",
-        "release-engineer"
+        "release-engineer",
+        "compliance"
       ],
       "args": {
         "type": "object",
@@ -1715,7 +1718,8 @@
       "name": "harness.verify",
       "description": "check_harness_config + policy manifest verification (read-only).",
       "roles": [
-        "orchestrator"
+        "orchestrator",
+        "compliance"
       ],
       "args": {
         "type": "object",

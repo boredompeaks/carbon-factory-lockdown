@@ -5,7 +5,11 @@ mode: subagent
 temperature: 0.1
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: tool, resource: "check.run", effect: allow }
   - { action: tool, resource: "code.write", effect: allow }
+  - { action: tool, resource: "drain.validate", effect: allow }
+  - { action: tool, resource: "gate.control", effect: allow }
+  - { action: tool, resource: "harness.verify", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }
@@ -217,6 +221,10 @@ permissions:
 ## Tool surface
 
 - Use `code.write` for the section table only under `backend/docs/compliance/*`; no other writes.
+- Use `harness.verify` to verify `harness_config` or `policy_manifest` before recording sweep evidence.
+- Use `drain.validate` in `verify` mode to check drain stages R1-R5 before verdict or release.
+- Use `gate.control` in `run` or `verify` mode to check gate/policy-digest/drain/manifest state for the sweep evidence.
+- Use `check.run` with `check_id: "POLICY_DIGEST"` for the policy-digest sweep evidence at the checked tree.
 - Use `basemind_code` (`code.search{mode:grep}`) instead of ad-hoc reading to verify spec-vs-code.
 - Use `basemind_git` for indexed history/diff questions only; never for mutations.
 - Use `basemind_graph` for architecture questions instead of ad-hoc reading.

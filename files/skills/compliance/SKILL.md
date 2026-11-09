@@ -16,10 +16,10 @@ check.run({ check_id: "POLICY_DIGEST", tree: "<40-hex-sha>", engine: "sqlite"|"p
 `serves:` read-only evidence review (the harness-config, drain, gate-control and policy-digest pass; it backs `GATE_CONTROLS`, `POLICY_DIGEST` and the drain-lineage verdict rather than a single check id). Compliance writes its evidence via `code.write` (`backend/docs/compliance/*`).
 
 `args:`
-- `harness.verify`: `{ scope }` (`harness_config`|`policy_manifest`). Orchestrator only.
-- `drain.validate`: `{ stage, record_hash?, mode? }` (`stage` `R1`-`R5`; `record_hash` ^[a-f0-9]{64}$; `mode` `verify`). Auditor/orchestrator/release-engineer.
-- `gate.control`: `{ target, mode? }` (`target` `gate`|`impl`|`policy_digest`|`gate_impl`|`drain`|`manifest`; `mode` `run`|`verify`). Auditor `run`, orchestrator `verify`.
-- `check.run`: `{ check_id: "POLICY_DIGEST", tree, engine }` (`tree` ^[a-f0-9]{40}$; `engine` `sqlite`|`postgres`|`none`). Runners builder, auditor, ci.
+- `harness.verify`: `{ scope }` (`harness_config`|`policy_manifest`). Orchestrator, compliance (A6 sweep).
+- `drain.validate`: `{ stage, record_hash?, mode? }` (`stage` `R1`-`R5`; `record_hash` ^[a-f0-9]{64}$; `mode` `verify`). Auditor/orchestrator/release-engineer/compliance (A6 sweep).
+- `gate.control`: `{ target, mode? }` (`target` `gate`|`impl`|`policy_digest`|`gate_impl`|`drain`|`manifest`; `mode` `run`|`verify`). Auditor `run`, orchestrator `verify`, compliance `run`/`verify` (A6 sweep).
+- `check.run`: `{ check_id: "POLICY_DIGEST", tree, engine }` (`tree` ^[a-f0-9]{40}$; `engine` `sqlite`|`postgres`|`none`). Runners builder, auditor, ci, compliance (A6 POLICY_DIGEST sweep).
 - `code.write`: `{ path, content, encoding?: "utf-8" }` (`path` under `backend/docs/compliance/*`). Compliance scope only.
 
 `output schema:` one verdict per tool — `harness.verify` scope PASS/FAIL, `drain.validate` `PASS`|`FAIL` with `records_checked`/`problems`, `gate.control` chain PASS/FAIL with `problems`, `check.run` `POLICY_DIGEST` `RESULT` with `digest`/`files`/`match`. The sweep verdict block aggregates them.
@@ -39,4 +39,4 @@ drain.validate({ stage: "R1", mode: "verify" })
 gate.control({ target: "gate", mode: "verify" })
 check.run({ check_id: "POLICY_DIGEST", tree: "12c96d1117c1a581eafe4a5c780a12f45808e30c", engine: "none" })
 ```
-`verified:` 2026-11-08, tool names per registry (`harness.verify`, `drain.validate`, `gate.control`, `check.run`, `code.write`); stale-seal propagation retained as a failure mode.
+`verified:` 2026-11-09 (A6), tool names per registry (`harness.verify`, `drain.validate`, `gate.control`, `check.run`, `code.write`); registry grants compliance all five; stale-seal propagation retained as a failure mode.
