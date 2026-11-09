@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T14:02:23Z",
+  "created_at": "2026-11-09T14:32:54Z",
   "file_count": 269,
   "files": [
     {
@@ -28,15 +28,15 @@
     },
     {
       "path": "agent:files/auditor.md",
-      "sha256": "f3f4c3cdfd29a844ac8e0dad3626ff1328212273b93b8d43a5477b57179cc17e"
+      "sha256": "c91a5bb4ccf53709bdd4ee6cd0bb295d3031e992da03af55bebd2db15b3fcbca"
     },
     {
       "path": "agent:files/builder.md",
-      "sha256": "9186c3832f59305b582e859d403b63cc63afee87a730f46ad069e09a28ad6c9e"
+      "sha256": "579e7b2b2225e866b799b88dd31b87444bac8979ef7cc6577107519f02a612a3"
     },
     {
       "path": "agent:files/compliance.md",
-      "sha256": "a54edf6659872eda62f4c92741ff91c193565cd0f49f1693d1c589bf0e3b7cf4"
+      "sha256": "7192f1195f5a6d2ac130d38bbd886a7058710fb9a8b1974d97be62645d1512fa"
     },
     {
       "path": "agent:files/crouton-alpha.md",
@@ -44,15 +44,15 @@
     },
     {
       "path": "agent:files/hacker.md",
-      "sha256": "e7e2e74b3b187b8443d18d354aa8558798c127d5672d92d6f0cd2d7f2d3b8211"
+      "sha256": "7e3247fb981fafdd16deea188978fef0bab4c83c4a18e197300b02119ec714ed"
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "40dd6ae35c2a3b83567f6bf205c32b76b8b0722690e2b58ce61ec0c71cfd72fc"
+      "sha256": "ee7976d3c782d83b12e4bfbe792e3189549b9fab1862dfd1a163c2628f1ab356"
     },
     {
       "path": "agent:files/release-engineer.md",
-      "sha256": "282590eba6ab25a716e7212e9a7a065b73bc67d13b040a4de73d29d481c9abb4"
+      "sha256": "30d9ea91fd62c08749556ecf164e0ed89fb2495b92564f50c8a7b9efcf2801ce"
     },
     {
       "path": "docker:files/docker/k1/Dockerfile",
@@ -660,23 +660,23 @@
     },
     {
       "path": "harness:.opencode/plugins/agt.js",
-      "sha256": "41b0d3b33edb17b357ff1a07c47cc3fcee0e3e41335c3ff880c59ea841831cb9"
+      "sha256": "bbeb9fd65cdebbb1b948a74f612d6a091f8ddb9b080ddf0600c085ad11e43ed5"
     },
     {
       "path": "harness:opencode.json",
-      "sha256": "e29902468ece715188e4ca879dc1ab5c6e85e0c3097db0e48fd57efece4fe352"
+      "sha256": "ab67dc6547cc1b5f932b1e2f6a333c95d86de91016f0f471a76df4f08e2421b4"
     },
     {
       "path": "installed_agent:.opencode/agents/auditor.md",
-      "sha256": "f3f4c3cdfd29a844ac8e0dad3626ff1328212273b93b8d43a5477b57179cc17e"
+      "sha256": "c91a5bb4ccf53709bdd4ee6cd0bb295d3031e992da03af55bebd2db15b3fcbca"
     },
     {
       "path": "installed_agent:.opencode/agents/builder.md",
-      "sha256": "9186c3832f59305b582e859d403b63cc63afee87a730f46ad069e09a28ad6c9e"
+      "sha256": "579e7b2b2225e866b799b88dd31b87444bac8979ef7cc6577107519f02a612a3"
     },
     {
       "path": "installed_agent:.opencode/agents/compliance.md",
-      "sha256": "a54edf6659872eda62f4c92741ff91c193565cd0f49f1693d1c589bf0e3b7cf4"
+      "sha256": "7192f1195f5a6d2ac130d38bbd886a7058710fb9a8b1974d97be62645d1512fa"
     },
     {
       "path": "installed_agent:.opencode/agents/crouton-alpha.md",
@@ -684,15 +684,15 @@
     },
     {
       "path": "installed_agent:.opencode/agents/hacker.md",
-      "sha256": "e7e2e74b3b187b8443d18d354aa8558798c127d5672d92d6f0cd2d7f2d3b8211"
+      "sha256": "7e3247fb981fafdd16deea188978fef0bab4c83c4a18e197300b02119ec714ed"
     },
     {
       "path": "installed_agent:.opencode/agents/orchestrator.md",
-      "sha256": "40dd6ae35c2a3b83567f6bf205c32b76b8b0722690e2b58ce61ec0c71cfd72fc"
+      "sha256": "ee7976d3c782d83b12e4bfbe792e3189549b9fab1862dfd1a163c2628f1ab356"
     },
     {
       "path": "installed_agent:.opencode/agents/release-engineer.md",
-      "sha256": "282590eba6ab25a716e7212e9a7a065b73bc67d13b040a4de73d29d481c9abb4"
+      "sha256": "30d9ea91fd62c08749556ecf164e0ed89fb2495b92564f50c8a7b9efcf2801ce"
     },
     {
       "path": "policy:files/policies/assert-rules.json",
@@ -768,7 +768,7 @@
     },
     {
       "path": "policy:files/policies/redaction.json",
-      "sha256": "a4c31530c11e558c0a7a64847f82551bd86d25b8876f1e092f377248f397b6db"
+      "sha256": "2bf2d4d8dfaf2f549d17755fd4b9442d6c1793bf8ead4a852144426891d59fb7"
     },
     {
       "path": "policy:files/policies/reuse.json",
@@ -1084,17 +1084,17 @@
     }
   ],
   "digests": {
-    "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
+    "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "81bab309a8940913bb4a38118c008196e0d798d6b47ba64c7a40a7fa5eb92d23"
+    "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4"
   },
   "gate_control": {
-    "record": "0021-d2893f8b5684.json",
-    "record_hash": "27402a862cdedbe63a6073b995cfd59ef3cdbbde28b715b97281a3ca1a3bfdd3",
-    "gate_sha": "d2893f8b5684166edfafde41e43caebdebd3e493",
-    "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
+    "record": "0020-901f7c7d9e41.json",
+    "record_hash": "ae7c2ad85d4998b9d433bed92b039d5c108a70583e76868440a9b699251bae7d",
+    "gate_sha": "901f7c7d9e41eb116f15a4072cfaca7df604c1f6",
+    "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "81bab309a8940913bb4a38118c008196e0d798d6b47ba64c7a40a7fa5eb92d23",
+    "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4",
     "result": "PASS"
   },
   "drift": [],
@@ -1189,5 +1189,5 @@
       ]
     }
   },
-  "manifest_sha": "54c60ccf1111c66dcb593cb0d810d4220303e82163316fa75d76f176da9aef3e"
+  "manifest_sha": "8c8b2070883f1457c9a2d62680eb684c161d5359b25b86493b7d781254941426"
 }

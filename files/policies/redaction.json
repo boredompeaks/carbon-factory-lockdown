@@ -148,8 +148,10 @@
       "^pay_[0-9a-f]{16}$",
       "^ref_[0-9a-f]{16}$",
       "^/work/",
-      "^/repo/"
+      "^/repo/",
+      "^/[^\\s]*/quality/ledger/[a-z-]+/[0-9]{4}-[0-9a-f]{12}(\\.json)?$",
+      "^/[^\\s]*/files/quality/ledger/[a-z-]+/[0-9]{4}-[0-9a-f]{12}(\\.json)?$"
     ],
-    "runner_contract": "Replacement steps must consult this allowlist before the high-entropy fallback (so session and CSRF tokens still fail closed while K1 fixture constants pass). Runner implementation is 6B-0 server code (files/tools/redaction_runner.py); this change is policy-only."
+    "runner_contract": "Replacement steps must consult this allowlist before the high-entropy fallback (so session and CSRF tokens still fail closed while K1 fixture constants pass). Runner implementation is 6B-0 server code (files/tools/redaction_runner.py); this change is policy-only. POSIX absolute ledger-record paths are allowlisted (length/entropy can exceed the Windows short path on Linux; the token is a path, not a secret)."
   }
 }
