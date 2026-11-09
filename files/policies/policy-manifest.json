@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T08:54:40Z",
+  "created_at": "2026-11-09T09:05:04Z",
   "file_count": 265,
   "files": [
     {
@@ -952,7 +952,7 @@
     },
     {
       "path": "skill:.opencode/skills/hacker-exploit/SKILL.md",
-      "sha256": "d7f2a12703436a965f28c20b99e8d10be81cd86a70a849d26e5953fda83e31e1"
+      "sha256": "2bcda47a66bc25f3469adb4962c1d8c3bf7eb21c09ca64878e14aca2d07a9e11"
     },
     {
       "path": "skill:.opencode/skills/k1-sandbox/SKILL.md",
@@ -968,11 +968,11 @@
     },
     {
       "path": "sop:files/sop/orchestrator.md",
-      "sha256": "7636537ed443a7e0aa3d5a430c3d48e700c64913e383a7dba2aa39e06a9e9b4e"
+      "sha256": "2f5f07ff5649e34aade697d8efd18258e0c795b1169e6884c02f4682cdd62915"
     },
     {
       "path": "sop:files/sop/release-engineer.md",
-      "sha256": "fd2ef8d04ca46f2fc80a0910ba5411b59a54dc8927573ca9ec18f178b23f4d35"
+      "sha256": "ef975c3a2522dc4eb286f47c6f49c546a19582057b01da68daef4e976b41da92"
     },
     {
       "path": "tool:files/tools/agt_audit.py",
@@ -1073,9 +1073,9 @@
     "gate_impl_digest": "28f37e3afef3c02baf9afe8f22c12169ad6bc588b5ece154d9708614527182ad"
   },
   "gate_control": {
-    "record": "0015-57de7b8572e9.json",
-    "record_hash": "b4c809674962d147ef83fec47fbbc340141de6e38513c13357e6f586f89f8137",
-    "gate_sha": "57de7b8572e9191ea6adeeb77bfee37d0226e2c4",
+    "record": "0016-e907a35315b5.json",
+    "record_hash": "7f8039a76dd31edb2fbd649b46db0034c7dc741c0a3fd83ee99dfccec1b3b126",
+    "gate_sha": "e907a35315b575118b67c1886018741789fee115",
     "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "28f37e3afef3c02baf9afe8f22c12169ad6bc588b5ece154d9708614527182ad",
@@ -1173,5 +1173,5 @@
       ]
     }
   },
-  "manifest_sha": "a8316fa2b50783f9b4d0c987dac832bfb5e67ccbddde4a74007e16631775ffab"
+  "manifest_sha": "e10f415c62c330b008c3b05296439d444950c7ae2de46b28464b01658cec45f8"
 }
