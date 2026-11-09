@@ -262,6 +262,12 @@ def _probe(server, tool: str, role: str, args: dict) -> dict:
         })
     blocked_distinct = count_distinct_blocked(records)
     distinct = count_distinct(records)
+    min_probes = min_probes_for(item_id, variant)
+    if distinct < min_probes:
+        raise Reject(
+            "REJECT_PRECONDITION",
+            f"under-probe: distinct {distinct} < min_probes {min_probes} for {item_id!r} ({variant})",
+        )
     refuted = can_refute(records, item_id, variant)
     reproduced = any(r.get("outcome") == "reproduced" for r in records)
     if refuted:
@@ -283,7 +289,7 @@ def _probe(server, tool: str, role: str, args: dict) -> dict:
             "total": len(records),
             "blocked_distinct": blocked_distinct,
             "distinct": distinct,
-            "min_probes": min_probes_for(item_id, variant),
+            "min_probes": min_probes,
             "refuted": 1 if refuted else 0,
         },
         "attempted": len(records),

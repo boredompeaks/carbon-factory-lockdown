@@ -18,7 +18,7 @@ audited worktree; `$PY` = `$REPO/backend/venv/bin/python` on Linux, `$REPO\backe
    command. Do not try alternate paths, shell tricks, or a different image
    source.
 
-1. **Pin the tree.** `git -C $REPO rev-parse HEAD` and `git -C $REPO branch --show-current`.
+1. **Pin the tree.** `git.state({ fields: ["head", "branch"] })`.
    Expected: the exact dispatch SHA; a branch, not `HEAD` detached.
    Parse: the 40-char SHA string. Stop if it differs from the capability record.
 
@@ -34,28 +34,28 @@ audited worktree; `$PY` = `$REPO/backend/venv/bin/python` on Linux, `$REPO\backe
 
 4. **Implement the smallest change that satisfies the ticket.**
    Command: the `edit`/`write` tool on the scoped files only.
-   Expected: `git -C $REPO status --porcelain` lists only scoped paths.
+   Expected: `git.state({ fields: ["clean"] })` lists only scoped paths.
    Parse: the porcelain lines. Stop if an out-of-scope file appears.
 
 5. **Migration state.** `cd $REPO/backend; $PY manage.py makemigrations --check --dry-run`.
    Expected: `No changes detected`, exit 0. Parse: that line.
    Stop if it proposes a change you did not write by hand.
 
-6. **Targeted suites.** `$PY manage.py test <ticket labels> --noinput`.
+6. **Targeted suites.** `check.run({ check_id: "SUITE", tree: "<capability.tree>", engine: "postgres" })`.
    Expected: `Ran <N> tests in <t>s` followed by `OK`.
    Parse: the summary pair; the shell exit is corroboration, never the verdict.
    Stop if `FAILED (...)` or if the summary is missing.
 
-7. **Full app suite.** `$PY manage.py test orders --noinput`.
+7. **Full app suite.** `check.run({ check_id: "SUITE", tree: "<capability.tree>", engine: "postgres" })`.
    Expected: `OK`; pre-existing unrelated failures are named verbatim and not
    chased. Stop only on failures inside the touched surface.
 
 8. **Format and lint the touched Python.**
-   `$PY -m ruff check <touched .py>` and `$PY -m ruff format --check <touched .py>`.
+   `check.run({ check_id: "CONVENTION", tree: "<capability.tree>", engine: "none" })`.
    Expected: `All checks passed!` and `N files already formatted`. Parse both.
 
 9. **Concurrency on the real engine.**
-   `DATABASE_URL='postgresql://perfume:pg2a_local_test_only@127.0.0.1:5432/perfume_store' $PY manage.py test <race class> --keepdb -v 2 --noinput`.
+   `check.run({ check_id: "THREAD_RACE", tree: "<capability.tree>", engine: "postgres" })`.
    Expected per run: `Ran 1 test` + `OK`. Repeat N times (high: 5 builder reps).
    Decision: any flake or red rep is a BLOCK; do not average it away.
 
@@ -64,8 +64,7 @@ audited worktree; `$PY` = `$REPO/backend/venv/bin/python` on Linux, `$REPO\backe
     Expected: identical to step 2. Stop if it differs.
 
 11. **Commit only the change set.**
-    `git -C $REPO add -- <explicit paths>` then
-    `git -C $REPO commit -m "<scope>: <summary>"`. Verify `git log --oneline -1`.
+    `git.commit({ message: "<scope>: <summary>", tree: "<capability.tree>", paths: [...] })`. Verify `git.log({ limit: 1 })`.
     Expected: one commit, the staged paths only. Stop before any merge.
 
 12. **Hand off.** Report per step: command, exit code, parsed line. Name the
@@ -77,8 +76,9 @@ suite; a required check red or BLOCKED that you have not named.
 
 ## Lane / integration topology (permanent)
 
-- Worktrees: `lane/a` at `<lane-a-worktree>`, `lane/b` at `wt-async`, integration
-  `spec-comp` at `<worktree>`. `feat/add-frontend` is the promotion target and is
+- Worktrees (resolve via `files/policies/worktree-map.json`): `lane/a` at `#lane/a`,
+  `lane/b` at `#lane/b`, integration
+  `spec-comp` at `#spec-comp`. `feat/add-frontend` is the promotion target and is
   never committed or pushed directly.
 - Work only in the worktree/branch named by the capability. Never cut a
   per-task branch; lanes and `spec-comp` are permanent.

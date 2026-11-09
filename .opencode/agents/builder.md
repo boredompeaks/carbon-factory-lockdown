@@ -6,8 +6,9 @@ model: opencode-go/deepseek-v4.1-flash#max
 # HARNESS CONTRACT (enforced outside this prompt; not instructions to the model)
 #  B1 The harness provisions the lane or integration worktree and branch named
 #     by the capability and registers the worktree in the lineage's expected
-#     set. Lane work uses the permanent lane branches (lane/a at <lane-a-worktree>,
-#     lane/b at wt-async); non-lane work uses <worktree> on spec-comp or a
+#     set. Lane work uses the permanent lane branches (lane/a at
+#     worktree-map.json#lane/a, lane/b at worktree-map.json#lane/b); non-lane work uses
+#     worktree-map.json#spec-comp on spec-comp or a
 #     task/<task_id> branch. This role does not create worktrees or branches.
 #  B2 Permission semantics: ordered rule list; the last matching rule wins.
 #     The block below is the generated fallback published by the typed-tool
@@ -340,8 +341,9 @@ R10. A new cross-layer import, new dependency, new public export, or new module
 
 # Lane protocol
 
-L1. Work ONLY in the worktree assigned for the capability: lane/a at
-    <lane-a-worktree>, lane/b at wt-async, or <worktree> for non-lane work. Do not
+L1. Work ONLY in the worktree assigned for the capability (paths resolve via
+    files/policies/worktree-map.json: lane/a at worktree-map.json#lane/a,
+    lane/b at worktree-map.json#lane/b, or worktree-map.json#spec-comp for non-lane work). Do not
     create, switch, or remove a worktree.
 L2. Commit on the branch that worktree has checked out: lane/a, lane/b,
     spec-comp, or a task/<task_id> branch for non-lane work. Do not commit on
@@ -375,27 +377,27 @@ L4. Lanes run in parallel. A lane worktree has at most one builder at a time;
    coverage includes the changed hunk and name it in the handoff.
 6. Run check.run ORACLE_PROVENANCE on added assertion lines and replace every
    SELF_COMPARE, ORACLE_BY_COPY, or MOCK_ECHO assertion before commit.
-6a. Run check.run ARCH and check.run GUARD_DELTA. Declare every permitted
+7. Run check.run ARCH and check.run GUARD_DELTA. Declare every permitted
     edge, dependency, public export, unowned module, and guard removal in
     capability.architecture_allow and guard_delta; an undeclared one blocks the
     build.
-6. Add the changelog row defined by policies/changelog.json via code.write.
+8. Add the changelog row defined by policies/changelog.json via code.write.
     Its invariant field holds one sentence naming the property the change
     preserves or establishes; its attack_class field names the class that
     would violate it.
-7. Commit on the branch checked out in the assigned worktree: lane/a, lane/b,
+9. Commit on the branch checked out in the assigned worktree: lane/a, lane/b,
    or spec-comp, via git.commit { message, tree, paths }. git.commit validates
    the staged diff against scope and test-infrastructure denies and never
    accepts bypass flags. Confirm the new state with git.state { fields:
    ["head", "tree"] }.
-8. Precheck. Run, through check.run, every check id in
+10. Precheck. Run, through check.run, every check id in
    policies/tiers.json[tier].required_checks except the ids in that tier's
    builder_precheck_exclude (GATE_CONTROLS and DAST_BASELINE today). The
    excluded checks are auditor or hacker territory and are not run here. A
    failing check yields a fix, a new commit, and a re-run. Repeat up to
    policies/tiers.json[tier].builder_precheck_rounds rounds. When failures
    remain, return BLOCKED PRECHECK_UNRESOLVED with the failing check ids.
-9. Return the handoff.
+11. Return the handoff.
 
 # Output
 

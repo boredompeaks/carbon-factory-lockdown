@@ -34,6 +34,29 @@ The manifest is **not** a gate input and must never be added to
 `policy_digest.COVERED` (that would make the digest self-referential and
 invalidate on every manifest write).
 
+### The structural +1 rule — manifest.record vs the newest seal (P1-2)
+
+`files/policies/policy-manifest.json` lives under `policies/**`, which is one
+of `gate_paths` in `files/policies/gate.json` (`tools/**`, `policies/**`,
+`.github/workflows/**`), and `gate_sha` is `git log -1` over those paths
+(`gate_control.gate_sha`) — so the manifest itself is a gate-path input.
+Step order (§3A) is: seal (step 5, `gate_control.py --write`) → manifest
+write (step 9, `scripts/policy_manifest.py --write`). The manifest therefore
+always records the seal that precedes it: `manifest.gate_control.record`
+(`policy_manifest.newest_record()` in `scripts/policy_manifest.py`) is the
+newest seal minus the manifest's own commit, and committing the manifest
+advances `gate_sha`, so the next seal is structurally one ahead. Expected
+steady state after a clean seal → manifest → commit cycle: `manifest.record`
+lags the newest seal by **exactly one** (e.g. newest `0023-*.json`,
+`manifest.record` `0022-*.json`). That lag is not drift. **Freshness is digest
+equality, not record-id equality**: `policy_digest`, `control_set_sha`, and
+`gate_impl_digest` must match between `manifest.gate_control` / `manifest.digests`
+(`policy_manifest.verify()` compares live digests) and the newest gate-control
+record. Record-id equality can never hold post-commit and must never be
+required. A lag greater than one (or any digest mismatch) means a re-seal
+happened without a manifest refresh (or vice versa) — re-run
+`scripts/policy_manifest.py --write`, then `gate_control.py --verify-chain`.
+
 Current manifest: `policy-manifest/2`, **180 files**, `owner_only: true`,
 `manifest_sha` recomputes over the body minus itself, and
 `scripts/check_harness_config.py` runs `policy_manifest.py --verify` as one of
@@ -78,10 +101,13 @@ files/<role>.md  ──byte-identical──>  .opencode/agents/<role>.md
    `python scripts/control_mutation.py --all`.
 3. Dry-run `python files/tools/gate_control.py`; require `result=PASS`.
 4. Back up `files/quality/ledger/gate-control` outside the scan directory.
-5. `python files/tools/gate_control.py --write` → new record.
+5. `python files/tools/gate_control.py --write` → new record (on success it
+   auto-appends the seal block to `files/drain/refund-cluster/SIGNING.md`;
+   if the append fails the run errors instead of claiming success).
 6. Re-seal the drain chain to the new `policy_digest`: R1 → R2 → R3
    (`prev_hash` then `record_hash`), capability, dispatch evidence, R4 artifact.
-7. Append `SIGNING.md` (old → new digest, record id, reason).
+7. Confirm the auto-appended `SIGNING.md` block (record id + digests + result);
+   hand-append only for seals predating the auto-append (P1-3).
 8. `gate_control.py --verify <new>`, `--verify-chain`, `validatedrain.py`.
 9. `python scripts/policy_manifest.py --write`.
 10. If `.agt/policy.json`, `opencode.json`, a tool body, or a fixture also
@@ -165,6 +191,10 @@ attribute only stops accidental writes. Do not claim OS isolation.
 - **Gate-control record** — append-only, `prev_hash` → `record_hash`, newest is
   the only PASS; older records are `SUPERSEDED`. It carries the four hashes and
   the observed outcome of every control.
+- **Fail actions (P3-2 note):** all 24 checks in `files/policies/checks.json`
+  are `fail_action: BLOCK` — there is no WARN tier. P3-residual severity is
+  informational-only and never a PASS (see `files/policies/severity.json`:
+  blocking P1/P2, residual P3). This note documents the gate; it does not alter it.
 - **Drain chain** — R1 → R2 → R3 `prev_hash` links; `validatedrain.py` checks
   schema, tree identity, live `policy_digest`, capability, dispatch evidence,
   R3 repro file, and the newest seal.

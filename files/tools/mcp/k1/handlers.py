@@ -583,6 +583,9 @@ def _up_native(server, tool: str, args: dict) -> dict:
         _wait_until(docker, pg, [docker, "exec", pg, "pg_isready", "-U", "postgres", "-d", "k1"], "pg_isready")
         out_lines.append(f"pg: {pg} ready ({pg_ref}, tmpfs /var/lib/postgresql/data)")
         # --- app (read-only, user 10001, tmpfs /tmp,/run,/work,/home/k1) ---
+        # /work is rw,exec (must execute built artifacts); compensating
+        # controls: internal-only net, read-only rootfs, cap-drop ALL,
+        # no-new-privileges, non-root; other tmpfs stay noexec,nosuid,nodev.
         app_run_argv = [
             docker, "run", "-d", "--name", app, "--network", net,
             "--read-only", "--user", "10001:10001",
@@ -609,7 +612,7 @@ def _up_native(server, tool: str, args: dict) -> dict:
         _wait_until(docker, app, [docker, "exec", app, "python", "-c", _HEALTH_PY], "app /health")
         out_lines.append(f"app: {app} healthy (fake provider http://127.0.0.1:8081)")
         out_lines.append(f"k1 up: {run_id} app={app} pg={pg} net={net}")
-    except Reject:
+    except BaseException:  # noqa: BLE001 - rollback then re-raise; cancellation preserved
         # Rollback (mirror k1_up.ps1 catch): remove created resources only.
         if created["app"]:
             _try_run([docker, "rm", "-f", app], timeout=60)
@@ -684,6 +687,16 @@ def _copy_artifacts_native(docker: str, app: str, run_dir: Path) -> tuple[str, s
     return "copied", ""
 
 
+def _best_effort_run(argv: list[str], timeout: int, errors: list[str], pending: list[BaseException] | None = None) -> subprocess.CompletedProcess:
+    try:
+        return _run(argv, timeout=timeout)
+    except BaseException as exc:  # noqa: BLE001 - teardown continues; cancellation re-raised after cleanup
+        detail = str(getattr(exc, "detail", exc)); errors.append(detail)
+        if pending is not None and (not isinstance(exc, Exception) or type(exc).__name__ == "CancelledError"):
+            pending.append(exc)
+        return subprocess.CompletedProcess(argv, 1, stdout="", stderr=detail)
+
+
 def _down_native(server, tool: str, args: dict) -> dict:
     """Native ``k1_down.ps1`` equivalent (artifacts, rm -f, net, run dir)."""
     run_id = _check_run_id(str(args.get("run_id", "")))
@@ -697,66 +710,107 @@ def _down_native(server, tool: str, args: dict) -> dict:
     lines: list[str] = []
     last_argv: list[str] | None = None
     last_proc = None
-    # Artifacts before the container goes away (best-effort, like .ps1).
-    if _docker_exists(docker, "container", app):
+    down_errors: list[str] = []
+    pending: list[BaseException] = []
+
+    def _exists(kind: str, name: str) -> bool:
         try:
-            run_dir.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            pass
-        status, msg = _copy_artifacts_native(docker, app, run_dir)
-        if status == "copied":
-            lines.append(f"artifacts: copied to {run_dir / 'artifacts'}")
-        elif status == "none":
-            lines.append(f"artifacts: none in {app} (ok)")
+            return _docker_exists(docker, kind, name)
+        except BaseException as exc:  # noqa: BLE001 - continue teardown, re-raised after cleanup
+            detail = str(getattr(exc, "detail", exc))
+            down_errors.append(detail)
+            if not isinstance(exc, Exception) or type(exc).__name__ == "CancelledError":
+                pending.append(exc)
+            return True
+
+    try:
+        # Artifacts before the container goes away (best-effort, like .ps1).
+        if _exists("container", app):
+            try:
+                run_dir.mkdir(parents=True, exist_ok=True)
+            except BaseException as exc:  # noqa: BLE001 - continue teardown, re-raised after cleanup
+                detail = str(getattr(exc, "detail", exc))
+                down_errors.append(detail)
+                if not isinstance(exc, Exception) or type(exc).__name__ == "CancelledError":
+                    pending.append(exc)
+            try:
+                status, msg = _copy_artifacts_native(docker, app, run_dir)
+            except BaseException as exc:  # noqa: BLE001 - continue teardown, re-raised after cleanup
+                detail = str(getattr(exc, "detail", exc))
+                down_errors.append(detail)
+                if not isinstance(exc, Exception) or type(exc).__name__ == "CancelledError":
+                    pending.append(exc)
+                status, msg = "failed", detail
+            if status == "copied":
+                lines.append(f"artifacts: copied to {run_dir / 'artifacts'}")
+            elif status == "none":
+                lines.append(f"artifacts: none in {app} (ok)")
+            else:
+                lines.append(f"artifacts: copy failed (continuing): {msg}")
         else:
-            lines.append(f"artifacts: copy failed (continuing): {msg}")
-    else:
-        lines.append(f"app container {app}: not found (ok)")
-    for name in (app, pg):
-        if _docker_exists(docker, "container", name):
-            argv = [docker, "rm", "-f", name]
-            proc = _run(argv, timeout=120)
+            lines.append(f"app container {app}: not found (ok)")
+        for name in (app, pg):
+            if _exists("container", name):
+                argv = [docker, "rm", "-f", name]
+                proc = _best_effort_run(argv, 120, down_errors, pending)
+                last_argv, last_proc = argv, proc
+                lines.append(
+                    f"container {name}: removed" if proc.returncode == 0
+                    else f"container {name}: remove failed (continuing)"
+                )
+            else:
+                lines.append(f"container {name}: not found (ok)")
+        if _exists("network", net):
+            argv = [docker, "network", "rm", net]
+            proc = _best_effort_run(argv, 60, down_errors, pending)
             last_argv, last_proc = argv, proc
             lines.append(
-                f"container {name}: removed" if proc.returncode == 0
-                else f"container {name}: remove failed (continuing)"
+                f"network {net}: removed" if proc.returncode == 0
+                else f"network {net}: remove failed (continuing)"
             )
         else:
-            lines.append(f"container {name}: not found (ok)")
-    if _docker_exists(docker, "network", net):
-        argv = [docker, "network", "rm", net]
-        proc = _run(argv, timeout=60)
-        last_argv, last_proc = argv, proc
-        lines.append(
-            f"network {net}: removed" if proc.returncode == 0
-            else f"network {net}: remove failed (continuing)"
-        )
-    else:
-        lines.append(f"network {net}: not found (ok)")
-    if run_dir.exists():
-        if keep_artifacts:
-            lines.append(f"run dir: kept {run_dir} (-KeepArtifacts)")
+            lines.append(f"network {net}: not found (ok)")
+        if run_dir.exists():
+            if keep_artifacts:
+                lines.append(f"run dir: kept {run_dir} (-KeepArtifacts)")
+            else:
+                try:
+                    shutil.rmtree(run_dir, ignore_errors=True)
+                except OSError:
+                    pass
+                lines.append(f"run dir: removed {run_dir}")
         else:
-            try:
-                shutil.rmtree(run_dir, ignore_errors=True)
-            except OSError:
+            lines.append(f"run dir: not found (ok) {run_dir}")
+    finally:
+        try:
+            _leases(server).pop(run_id, None)
+        except BaseException as exc:  # noqa: BLE001 - prefer original pending over cleanup error
+            down_errors.append(str(getattr(exc, "detail", exc)))
+            if pending:
                 pass
-            lines.append(f"run dir: removed {run_dir}")
-    else:
-        lines.append(f"run dir: not found (ok) {run_dir}")
-    _leases(server).pop(run_id, None)
-    after = _any_exists(server, run_id)
+            elif not isinstance(exc, Exception) or type(exc).__name__ == "CancelledError":
+                pending.append(exc)
+            else:
+                raise
+    try:
+        after = _any_exists(server, run_id)
+    except BaseException as exc:  # noqa: BLE001 - first pending wins, probe/verdict still guarded
+        down_errors.append(str(getattr(exc, "detail", exc)))
+        if not pending:
+            pending.append(exc)
+        after = True
     if last_argv is None or last_proc is None:
         # Nothing to remove: still report a real executed argv as evidence.
         last_argv = [docker, "inspect", app]
-        probe_proc = _run(last_argv, timeout=30)
-        last_proc = probe_proc
+        last_proc = _best_effort_run(last_argv, 30, down_errors, pending)
+    if pending:
+        raise pending[0]
     reaped = bool(before) and not after
     return {
         "tool": tool, "run_id": run_id,
         "executed": True, "reaped": reaped, "lease": False,
         "before": bool(before), "after": bool(after),
-        "stdout": _trunc("\n".join(lines)), "stderr": "",
+        "stdout": _trunc("\n".join(lines)), "stderr": _trunc("; ".join(down_errors)),
         "evidence": _evidence(last_argv, last_proc),
     }
 
@@ -887,11 +941,13 @@ def _down(server, tool: str, args: dict) -> dict:
     before = _any_exists(server, run_id)
     argv = [ps, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script),
             "-RunId", run_id]
-    proc = _run(argv)
-    if proc.returncode != 0:
-        detail = _trunc((proc.stderr or proc.stdout or "").strip(), 1000)
-        raise Reject("REJECT_PRECONDITION", f"k1_down failed (exit {proc.returncode}): {detail}")
-    _leases(server).pop(run_id, None)
+    try:
+        proc = _run(argv)
+        if proc.returncode != 0:
+            detail = _trunc((proc.stderr or proc.stdout or "").strip(), 1000)
+            raise Reject("REJECT_PRECONDITION", f"k1_down failed (exit {proc.returncode}): {detail}")
+    finally:
+        _leases(server).pop(run_id, None)
     after = _any_exists(server, run_id)
     reaped = bool(before) and not after
     return {

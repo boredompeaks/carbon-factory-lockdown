@@ -518,9 +518,9 @@ branch you audited:
 
 | audited branch | worktree |
 |---|---|
-| lane/a | <lane-a-worktree> |
-| lane/b | wt-async |
-| spec-comp | <worktree> |
+| lane/a | worktree-map.json#lane/a |
+| lane/b | worktree-map.json#lane/b |
+| spec-comp | worktree-map.json#spec-comp |
 
 Invoke git.push_ref { ref: refs/heads/<branch>, expected_head: <audited
 head> } once. The implementation uses the explicit refspec

@@ -58,9 +58,9 @@ Usage:
   python files/tools/mcp/gen_perms.py --out FILE      # write file (LF, utf-8)
 
 Inputs are registry.json + matrix.csv (defaults resolved relative to
-this file). controls.json, when present next to the registry, is read
-only to assert every emitted tool has at least one negative control;
-its absence does not fail generation.
+this file). controls.json next to the registry is REQUIRED: it asserts
+every emitted tool has at least one negative control. A missing,
+unreadable, or invalid controls.json is FATAL (exit 2).
 """
 from __future__ import annotations
 
@@ -211,11 +211,21 @@ def load_matrix_rows(path: Path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def load_controls_tools(path: Path) -> set[str] | None:
-    """Return the set of tool names that have >=1 control, or None if absent."""
-    if not Path(path).exists():
-        return None
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+def load_controls_tools(path: Path) -> set[str]:
+    """Return the set of tool names that have >=1 control.
+
+    Missing, unreadable, or invalid controls.json is FATAL (exit 2):
+    generation must not silently weaken the permission check.
+    """
+    p = Path(path)
+    if not p.exists():
+        print(f"gen_perms: FATAL: controls.json not found: {p}", file=sys.stderr)
+        raise SystemExit(2)
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        print(f"gen_perms: FATAL: unreadable/invalid controls.json: {p}: {e}", file=sys.stderr)
+        raise SystemExit(2) from e
     return {c.get("tool", "") for c in data.get("controls", []) if c.get("tool")}
 
 
@@ -243,7 +253,7 @@ def matrix_tools_by_role(rows: list[dict]) -> dict[str, set[str]]:
 
 
 def checked_tools_by_role(
-    registry: dict, rows: list[dict], controls_tools: set[str] | None
+    registry: dict, rows: list[dict], controls_tools: set[str]
 ) -> dict[str, set[str]]:
     reg = registry_tools_by_role(registry)
     mat = matrix_tools_by_role(rows)
@@ -263,15 +273,14 @@ def checked_tools_by_role(
         raise SystemExit(
             "gen_perms: per-role tool list != matrix (INV-5)\n" + "\n".join(mismatches)
         )
-    if controls_tools is not None:
-        known = set(controls_tools)
-        for role in roles:
-            for tool in sorted(reg.get(role, set())):
-                if tool not in known:
-                    raise SystemExit(
-                        f"gen_perms: tool {tool!r} (role {role}) has no "
-                        "control in controls.json"
-                    )
+    known = set(controls_tools)
+    for role in roles:
+        for tool in sorted(reg.get(role, set())):
+            if tool not in known:
+                raise SystemExit(
+                    f"gen_perms: tool {tool!r} (role {role}) has no "
+                    "control in controls.json"
+                )
     return {role: set(reg.get(role, set())) for role in roles}
 
 

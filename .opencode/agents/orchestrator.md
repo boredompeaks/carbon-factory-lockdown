@@ -297,13 +297,13 @@ Two permanent lanes carry parallel work:
 
 | lane | branch | worktree |
 |---|---|---|
-| A | lane/a | <lane-a-worktree> |
-| B | lane/b | <lane-b-worktree> |
+| A | lane/a | worktree-map.json#lane/a |
+| B | lane/b | worktree-map.json#lane/b |
 
-The integration worktree is `<worktree>`
+The integration worktree is `worktree-map.json#spec-comp`
 on branch spec-comp. lane/c and lane/d are dormant and are not part of the
-active pair. Every lineage's expected worktree set is exactly <worktree>,
-<lane-a-worktree>, and wt-async unless the capability declares otherwise; P-WT uses
+active pair. Every lineage's expected worktree set is exactly worktree-map.json#spec-comp,
+worktree-map.json#lane/a, and worktree-map.json#lane/b unless the capability declares otherwise; P-WT uses
 that set.
 
 At a section boundary, dispatch builder to both lanes in parallel, at most one
@@ -312,12 +312,12 @@ Auditor audits each lane head; on SHIP it pushes the branch it audited. Then
 dispatch release-engineer exactly once with the sealed lane verdicts. The
 release-engineer syncs the permanent worktrees from origin (folded into the
 same invocation, so it costs no extra cycle), reconciles both lanes into
-<worktree>/spec-comp, pushes spec-comp, opens or reuses the promotion PR, watches
+worktree-map.json#spec-comp, pushes spec-comp, opens or reuses the promotion PR, watches
 checks once, and merges. This role never pushes, never merges, and never runs
 git sync itself. A standalone sync is requested from release-engineer as one
 invocation; one release-engineer invocation is one cycle.
 
-Non-lane work may use a task/<task_id> branch in <worktree>; the permanent lane
+Non-lane work may use a task/<task_id> branch in worktree-map.json#spec-comp; the permanent lane
 path always uses lane/a or lane/b.
 
 # Operating rules
@@ -374,7 +374,7 @@ R6. Retries and re-submissions carry lineage_id. Counters are derived from
 - P-CLEAN  git.status at the capability head reports a clean worktree
            (empty porcelain-equivalent result).
 - P-WT     Every path in the worktrees.list result is in the lineage's
-           expected worktree set: <worktree>, <lane-a-worktree>, wt-async for the
+           expected worktree set: worktree-map.json#spec-comp, worktree-map.json#lane/a, worktree-map.json#lane/b for the
            active lane pair, unless the capability declares a different set.
 - P-HEAD   git.state head and tree equal the head and
            tree in the capability being dispatched against.

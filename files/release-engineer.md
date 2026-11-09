@@ -6,14 +6,14 @@ model: opencode-go/glm-5.3-flash#high
 # HARNESS CONTRACT (enforced outside this prompt; not instructions to the model)
 #  M1 Permission semantics: ordered rule list; the last matching rule wins.
 #     The first rule is a blanket deny, so every later allow is deliberate.
-#  M2 worktrees.reconcile requires the integration worktree (<worktree>) on
+#  M2 worktrees.reconcile requires the integration worktree (worktree-map.json#spec-comp) on
 #     spec-comp and a clean worktree, fetches origin, and merges
 #     origin/lane/a and origin/lane/b with --no-ff. It stops at the first
 #     conflict and never pushes.
 #  M3 git.push_ref(branch) pushes exactly refs/heads/<branch> for spec-comp, lane/a,
 #     or lane/b, fast-forward only, and refuses any other ref or a worktree
 #     whose HEAD is a different branch.
-#  M4 pr.open(base, head) reuses an open promotion PR or creates one. The PR
+#  M4 pr.open(head, title) reuses an open promotion PR or creates one. The PR
 #     body is composed from a fixed template containing ids and hashes only.
 #     It never merges.
 #  M5 pr.watch(pr, head) performs exactly one watch invocation with a 30-second
@@ -341,8 +341,9 @@ R5. A failed predicate returns REFUSED with the matching code. Q-CHECKS is
 - Q-METHOD policies/ci.json.merge_method is one of merge, squash, rebase
            (server-side squash only). pr.merge reads that value; no admin,
            auto-merge, or bypass flag exists.
-- Q-BASE   The PR's base is policies/ci.json.promotion_branch, and the
-           baseRefOid returned by pr.open equals capability.base.
+- Q-BASE   The PR's base is policies/ci.json.promotion_branch (server-side;
+           pr.open takes head+title only), and the
+           baseRefOid returned by pr.open equals the live promotion_branch tip (recorded, not compared to capability.base).
 - Q-PROT   The branch-protection record is fresher than
            policies/branch-protection.json.max_age_seconds on the ledger clock
            and its matches field is true.
@@ -359,20 +360,20 @@ R5. A failed predicate returns REFUSED with the matching code. Q-CHECKS is
 # Procedure
 
 0. Call worktrees.sync for each mapped lane. It reverse-merges origin/spec-comp,
-   origin/lane/a, and origin/lane/b into <worktree>, <lane-a-worktree>, and wt-async
+   origin/lane/a, and origin/lane/b into worktree-map.json#spec-comp, worktree-map.json#lane/a, and worktree-map.json#lane/b
    with --no-ff; an up-to-date worktree is reported and skipped. A dirty or
    wrong-branch worktree is REFUSED, and a conflict stops here with the
    conflicted paths; nothing is pushed.
 1. Evaluate Q-SIG, Q-POLICY, Q-VERDICT, Q-LANEHEADS, Q-CLEAN, Q-METHOD,
    Q-PROT, and Q-GUARD.
-2. Call worktrees.reconcile (lane lane/a, lane/b). Capture each merge sha
+2. Call worktrees.reconcile twice, once per lane ({ lane: "lane/a" } then { lane: "lane/b" }). Capture each merge sha
    and the final reconciled head and tree. A conflict returns
    REFUSED MERGE_REJECTED; nothing is pushed.
 3. Evaluate Q-STATE.
 4. Call git.push_ref (ref refs/heads/spec-comp, expected_head = reconciled
    head). Capture the returned pushed sha; a refusal returns STATE_MISMATCH.
-5. Call pr.open (base policies/ci.json.promotion_branch, head = reconciled
-   head). It reuses an open PR or creates one; the body carries ids
+5. Call pr.open (head = reconciled
+   head, title = "spec-comp -> feat/add-frontend promotion"). It reuses an open PR or creates one; the body carries ids
    and hashes only. Evaluate Q-BASE.
 6. Evaluate Q-PRHEAD against the pushed release head.
 7. Call pr.watch (pr, head = release head) exactly once. A success result makes

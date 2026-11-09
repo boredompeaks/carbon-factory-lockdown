@@ -21,7 +21,7 @@
 # .git-credentials, id_rsa / id_dsa / id_ecdsa / id_ed25519, *.pem, *.key, *.p12, *.pfx, *.jks,
 # *.keystore.
 # exclude = []
-exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "**/.opencode/**", "**/.git/**", "**/node_modules/**", "**/venv/**", "**/__pycache__/**", "**/policy-manifest.json", "**/*.sqlite", "**/db.sqlite3", "**/files/**", "**/.agents/**", "**/quality/ledger/**", "**/audit-scratch/**", "**/.agt/**", "opencode.json", "**/opencode.json", ".opencode/**", ".opencode"]
+exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "**/.opencode/**", "**/.git/**", "**/node_modules/**", "**/venv/**", "**/__pycache__/**", "**/.ruff_cache/**", "**/.playwright-mcp/**", "**/policy-manifest.json", "**/*.sqlite", "**/db.sqlite3", "**/.agents/**", "**/quality/ledger/**", "**/audit-scratch/**", "**/.agt/**", "opencode.json", "**/opencode.json", ".opencode/**", ".opencode", "**/policies/**", "**/files/tools/out/**", "**/files/quality/**", "**/*.ipynb", "**/files.zip", "**/commits_raw.json", "report/**", "quality-scan/**", "**/*.png"]
 # Floor entries to drop so that tree gets indexed, by directory name, file name or glob (`build`,
 # `.env.*`, `*.pem`), or the floor pattern itself. `.git` and `.basemind` can never be allowed, and
 # a credential entry is honoured only with the operator's BASEMIND_ALLOW_REPO_CREDENTIALS grant. The
@@ -99,7 +99,7 @@ exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "*
 # Globs scoping which non-code files are indexed as documents. Empty include = everything that
 # passes [scan]; exclude applies to document indexing itself and beats include.
 # include = []
-exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "**/.opencode/**", "**/.git/**", "**/node_modules/**", "**/venv/**", "**/__pycache__/**", "**/policy-manifest.json", "**/*.sqlite", "**/db.sqlite3", "**/files/**", "**/.agents/**", "**/quality/ledger/**", "**/audit-scratch/**", "**/.agt/**", "opencode.json", "**/opencode.json", ".opencode/**", ".opencode"]
+exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "**/.opencode/**", "**/.git/**", "**/node_modules/**", "**/venv/**", "**/__pycache__/**", "**/.ruff_cache/**", "**/.playwright-mcp/**", "**/policy-manifest.json", "**/*.sqlite", "**/db.sqlite3", "**/.agents/**", "**/quality/ledger/**", "**/audit-scratch/**", "**/.agt/**", "opencode.json", "**/opencode.json", ".opencode/**", ".opencode", "**/policies/**", "**/files/tools/out/**", "**/files/quality/**", "**/*.ipynb", "**/files.zip", "**/commits_raw.json", "report/**", "quality-scan/**", "**/*.png"]
 # Per-document size cap in bytes (separate from scan.max_file_bytes, so big PDFs/Office files work).
 # max_file_bytes = 52428800
 # Extensions to skip on top of the built-in archive/binary floor (case-insensitive, dot optional).

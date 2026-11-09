@@ -61,6 +61,67 @@ MANDATED_POLICY = {
         "defaultEffect": "deny",
         "reviewTools": [],
     },
+    "directResourcePolicies": {
+        "pathRules": [
+            {
+                "id": "no-opencode-tree",
+                "effect": "deny",
+                "operation": "any",
+                "pathPatterns": [
+                    {"source": r"(^|/)\.opencode(/|$)", "flags": "i"},
+                    {"source": r"(^|/)\.config/opencode(/|$)", "flags": "i"},
+                    {"source": r"(^|/)\.local/share/opencode(/|$)", "flags": "i"},
+                ],
+                "reason": "R05-10: the OpenCode control tree is not accessible to agents.",
+            },
+            {
+                "id": "no-fuzz-seed-evidence",
+                "effect": "deny",
+                "operation": "read",
+                "pathPatterns": [
+                    {"source": r"(^|/)fuzz-evidence(/|$)", "flags": "i"},
+                    {"source": r"(^|/)schema-fuzz-evidence(/|$)", "flags": "i"},
+                    {"source": r"(^|/)[^/]*fuzz[^/]*seed[^/]*\.json$", "flags": "i"},
+                ],
+                "reason": "Fuzz seed evidence is not readable by agents; the per-cycle seed lives in evidence artifacts only.",
+            },
+            {
+                "id": "no-ledger-tree",
+                "effect": "deny",
+                "operation": "any",
+                "pathPatterns": [
+                    {"source": r"(^|/)quality/ledger(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/findings(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/attack-logs(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/dispatch(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/gate-control(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/release(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/acceptance(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/verdicts(/|$)", "flags": "i"},
+                    {"source": r"(^|/)quality/ledger/audit(/|$)", "flags": "i"},
+                ],
+                "reason": "quality/ledger is not directly readable by agents; records are written only via ledger.append.",
+            },
+            {
+                "id": "no-agt-tree",
+                "effect": "deny",
+                "operation": "any",
+                "pathPatterns": [
+                    {"source": r"(^|/)\.agt(/|$)", "flags": "i"},
+                ],
+                "reason": "The AGT policy tree reveals the allowed-tool list and must not be readable by agents.",
+            },
+            {
+                "id": "no-git-tree",
+                "effect": "deny",
+                "operation": "any",
+                "pathPatterns": [
+                    {"source": r"(^|/)\.git(/|$)", "flags": "i"},
+                ],
+                "reason": "Git metadata is not directly readable by agents; repo reads go through typed MCP tools.",
+            },
+        ]
+    },
 }
 
 

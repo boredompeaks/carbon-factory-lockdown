@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "finding.json",
+  "title": "finding",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "finding_id",
+    "fingerprint",
+    "class",
+    "locus",
+    "severity",
+    "source",
+    "repro_ref",
+    "introduced",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "finding/1"
+    },
+    "finding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "class": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "locus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "CHECK",
+        "HACKER"
+      ]
+    },
+    "repro_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "introduced": {
+      "type": "string",
+      "enum": [
+        "causal",
+        "proximity",
+        "preexisting"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Optional linkage: when present, must match capability.json capability_id (cap_ prefix)."
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runs": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reproduced": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

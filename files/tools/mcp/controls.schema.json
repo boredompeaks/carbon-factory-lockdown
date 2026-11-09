@@ -25,7 +25,7 @@
     },
     "controls": {
       "type": "array",
-      "minItems": 167,
+      "minItems": 234,
       "items": {
         "type": "object",
         "required": [

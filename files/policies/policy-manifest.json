@@ -3,12 +3,12 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T15:06:57Z",
-  "file_count": 269,
+  "created_at": "2026-11-09T18:42:27Z",
+  "file_count": 272,
   "files": [
     {
       "path": "agent:files/BASEMIND-INDEX.md",
-      "sha256": "f75492f2cf131e3909745c4b2c1681523ee12305bb4a59f5e7af5e85ff28c375"
+      "sha256": "e2afd316b8b99ceee34020aa7f26ef43cbc51ee07470b88e32b1ffcd90c7805e"
     },
     {
       "path": "agent:files/CHANGELOG-PHASE1-PHASE2-2026-11-07.md",
@@ -16,11 +16,11 @@
     },
     {
       "path": "agent:files/FACTORY-POLICY-MAP.md",
-      "sha256": "3e2a2f45ebc63f70a56733436d4f36371e05a3be4c9fc76483d7d964f2e84c60"
+      "sha256": "a5bfa9b7ae5776360b6e3f103f11f94c48769d2c1fd5edeb9e351a5af3a1d200"
     },
     {
       "path": "agent:files/K1-CONTAINER-PLAN.md",
-      "sha256": "6357683eef78875d246f9ebe3b22701998f6f277c4770cf14e87e7782efcd4d7"
+      "sha256": "ac7c3eb097a8afab503bed6ed276600cfc9d0b3f71b9007858f63149dd2f0eb2"
     },
     {
       "path": "agent:files/UBUNTU-BOOTSTRAP.md",
@@ -28,11 +28,11 @@
     },
     {
       "path": "agent:files/auditor.md",
-      "sha256": "c91a5bb4ccf53709bdd4ee6cd0bb295d3031e992da03af55bebd2db15b3fcbca"
+      "sha256": "f7afcc4d133ca4435c75c5138cdb216f32d2d6e6fd80b4d13c0ab21ab2ffd2da"
     },
     {
       "path": "agent:files/builder.md",
-      "sha256": "579e7b2b2225e866b799b88dd31b87444bac8979ef7cc6577107519f02a612a3"
+      "sha256": "5e2cb43dc3972c425a24becc8a83575a61a07073bc60cd455c5440631fbb7f55"
     },
     {
       "path": "agent:files/compliance.md",
@@ -48,11 +48,11 @@
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "ee7976d3c782d83b12e4bfbe792e3189549b9fab1862dfd1a163c2628f1ab356"
+      "sha256": "87af5d01dfa7d74afe6cc4d263409e723deeb346c6914440fa6c2cbd49baecda"
     },
     {
       "path": "agent:files/release-engineer.md",
-      "sha256": "30d9ea91fd62c08749556ecf164e0ed89fb2495b92564f50c8a7b9efcf2801ce"
+      "sha256": "173a09295e93c14f33b56018ad5dd191c3f1a6944864e8c639c7f35d2706df82"
     },
     {
       "path": "docker:files/docker/k1/Dockerfile",
@@ -68,7 +68,7 @@
     },
     {
       "path": "docker:files/docker/k1/compose.yaml",
-      "sha256": "3f7537e7034b29b58972e4f88ff83fd99189762e3c9352f8d021f58c4b178aab"
+      "sha256": "46566e8db6fb50ed08ed927b9c0808b95af8dbdfefa18c6754fd2c92d55756c6"
     },
     {
       "path": "docker:files/docker/k1/entrypoint.sh",
@@ -124,7 +124,7 @@
     },
     {
       "path": "files/tools/mcp/controls.schema.json",
-      "sha256": "fef9ac2845be3c820c164595fca3e4f994c9a0f2edafa044d73a981981a4357f"
+      "sha256": "3faf492b39cf10372e4ab02cb78d2a65554167c7f84c818477be7812ab3409fc"
     },
     {
       "path": "files/tools/mcp/core/__init__.py",
@@ -160,7 +160,7 @@
     },
     {
       "path": "files/tools/mcp/gen_perms.py",
-      "sha256": "ba10d3ccc35845ea20c5a013155777cd15c831e333a0b6004bd69bf3bc7d6e4e"
+      "sha256": "b7a5c53fa020c1bfb9e0f76aab1a6be37ed70b214556c71edd588f3fdaded54e"
     },
     {
       "path": "files/tools/mcp/git/__init__.py",
@@ -180,7 +180,7 @@
     },
     {
       "path": "files/tools/mcp/hacker/handlers.py",
-      "sha256": "05add1bbe6c416bc110ab0989de514b3ceb057a04f44b900e1cc7da60b02ed33"
+      "sha256": "97078847f2949b6fc98f5ecdfaa475475ce45ac2693af709d851d3bc45d2d140"
     },
     {
       "path": "files/tools/mcp/hacker/probe.py",
@@ -192,7 +192,7 @@
     },
     {
       "path": "files/tools/mcp/k1/handlers.py",
-      "sha256": "809ffe5b1cfd3230c6628ad23edea60c90039e1e9e1a8b50b80396369b80222d"
+      "sha256": "9490d93ac92acb5dc37d7dee5a1d81f61ae7e9eb36f4df63dbb81d6d5ec507ec"
     },
     {
       "path": "files/tools/mcp/k1/leases.py",
@@ -296,7 +296,7 @@
     },
     {
       "path": "fixture:files/tools/fixtures/agt_parity/good_root/.agt/policy.json",
-      "sha256": "760737a87bfc44eb89de2184d10b063e94e8c13ceaff6693f53b0b9cccf680d9"
+      "sha256": "24083e639a5e5f270026a4ff556f3f52d7cdb843547195d1dec584782cca8509"
     },
     {
       "path": "fixture:files/tools/fixtures/agt_parity/good_root/.opencode/package-lock.json",
@@ -664,15 +664,15 @@
     },
     {
       "path": "harness:opencode.json",
-      "sha256": "ab67dc6547cc1b5f932b1e2f6a333c95d86de91016f0f471a76df4f08e2421b4"
+      "sha256": "eb1b53191b9cf25486d90d5839c461411175c4f934fac99d8326b46968c1d962"
     },
     {
       "path": "installed_agent:.opencode/agents/auditor.md",
-      "sha256": "c91a5bb4ccf53709bdd4ee6cd0bb295d3031e992da03af55bebd2db15b3fcbca"
+      "sha256": "f7afcc4d133ca4435c75c5138cdb216f32d2d6e6fd80b4d13c0ab21ab2ffd2da"
     },
     {
       "path": "installed_agent:.opencode/agents/builder.md",
-      "sha256": "579e7b2b2225e866b799b88dd31b87444bac8979ef7cc6577107519f02a612a3"
+      "sha256": "5e2cb43dc3972c425a24becc8a83575a61a07073bc60cd455c5440631fbb7f55"
     },
     {
       "path": "installed_agent:.opencode/agents/compliance.md",
@@ -688,11 +688,11 @@
     },
     {
       "path": "installed_agent:.opencode/agents/orchestrator.md",
-      "sha256": "ee7976d3c782d83b12e4bfbe792e3189549b9fab1862dfd1a163c2628f1ab356"
+      "sha256": "87af5d01dfa7d74afe6cc4d263409e723deeb346c6914440fa6c2cbd49baecda"
     },
     {
       "path": "installed_agent:.opencode/agents/release-engineer.md",
-      "sha256": "30d9ea91fd62c08749556ecf164e0ed89fb2495b92564f50c8a7b9efcf2801ce"
+      "sha256": "173a09295e93c14f33b56018ad5dd191c3f1a6944864e8c639c7f35d2706df82"
     },
     {
       "path": "policy:files/policies/assert-rules.json",
@@ -744,7 +744,7 @@
     },
     {
       "path": "policy:files/policies/invariants.json",
-      "sha256": "77c267c19572132ecb17158f5053d754a562aa3fc30805d0d8c601cf697b604f"
+      "sha256": "af5547218250d6369b37212ef088ec044f948b06b012587df85c7d9981447df0"
     },
     {
       "path": "policy:files/policies/layers.json",
@@ -760,7 +760,7 @@
     },
     {
       "path": "policy:files/policies/mutation.json",
-      "sha256": "b18e34f098201ced99af4303eeb84ac9831a08dd723d0658da03435b60c734a0"
+      "sha256": "5aaccc2b1191ddd967b1553e471acc9a672772b5b86933d9d9635ad0fcba2375"
     },
     {
       "path": "policy:files/policies/negative-controls.json",
@@ -795,12 +795,20 @@
       "sha256": "a612666cd2643887d1983ff9199f7654214f16e362428a507370f72d77bab7f6"
     },
     {
+      "path": "policy:files/policies/schemas/dispatch.json",
+      "sha256": "c3b900783c41763f0380d761f65b2910f534bebb20bea9adc07b6f68c9f5d8c8"
+    },
+    {
       "path": "policy:files/policies/schemas/drain-record.json",
       "sha256": "fce41e0086dc81919e981c7881dd28c77fd9aca2c5c9baf3df0756b0d9e056ce"
     },
     {
       "path": "policy:files/policies/schemas/fault-codes.json",
       "sha256": "79db524c47757bc07969c564214eae8b15787ece232681a4aa57a290c9a3ce5d"
+    },
+    {
+      "path": "policy:files/policies/schemas/finding.json",
+      "sha256": "2019ca9f9a808c0027087ad3a453a7b83fba5f58ac75e403e855ecc40d395471"
     },
     {
       "path": "policy:files/policies/schemas/gate-control.json",
@@ -863,6 +871,10 @@
       "sha256": "3ae73e100ebfcd2739c6eb5affc34ca863a424daabab89be6365864062b99461"
     },
     {
+      "path": "policy:files/policies/worktree-map.json",
+      "sha256": "ff73be6377c281cfabd4d38daf1349238cf289651d82b5d39a2ea2568a3e333f"
+    },
+    {
       "path": "request:requests/R05-01-model-independence.md",
       "sha256": "0d3ccc0371d2917f9dcfdc42bdeb66bda3e32f6a39c7cb5150435cdf00bd63aa"
     },
@@ -912,7 +924,7 @@
     },
     {
       "path": "script:scripts/check_harness_config.py",
-      "sha256": "1157d3414f16d84a7271ce5dc5750312e53a3378e9242c98aaf1ebc354587171"
+      "sha256": "1655b3167deb46bd0689655ba9481d5843e0718ec08a5ee02b3275b00f1004b1"
     },
     {
       "path": "script:scripts/config_controls.py",
@@ -928,7 +940,7 @@
     },
     {
       "path": "script:scripts/gen_opencode_config.py",
-      "sha256": "32f67c69dc9e33472d0fb3d77fd9d0e794bc64a74b3271bf4b878a1c5d1d43ad"
+      "sha256": "8ac7eb34912eea7d172a48fc62437978e3ab31798dc583435e3e82eba00b48d3"
     },
     {
       "path": "script:scripts/generate_policies.py",
@@ -976,19 +988,19 @@
     },
     {
       "path": "sop:files/sop/auditor.md",
-      "sha256": "00b1e829598399a41aadc52242f46b0c8b75ea1ccd1b63860f0bc66c64df349c"
+      "sha256": "db0a4bd98eecc5162d1f6ef2084f598240d3d4a23c7e836397a447fb3b2feb98"
     },
     {
       "path": "sop:files/sop/builder.md",
-      "sha256": "90dcb8a4032a47410e76d819cf2064a6748adba3bb19054a992a6a8ba27b6728"
+      "sha256": "9073a7a9346fc1019fdabb8c71ffb69c141711d2d3f4f78c3bf65532001c73fc"
     },
     {
       "path": "sop:files/sop/orchestrator.md",
-      "sha256": "01bb8c7432b706fef861635b0403cd7c7f5e8b2b5fdf7fe3b9c0cc41c5ce5a3b"
+      "sha256": "3b80b3b5bd6ab81bc4ee510b9c1002a1ec3504e0b29ce881ab156164f3b71b1a"
     },
     {
       "path": "sop:files/sop/release-engineer.md",
-      "sha256": "b4fe51f845b15919d6137ab924eb63e7ed584f36ad21760694095511c4d2c45b"
+      "sha256": "ff12a6aea2c7603ab5e0edfb07f0d0b5069d6915f22a27e564a1d38ad69d3f09"
     },
     {
       "path": "tool:files/tools/agt_audit.py",
@@ -996,7 +1008,7 @@
     },
     {
       "path": "tool:files/tools/agt_parity.py",
-      "sha256": "fc9a520b8e67b0d24c488321aadff798c22caaaa7ec4357fa3cbc9790e4ade58"
+      "sha256": "a949aef2f053d072f12336032f372cbd2a4432a610295c734145db237e3bd8e5"
     },
     {
       "path": "tool:files/tools/arch_check.py",
@@ -1008,11 +1020,11 @@
     },
     {
       "path": "tool:files/tools/gate_control.py",
-      "sha256": "87d28bc818f76cc5255b35efc3225e4aea58c88763f374389475184c1536b6b4"
+      "sha256": "67c9904f0d54482df0640c044c8a2d43f806fbe6fc2afbdfa6cd28f85b3578e9"
     },
     {
       "path": "tool:files/tools/gate_run.py",
-      "sha256": "86c0d07d4c2997eda745282a6d0bfe18e355ab202251ff930aaec5281987f7b5"
+      "sha256": "48bba223ec8a1a0373c051a6799c4b7be45fa7811f552574ac288feeacbd04ab"
     },
     {
       "path": "tool:files/tools/guard_delta.py",
@@ -1084,20 +1096,23 @@
     }
   ],
   "digests": {
-    "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
+    "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4"
+    "gate_impl_digest": "df41dac826c4f480b2db7eb9ae295fdd315919453ca545067ed05bf73e6e9728"
   },
   "gate_control": {
-    "record": "0021-9c21b04f52f4.json",
-    "record_hash": "c4f13835e5370c9de92bdb99f6af85b3816009e57d8b07dd3f52719b273312a8",
-    "gate_sha": "9c21b04f52f4172ec0b18c70b082e0bd71142e8c",
+    "record": "0022-ed4e091d9037.json",
+    "record_hash": "f5986f900a5fa62c0f71f6df1a6b4c44059d9df7bd58ec297e6d8cec2a4143ba",
+    "gate_sha": "ed4e091d90372619dd07aa7303de01e4fba40efc",
     "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "policy_digest: live cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3 != record a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
+    "gate_impl_digest: live df41dac826c4f480b2db7eb9ae295fdd315919453ca545067ed05bf73e6e9728 != record 3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1189,5 +1204,5 @@
       ]
     }
   },
-  "manifest_sha": "22094ac9e4c9d843583e9dbb10d3b6fa201599e22fbdd4de36a31408f541dfb5"
+  "manifest_sha": "c3a372d52197db4a4b230b3cbed2455029ee0ba900ac76f497d60bc6f96f09a6"
 }

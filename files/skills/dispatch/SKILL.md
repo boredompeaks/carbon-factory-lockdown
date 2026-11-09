@@ -38,3 +38,5 @@ subagent({ agent: "compliance", description: "dispatch probe", prompt: "Reply wi
 # => { sessionID: "<id>", state: "completed", ... final text: OK }
 ```
 `verified:` 2026-11-08, tool names per registry (`subagent`, `ledger.append`); permission action `subagent`, resource = target agent id.
+
+`contract note:` `subagent` is a harness-namespace action, not an MCP registry tool. The dispatch contract is pinned to the gate SHA (newest gate-control record) and the registry SHA (`files/tools/mcp/registry.json`).

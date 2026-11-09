@@ -386,6 +386,16 @@
         "AGT_PARITY"
       ],
       "owner": "platform"
+    },
+    {
+      "id": 39,
+      "name": "Prose tool-call lint",
+      "rule": "Every backticked tool.method({...}) call in files/sop/*.md and persona files names a registry tool whose args schema contains every named key and all required keys, and uses no banned raw-shell substitution (git -C, manage.py test, semgrep_runner.py).",
+      "source": "check_harness_config.py#INV-8",
+      "enforcement": [
+        "INV-8"
+      ],
+      "owner": "platform"
     }
   ]
 }

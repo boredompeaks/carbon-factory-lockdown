@@ -1,7 +1,10 @@
 # K1 runtime shape — HARDENED (6B-7). Internal network, no published ports.
 # Canonical path: files/docker/k1/compose.yaml (see files/K1-CONTAINER-PLAN.md).
 # Bind: 127.0.0.1 only (fake provider inside the container).
-# /work: noexec (probe client is baked into the image, not run from /work).
+# /work: rw,exec (required to execute built artifacts per K1 contract).
+# Compensating controls for exec (noexec dropped): internal-only network,
+# read-only rootfs, cap-drop ALL + no-new-privileges, non-root uid 10001,
+# tmpfs nosuid/nodev; /tmp,/run,/home/k1 remain noexec,nosuid,nodev.
 # Pins: see image-pins.json. Offline build: --pull=false, no pull to obtain pins.
 name: k1
 
@@ -17,7 +20,7 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=10001,gid=10001,mode=1777
       - /run:rw,noexec,nosuid,nodev,size=8m,uid=10001,gid=10001,mode=0755
-      - /work:rw,noexec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0755
+      - /work:rw,exec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0755
       - /home/k1:rw,noexec,nosuid,nodev,size=8m,uid=10001,gid=10001,mode=0755
     volumes:
       - type: bind

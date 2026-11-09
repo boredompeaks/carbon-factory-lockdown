@@ -53,6 +53,9 @@ def check(condition: bool, label: str, detail: str = "") -> None:
         failures.append(label)
 
 
+_FM_CACHE: dict[tuple, dict] = {}
+
+
 def frontmatter(path: Path) -> dict:
     """Parse YAML frontmatter; return {} with a parse-error marker on failure.
 
@@ -60,15 +63,26 @@ def frontmatter(path: Path) -> dict:
     colon in `description`) must not crash the checker. The marker lets
     INV checks report FAIL with the parse error instead.
     """
+    try:
+        _st = path.stat()
+        _key = (str(path), _st.st_mtime_ns, _st.st_size)
+    except OSError:
+        _key = None
+    if _key is not None and _key in _FM_CACHE:
+        return _FM_CACHE[_key]
     text = path.read_text(encoding="utf-8")
     match = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
     if not match:
-        return {}
-    try:
-        loaded = yaml.safe_load(match.group(1))
-        return loaded if isinstance(loaded, dict) else {}
-    except Exception as exc:  # noqa: BLE001 -- report as check failure, never crash
-        return {"__parse_error__": f"{type(exc).__name__}: {exc}"}
+        _result: dict = {}
+    else:
+        try:
+            loaded = yaml.safe_load(match.group(1))
+            _result = loaded if isinstance(loaded, dict) else {}
+        except Exception as exc:  # noqa: BLE001 -- report as check failure, never crash
+            _result = {"__parse_error__": f"{type(exc).__name__}: {exc}"}
+    if _key is not None:
+        _FM_CACHE[_key] = _result
+    return _result
 
 
 def model_family(model: str) -> str:
@@ -90,7 +104,7 @@ except json.JSONDecodeError:
 models = json.loads(MODELS.read_text(encoding="utf-8"))
 
 # ============================================================================
-# INV-1..7: typed-tool lockdown invariants (phase 6C-3)
+# INV-1..8: typed-tool lockdown invariants (phase 6C-3 + P2-6)
 # ============================================================================
 # Each invariant is a pure function over a synthetic state so the same logic
 # runs live (built from resolved files below) and in --fixtures mode (built
@@ -100,6 +114,7 @@ models = json.loads(MODELS.read_text(encoding="utf-8"))
 #   manifest: {covers, files: [{path,sha256}], hashes: {path: sha}}
 #   dispatch: {rules: [{dispatch_first, require_before}]}
 #   orchestrator_targets: [enum targets routed by the orchestrator]
+#   sop_texts: {path: markdown} for INV-8 (absent => vacuous pass)
 #   expect_fails: [INV ids this fixture must fail] ([] for clean.json)
 # Live roles are the installed .opencode/agents/*.md files; the matrix and
 # registry cover 7 roles (incl. crouton). Missing agent files are reported
@@ -112,7 +127,7 @@ INV6_REQUIRED_COVERS = (
     "files/tools/mcp/controls.json",
     "files/docker/k1/probe_client.py",
 )
-INV_IDS = ("INV-1", "INV-2", "INV-3", "INV-4", "INV-5", "INV-6", "INV-7")
+INV_IDS = ("INV-1", "INV-2", "INV-3", "INV-4", "INV-5", "INV-6", "INV-7", "INV-8")
 
 
 def _norm_subagent(name: str) -> str:
@@ -277,8 +292,196 @@ def inv7(orchestrator_perms: list, dispatch_targets: set, orchestrator_targets: 
     return (not missing), f"missing subagent allows {missing} allowed={sorted(allowed)}"
 
 
+# INV-8 (P2-6): prose/args lint. INV-5/INV-7 compare registry/matrix/allows
+# but never parse SOP prose, so wrong args passed green. INV-8 parses every
+# backticked `tool.method({...})` call in files/sop/*.md + persona files and
+# checks tool existence and key validity against the registry args schema.
+INV8_ARGS_RESERVED = ("type", "properties", "required", "additionalProperties")
+INV8_BANNED_SHELLS = ("git -C", "manage.py test", "semgrep_runner.py")
+INV8_ILLUSTRATIVE = ("illustrative", "worked example", "example only")
+INV8_PERSONAS = ("orchestrator.md", "builder.md", "auditor.md", "hacker.md", "compliance.md", "release-engineer.md", "crouton-alpha.md")
+INV8_CALL_RE = re.compile(r"`\s*([a-z][a-z0-9_-]*\.[a-z][a-z0-9_]*)\s*\(")
+
+
+def _inv8_schemas(registry: dict) -> dict:
+    """Map tool name -> (allowed keys or None if args absent, required tuple)."""
+    out = {}
+    for tool in (registry.get("tools") or []):
+        if not isinstance(tool, dict) or not tool.get("name"):
+            continue
+        args = tool.get("args")
+        if not isinstance(args, dict):
+            out[str(tool["name"])] = (None, ())
+            continue
+        allowed = {k for k in args if k not in INV8_ARGS_RESERVED}
+        required = tuple(args.get("required") or ())
+        out[str(tool["name"])] = (allowed, required)
+    return out
+
+
+def _inv8_is_illustrative(line: str, span: str = "") -> bool:
+    hay = (line + "\n" + span).lower()
+    return any(mark in hay for mark in INV8_ILLUSTRATIVE)
+
+
+def _inv8_call_keys(arg_src: str) -> list | None:
+    """Top-level keys of a `{...}` object literal; None if not object form."""
+    s = (arg_src or "").strip()
+    if s == "":
+        return []
+    if not s.startswith("{"):
+        return None
+    depth, in_str, esc, end = 0, False, False, -1
+    for i, ch in enumerate(s):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[(":
+            depth += 1
+        elif ch in "}])":
+            depth -= 1
+            if depth == 0 and ch == "}":
+                end = i
+                break
+    if end == -1:
+        return None
+    body = s[1:end]
+    # split top-level commas (string/bracket aware)
+    parts, depth, in_str, esc, cur = [], 0, False, False, ""
+    for ch in body:
+        if in_str:
+            cur += ch
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            cur += ch
+        elif ch in "[{(":
+            depth += 1
+            cur += ch
+        elif ch in "]})":
+            depth -= 1
+            cur += ch
+        elif ch == "," and depth == 0:
+            parts.append(cur)
+            cur = ""
+        else:
+            cur += ch
+    if cur.strip():
+        parts.append(cur)
+    keys = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        # first top-level colon vs bare shorthand token
+        depth, in_str, esc, colon = 0, False, False, -1
+        for i, ch in enumerate(part):
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch in "[{(":
+                depth += 1
+            elif ch in "]})":
+                depth -= 1
+            elif ch == ":" and depth == 0:
+                colon = i
+                break
+        raw = part[:colon] if colon != -1 else part
+        key = raw.strip().strip('"').strip("'").strip()
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*", key):
+            keys.append(key)
+    return keys
+
+
+def _inv8_iter_calls(text: str) -> list:
+    """Backticked `tool.method(...)` calls as (line_no, line_text, tool, arg_src)."""
+    lines = text.splitlines()
+    found = []
+    for m in INV8_CALL_RE.finditer(text):
+        line_no = text.count("\n", 0, m.start()) + 1
+        line_text = lines[line_no - 1] if line_no - 1 < len(lines) else ""
+        tool = m.group(1)
+        open_paren = m.end() - 1  # position of '('
+        # balanced paren scan from open_paren (string aware)
+        depth, in_str, esc = 0, False, False
+        close = -1
+        for i in range(open_paren, len(text)):
+            ch = text[i]
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    close = i
+                    break
+        if close == -1:
+            continue
+        found.append((line_no, line_text, tool, text[open_paren + 1:close]))
+    return found
+
+
+def inv8(sop_texts: dict, registry: dict) -> tuple[bool, str]:
+    """INV-8: SOP/persona prose tool-call args match the registry schema."""
+    schemas = _inv8_schemas(registry if isinstance(registry, dict) else {})
+    bad = []
+    for path in sorted(sop_texts or {}):
+        text = sop_texts[path] or ""
+        for lit in INV8_BANNED_SHELLS:
+            if lit in text:
+                bad.append(f"{path}: banned raw shell {lit!r}")
+        for line_no, line_text, tool, arg_src in _inv8_iter_calls(str(text)):
+            if _inv8_is_illustrative(line_text):
+                continue
+            if tool not in schemas:
+                bad.append(f"{path}:{line_no}: unknown tool {tool}")
+                continue
+            keys = _inv8_call_keys(arg_src)
+            if keys is None:
+                continue  # positional/non-object prose form; not a `{...}` call
+            allowed, required = schemas[tool]
+            if allowed is None:
+                continue  # fixture registry without args schema: existence only
+            unknown = sorted(k for k in keys if k not in allowed)
+            missing = sorted(r for r in required if r not in keys)
+            if unknown:
+                bad.append(f"{path}:{line_no}: {tool} unknown keys {unknown} allowed={sorted(allowed)}")
+            if missing:
+                bad.append(f"{path}:{line_no}: {tool} missing required {missing} keys={keys}")
+    return (not bad), "; ".join(bad[:8])
+
+
 def _run_fixtures(fixtures_dir: Path) -> int:
-    """Run INV-1..7 against every fixture JSON; exit 0 iff expectations hold."""
+    """Run INV-1..8 against every fixture JSON; exit 0 iff expectations hold."""
     files = sorted(fixtures_dir.glob("*.json"))
     if not files:
         print(f"fixtures: no JSON found in {fixtures_dir}")
@@ -314,6 +517,7 @@ def _run_fixtures(fixtures_dir: Path) -> int:
             "INV-5": inv5(registry, matrix_rows),
             "INV-6": inv6(manifest, hashes),
             "INV-7": inv7(orch_perms, d_targets, o_targets),
+            "INV-8": inv8(state.get("sop_texts") or {}, registry),
         }
         expect = list(state.get("expect_fails") or [])
         total += len(results)
@@ -705,7 +909,7 @@ check(set(pol_runners["checks"]) == set(pol_checks), "check-runners mirror all c
 check(set(pol_runners["ci_self_audit"]) == _ci_req, "ci_self_audit matches ci required", f"audit_diff={sorted(set(pol_runners['ci_self_audit']) ^ _ci_req)}")
 check(set(pol_tiers["none"]["required_checks"]) <= set(pol_tiers["high"]["required_checks"]) <= set(pol_tiers["max"]["required_checks"]) == set(pol_checks), "tiers required_checks monotonic to max == all checks", f"max_diff={sorted(set(pol_tiers['max']['required_checks']) ^ set(pol_checks))} high_not_none={sorted(set(pol_tiers['high']['required_checks']) - set(pol_tiers['none']['required_checks']))}")
 
-# --- INV-1..7 (live, from resolved files) --------------------------------
+# --- INV-1..8 (live, from resolved files) --------------------------------
 # Build the synthetic state from live files and call the same pure functions
 # used by --fixtures. Live reds here are expected pre-cutover (6C-1b still
 # pending for builder/auditor/hacker; 6C-4 pending for INV-6).
@@ -763,6 +967,19 @@ try:
 except Exception as exc:  # noqa: BLE001
     _ok, _det = False, f"{type(exc).__name__}: {exc}"
 check(_ok, "INV-7 every subagent target orchestrator routes to is allowed", _det)
+try:
+    _sop_texts: dict = {}
+    for _p in sorted((FACTORY / "sop").glob("*.md")):
+        _sop_texts[f"files/sop/{_p.name}"] = _p.read_text(encoding="utf-8")
+    for _persona in INV8_PERSONAS:
+        _pp = FACTORY / _persona
+        if _pp.is_file():
+            _sop_texts[f"files/{_persona}"] = _pp.read_text(encoding="utf-8")
+    _reg8 = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    _ok, _det = inv8(_sop_texts, _reg8)
+except Exception as exc:  # noqa: BLE001
+    _ok, _det = False, f"{type(exc).__name__}: {exc}"
+check(_ok, "INV-8 prose tool-call args match registry", _det)
 
 print()
 if failures:

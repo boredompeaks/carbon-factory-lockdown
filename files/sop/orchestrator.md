@@ -7,11 +7,11 @@ Status legend: **PROVEN** = a command below ran in the R4 lineage;
 as procedure). The orchestrator dispatches; it does not write product code and
 does not merge.
 
-1. **Load check.** `cd $H; python scripts/check_harness_config.py`.
+1. **Load check.** `harness.verify({ scope: "harness_config" })`.
    Expected: `RESULT: PASS (<n> checks)`, exit 0. Parse: that line. PROVEN.
    Stop if FAIL — a role/model/permission invariant is broken.
 
-2. **Lineage check.** `python files/tools/validatedrain.py`.
+2. **Lineage check.** `gate.control({ target: "gate", mode: "verify" })`.
    Expected: PASS with the newest gate-control seal named. Parse: the summary +
    `problems:[]`. PROVEN at seal time — PASS against the newest gate-control
    record (live `policy_digest` / `gate_impl_digest` / `control_set_sha` per
@@ -46,21 +46,21 @@ does not merge.
    explicitly shadowed for one cycle; any BLOCKED required check keeps the
    stage open. Parse: the verdict field, not prose. PROVEN.
 
-8. **Release.** `merge_pr --match-head-commit <sha>` from the release-engineer
+8. **Release.** `pr.merge({ pr: <n>, head: "<sha>" })` from the release-engineer
    role, with admin/auto/force denied. Expected: merged tree == verdict tree,
    `guard_ref` written on the release record. **UNPROVEN** — first attempt is
    the R05 pilot; do not claim it works until the release record exists.
 
 9. **Guard.** The acceptance test becomes a permanent guard (`guard_ref` on the
-   release), never edited after landing. Verify: `git -C $REPO log --oneline -1`
+   release), never edited after landing. Verify: `git.log({ limit: 1 })`
    and the release record's `guard_ref`. PROVEN for the hash/immutability rule;
-   **UNPROVEN for the `merge_pr` half** until step 8 runs.
+   **UNPROVEN for the `pr.merge` half** until step 8 runs.
 
 10. **Report.** Per gate: MET/BLOCKED, command, exit, parsed line. Divergences
     from this SOP become SOP corrections, not blame. PROVEN.
 
 **Known unproven dependencies (do not pretend otherwise):**
-- `merge_pr --match-head-commit` and its `guard_ref` side effect (Gate 7 pilot).
+- `pr.merge({ pr: <n>, head: "<sha>" })` and its `guard_ref` side effect (Gate 7 pilot).
 - Service-booted orchestrator (the CLI-booted path is what ran; the service
   path is untested).
 - `subagent` permission on the orchestrator: no permission block authorises it
@@ -73,8 +73,9 @@ does not merge.
 
 ## Lane / integration topology (permanent)
 
-- Expected worktree set: `<worktree>` -> `spec-comp`, `<lane-a-worktree>` -> `lane/a`,
-  `wt-async` -> `lane/b`. `lane/c` and `lane/d` are dormant and are not
+- Expected worktree set (resolve via `files/policies/worktree-map.json`):
+  `#spec-comp` -> `spec-comp`, `#lane/a` -> `lane/a`,
+  `#lane/b` -> `lane/b`. `lane/c` and `lane/d` are dormant and are not
   dispatched.
 - Dispatch at most two builders in parallel, one per active lane. They commit
   locally and never push.
@@ -85,6 +86,6 @@ does not merge.
   at a section boundary (folded into the single RE invocation, no extra cycle)
   or standalone (one RE invocation = one cycle).
 - Release order: reconcile `origin/lane/a` and `origin/lane/b` into
-  `<worktree>/spec-comp` (`--no-ff`), push `spec-comp`, reuse/create
-  `spec-comp -> feat/add-frontend`, run one `gh pr checks --watch`, then merge
+  `worktree-map.json#spec-comp` (`--no-ff`), push `spec-comp`, reuse/create
+  `spec-comp -> feat/add-frontend`, run one `pr.watch({ pr: <n>, head: "<sha>" })`, then merge
   head-pinned. No lane PRs.

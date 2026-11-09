@@ -317,10 +317,15 @@ def _gitleaks_binary() -> str:
     )
 
 
+_GITLEAKS_INVOCATIONS = 0
+
+
 def _run_gitleaks(
     source: Path, report: Path, config: Path | None = None
 ) -> subprocess.CompletedProcess[str]:
     """Run gitleaks over an absolute source path; cwd is deliberately unset."""
+    global _GITLEAKS_INVOCATIONS
+    _GITLEAKS_INVOCATIONS += 1
     command = [
         _gitleaks_binary(),
         "detect",
@@ -1160,8 +1165,14 @@ def run_case(check_id: str, name: str) -> tuple[list[dict], str | None]:
 
 
 def run_control(check_id: str) -> dict:
+    global _GITLEAKS_INVOCATIONS
+    _GITLEAKS_INVOCATIONS = 0
     cases = []
+    gitleaks_invocations = 0
     for name, fixture_ref, expect_reject in control_specs()[check_id]:
+        # Instrument SECRETS: count gitleaks binary invocations so the
+        # caller can observe the true cost (3 fixture dirs per --control
+        # run; no identical dir is scanned twice within one run).
         findings, error = run_case(check_id, name)
         if error:
             cases.append(
@@ -1183,7 +1194,8 @@ def run_control(check_id: str) -> dict:
                 "passed": outcome == expected,
             }
         )
-    return {"ran": True, "passed": all(case["passed"] for case in cases), "cases": cases}
+    gitleaks_invocations = _GITLEAKS_INVOCATIONS
+    return {"ran": True, "passed": all(case["passed"] for case in cases), "cases": cases, "gitleaks_invocations": gitleaks_invocations}
 
 
 # ---------------------------------------------------------------------------

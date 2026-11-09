@@ -25,6 +25,8 @@ import os
 import shlex
 import subprocess
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -386,11 +388,27 @@ def match_case(cases: list[dict], fixture_ref: str) -> dict | None:
     return best
 
 
-def observed_for(entry: dict) -> tuple[str, str | None]:
+def _run_once(runner: str) -> tuple[int, str, str]:
+    """Run one runner command fail-closed: any exception is an ERROR result."""
+    try:
+        return run_command(runner)
+    except Exception as exc:  # noqa: BLE001 - worker boundary
+        return 2, "", f"ERROR: runner {runner!r} raised {type(exc).__name__}: {exc}"
+
+
+def _run_timed(runner: str) -> tuple[tuple[int, str, str], float]:
+    started = time.monotonic()
+    result = _run_once(runner)
+    return result, round(time.monotonic() - started, 3)
+
+
+def _observed_from_result(
+    entry: dict, code: int, stdout: str, stderr: str
+) -> tuple[str, str | None]:
+    """Parse one cached runner result into (observed, error). Pure."""
     # P0: keep ERROR handling intact. A strict live BLOCKED (exit 2, no control
     # cases) still surfaces as ERROR via the no-match branch below; the
     # --allow-fallback injection in run_command only affects --control runners.
-    code, stdout, stderr = run_command(entry["runner"])
     if "authz_matrix.py" in entry["runner"]:
         return ("FAIL" if code != 0 else "PASS"), (stderr.strip() or None)
     try:
@@ -410,6 +428,11 @@ def observed_for(entry: dict) -> tuple[str, str | None]:
             "missing outcome/findings/exit_code; passed-only outputs are rejected"
         )
     return outcome, None
+
+
+def observed_for(entry: dict) -> tuple[str, str | None]:
+    code, stdout, stderr = _run_once(entry["runner"])
+    return _observed_from_result(entry, code, stdout, stderr)
 
 
 def previous_hash(out_dir: Path, before: Path | None = None) -> str:
@@ -437,7 +460,143 @@ def seal(record: dict) -> dict:
     return record
 
 
-def build(repo: Path, manifest: dict, gate: dict) -> dict:
+# P2-1: sealed-record cache. The key is exactly
+# (gate_sha, control_set_sha, policy_digest), matching
+# policies/gate.json "gate_control_cache_key". A cache hit may return
+# PASS only when a sealed record with that exact key exists in the
+# ledger AND fully verifies (verify() PASS). There is no separate
+# partial/unsealed cache file: the ledger itself is the cache, and
+# anything unverified is a miss that runs the full build.
+def cache_key(repo: Path, manifest: dict, gate: dict) -> dict:
+    return {
+        "gate_sha": gate_sha(repo, gate),
+        "control_set_sha": control_set_sha(manifest),
+        "policy_digest": policy_digest(),
+    }
+
+
+def find_cache_hit(
+    out_dir: Path,
+    manifest: dict,
+    gate: dict,
+    repo: Path,
+    key: dict,
+) -> dict | None:
+    """Return {source_record, source_record_hash, record} or None.
+
+    Fail-closed: any I/O, parse, or verify failure is a miss (None),
+    never a PASS. Superseded records never satisfy the cache.
+    """
+    try:
+        if not out_dir.is_dir():
+            return None
+        records = sorted(
+            path for path in out_dir.glob("*.json") if path.name != "verify.json"
+        )
+        for path in records:
+            try:
+                record = load_json(path)
+            except Exception:  # noqa: BLE001 - unreadable record is a miss
+                continue
+            if record.get("gate_sha") != key["gate_sha"]:
+                continue
+            if record.get("control_set_sha") != key["control_set_sha"]:
+                continue
+            if record.get("policy_digest") != key["policy_digest"]:
+                continue
+            if record.get("result") != "PASS":
+                continue
+            if record.get("state") == "SUPERSEDED":
+                continue
+            try:
+                checked = verify(path, manifest, gate, repo)
+            except Exception:  # noqa: BLE001 - unverifiable is a miss
+                continue
+            if checked.get("result") != "PASS":
+                continue
+            return {
+                "source_record": path.name,
+                "source_record_hash": record.get("record_hash"),
+                "record": record,
+            }
+    except Exception:  # noqa: BLE001 - lookup failure must not PASS
+        return None
+    return None
+
+
+# P1-3: auto-append the seal to SIGNING.md on a successful --write.
+# Append-only and idempotent: never rewrites prior lines, never duplicates
+# an already-logged record (keyed by record_hash and by record id). Creates
+# the file with a header when missing. Raises on any I/O failure so the
+# caller cannot mark the seal successful when the append fails.
+SIGNING_REL = "drain/refund-cluster/SIGNING.md"
+SIGNING_HEADER = "# Signing status - refund cluster\n\n# Gate-control seals auto-appended by gate_control.py --write (P1-3).\n"
+
+
+def default_signing_path() -> Path:
+    return ROOT / SIGNING_REL
+
+
+def append_signing(signing_path: Path, record_id: str, record: dict) -> int:
+    """Append one seal block to SIGNING.md. Returns 1 if appended, 0 if
+    this record_hash / record_id is already present (idempotent no-op).
+    Raises on I/O failure; never truncates or rewrites existing lines.
+    """
+    record_hash = str(record["record_hash"])
+    timestamp = str(record.get("created_at") or "unknown")
+    block = (
+        f"## auto-seal {record_id} {timestamp}\n"
+        f"- record: {record_id}\n"
+        f"- gate_sha: {record['gate_sha']}\n"
+        f"- policy_digest: {record['policy_digest']}\n"
+        f"- control_set_sha: {record['control_set_sha']}\n"
+        f"- gate_impl_digest: {record['gate_impl_digest']}\n"
+        f"- record_hash: {record_hash}\n"
+        f"- result: {record.get('result')}\n"
+    )
+    existing = ""
+    if signing_path.is_file():
+        existing = signing_path.read_text(encoding="utf-8")
+        if record_hash in existing or record_id in existing:
+            return 0
+    text = existing or SIGNING_HEADER
+    if existing and not existing.endswith("\n"):
+        text += "\n"
+    text += block
+    with signing_path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(text[len(existing):])
+    return 1
+
+
+def self_test_signing(tmpdir: Path) -> dict:
+    """Prove the P1-3 append without touching the real ledger/SIGNING.md.
+
+    Writes only under <tmpdir>/SIGNING.md. Running twice against the same
+    tmpdir appends 1 entry the first time and 0 the second (idempotent).
+    """
+    tmpdir.mkdir(parents=True, exist_ok=True)
+    signing = tmpdir / "SIGNING.md"
+    fixture = {
+        "gate_sha": "selftest-gate-sha-000000000000",
+        "policy_digest": "selftest-policy-digest-00000000000",
+        "control_set_sha": "selftest-control-set-sha-000000000",
+        "gate_impl_digest": "selftest-gate-impl-digest-000000000",
+        "record_hash": "selftest-record-hash-0000000000000000",
+        "result": "PASS",
+        "created_at": "2026-11-09T00:00:00Z",
+    }
+    appended = append_signing(signing, "self-test-0001.json", fixture)
+    content = signing.read_text(encoding="utf-8") if signing.is_file() else ""
+    return {
+        "schema": "gate-control-self-test-signing/1",
+        "signing": str(signing),
+        "appended": appended,
+        "entry_count": content.count("## auto-seal "),
+        "exit_code": 0,
+    }
+
+
+def build(repo: Path, manifest: dict, gate: dict, _stats: dict | None = None) -> dict:
     entries = resolved_manifest(manifest)
     tombstones = resolved_tombstones(manifest)
     tomb_by_check: dict[str, int] = {}
@@ -445,8 +604,42 @@ def build(repo: Path, manifest: dict, gate: dict) -> dict:
         tomb_by_check[tomb["check_id"]] = tomb_by_check.get(tomb["check_id"], 0) + 1
     controls = []
     errors: list[str] = []
+    # P2-2 dedupe + P2-3 bounded parallel: each distinct runner string
+    # (e.g. "tools/semgrep_runner.py --control", shared by SEMGREP-01 and
+    # SEMGREP-02) executes exactly once and its parsed envelope is reused
+    # for every control naming it; per-control match_case then derives the
+    # identical verdict it would derive from a fresh run. Workers share
+    # no state (subprocess only); results are joined by runner key and
+    # replayed in the sorted entry order, so output ordering is
+    # deterministic regardless of completion order. Any worker exception
+    # becomes an ERROR result (fail-closed, never PASS).
+    distinct_runners: list[str] = []
     for entry in entries:
-        observed, error = observed_for(entry)
+        if entry["runner"] not in distinct_runners:
+            distinct_runners.append(entry["runner"])
+    runner_results: dict[str, tuple[int, str, str]] = {}
+    runner_seconds: dict[str, float] = {}
+    if distinct_runners:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            pending = {
+                pool.submit(_run_timed, runner): runner for runner in distinct_runners
+            }
+            for future, runner in pending.items():
+                try:
+                    outcome, elapsed = future.result()
+                except Exception as exc:  # noqa: BLE001 - fail-closed worker
+                    outcome = (
+                        2,
+                        "",
+                        f"ERROR: runner {runner!r} worker raised "
+                        f"{type(exc).__name__}: {exc}",
+                    )
+                    elapsed = 0.0
+                runner_results[runner] = outcome
+                runner_seconds[runner] = elapsed
+    for entry in entries:
+        code, stdout, stderr = runner_results[entry["runner"]]
+        observed, error = _observed_from_result(entry, code, stdout, stderr)
         if error:
             errors.append(f"{entry['control_id']}: {error}")
             observed = "ERROR"
@@ -522,7 +715,38 @@ def build(repo: Path, manifest: dict, gate: dict) -> dict:
     }
     if errors:
         record["errors"] = errors
-    return seal(record)
+    sealed = seal(record)
+    if _stats is not None:
+        # Instrumentation only: never part of the sealed record (the
+        # record keeps its exact pre-existing schema and record_hash).
+        # Counts are deduplicated executions, so SEMGREP=1 runner /
+        # gitleaks=3 binaries reflect one SECRETS --control run.
+        gitleaks_total = 0
+        for runner, (_code, stdout, _stderr) in runner_results.items():
+            try:
+                envelope = json.loads(stdout)
+            except json.JSONDecodeError:
+                continue
+            control_doc = envelope.get("control") or {}
+            if isinstance(control_doc, dict):
+                try:
+                    gitleaks_total += int(control_doc.get("gitleaks_invocations") or 0)
+                except (TypeError, ValueError):
+                    pass
+        _stats.update(
+            {
+                "controls_executed": len(entries),
+                "checks": len({entry["check_id"] for entry in entries}),
+                "runner_invocations": len(runner_results),
+                "distinct_runners": len(distinct_runners),
+                "semgrep_runner_invocations": sum(
+                    1 for runner in distinct_runners if "semgrep_runner.py" in runner
+                ),
+                "gitleaks_invocations": gitleaks_total,
+                "runner_seconds": runner_seconds,
+            }
+        )
+    return sealed
 
 
 def verify(
@@ -727,6 +951,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--gate", default=str(POLICIES / "gate.json"))
     parser.add_argument("--out", default=str(ROOT / "quality" / "ledger" / "gate-control"))
     parser.add_argument("--write", action="store_true", help="append the sealed record and supersede older records")
+    parser.add_argument("--no-cache", action="store_true", help="forced full run: bypass the sealed-record cache (P2-1); --write always runs full")
+    parser.add_argument("--self-test-signing", metavar="TMPDIR", help="P1-3 self-test: append a fixture seal entry to TMPDIR/SIGNING.md only (never the real ledger/SIGNING.md); idempotent, appended=1 then 0")
     parser.add_argument("--verify", default=None, help="verify a sealed record")
     parser.add_argument(
         "--verify-chain",
@@ -735,6 +961,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
+
+    # P1-3 self-test: prove the SIGNING auto-append against a temp
+    # directory only; never the real ledger or SIGNING.md.
+    if args.self_test_signing:
+        try:
+            result = self_test_signing(Path(args.self_test_signing).resolve())
+        except Exception as exc:  # noqa: BLE001 - CLI boundary
+            print(json.dumps({"schema": "gate-control-self-test-signing/1", "result": "ERROR", "error": f"{type(exc).__name__}: {exc}", "exit_code": 2}, sort_keys=True))
+            return 2
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return int(result["exit_code"])
 
     manifest = load_json(Path(args.manifest))
     gate = load_json(Path(args.gate))
@@ -745,8 +982,44 @@ def main(argv: list[str] | None = None) -> int:
             result = verify_chain(Path(args.out).resolve(), manifest, gate, repo)
         elif args.verify:
             result = verify(Path(args.verify).resolve(), manifest, gate, repo)
+        elif not args.write and not args.no_cache:
+            # P2-1 cache: hit only from a sealed, verifying record with
+            # the exact (gate_sha, control_set_sha, policy_digest) key.
+            key = cache_key(repo, manifest, gate)
+            hit = find_cache_hit(Path(args.out).resolve(), manifest, gate, repo, key)
+            if hit is not None:
+                result = dict(hit["record"])
+                result["cache"] = {
+                    "status": "hit",
+                    "key": key,
+                    "source_record": hit["source_record"],
+                    "source_record_hash": hit["source_record_hash"],
+                }
+                result["stats"] = {
+                    "controls_executed": 0,
+                    "checks": len({c.get("check_id") for c in result["controls"]}),
+                    "runner_invocations": 0,
+                    "distinct_runners": 0,
+                    "semgrep_runner_invocations": 0,
+                    "gitleaks_invocations": 0,
+                    "runner_seconds": {},
+                }
+                result["exit_code"] = 0
+            else:
+                stats: dict = {}
+                record = build(repo, manifest, gate, _stats=stats)
+                result = dict(record)
+                result["cache"] = {
+                    "status": "miss",
+                    "key": key,
+                    "source_record": None,
+                    "source_record_hash": None,
+                }
+                result["stats"] = stats
+                result["exit_code"] = 0 if record.get("result") == "PASS" else 1
         else:
-            record = build(repo, manifest, gate)
+            stats = {}
+            record = build(repo, manifest, gate, _stats=stats)
             if args.write:
                 out_dir = Path(args.out).resolve()
                 out_dir.mkdir(parents=True, exist_ok=True)
@@ -787,20 +1060,51 @@ def main(argv: list[str] | None = None) -> int:
                 record["prev_hash"] = prev_hash
                 seal(record)
                 path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+                # P1-3: the seal is only successful once written AND its
+                # record_hash recomputes AND the SIGNING.md append lands.
+                # A failure on either raises here, so the outer handler
+                # returns exit 2: the seal is never marked successful.
+                # (Full chain verification --verify/--verify-chain stays
+                # the seal-order step 2, unchanged.) The superseded chain
+                # and the new record are never rolled back here; the error
+                # surfaces the unproven seal instead of claiming PASS.
+                body = {key: value for key, value in record.items() if key != "record_hash"}
+                if sha256_text(canonical(body)) != record["record_hash"]:
+                    raise RuntimeError("record_hash does not recompute after write")
+                signing_path = default_signing_path()
+                signing_appended = append_signing(signing_path, path.name, record)
                 result = {
                     "schema": "gate-control-run/1",
                     "record": str(path),
                     "record_hash": record["record_hash"],
                     "result": record["result"],
+                    "signing": str(signing_path),
+                    "signing_appended": signing_appended,
                     "controls_total": record["controls_total"],
                     "controls_rejected": record["controls_rejected"],
                     "controls": len(record["controls"]),
                     "exit_code": 0 if record["result"] == "PASS" else 1,
                 }
+                result["cache"] = {
+                    "status": "bypassed",
+                    "key": cache_key(repo, manifest, gate),
+                    "source_record": None,
+                    "source_record_hash": None,
+                    "reason": "--write",
+                }
+                result["stats"] = stats
             else:
                 # exit_code must reflect the computed result, not
                 # default to 0. A FAIL record returns 1.
                 result = dict(record)
+                result["cache"] = {
+                    "status": "bypassed",
+                    "key": cache_key(repo, manifest, gate),
+                    "source_record": None,
+                    "source_record_hash": None,
+                    "reason": "--no-cache",
+                }
+                result["stats"] = stats
                 result["exit_code"] = 0 if record.get("result") == "PASS" else 1
     except Exception as exc:  # noqa: BLE001 - CLI boundary
         print(

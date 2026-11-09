@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dispatch.json",
+  "title": "dispatch",
+  "version": 2,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "task_id",
+    "lineage_id",
+    "step",
+    "action",
+    "target",
+    "reason_code",
+    "predicate_ids",
+    "evidence_refs",
+    "state",
+    "capability_id",
+    "sig_status",
+    "record_hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "orchestrator-decision/1",
+      "description": "Canonical id stamped by the orchestrator emitter (files/orchestrator.md handoff and drain dispatch.json); ledger record_type 'dispatch' maps to this schema."
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lineage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step": {
+      "type": "string",
+      "enum": [
+        "preflight",
+        "resolve",
+        "classify",
+        "capability",
+        "prebuild",
+        "build",
+        "audit",
+        "route",
+        "release",
+        "postmerge",
+        "lesson",
+        "drain"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "DISPATCH",
+        "HOLD",
+        "HALT",
+        "RECORD"
+      ]
+    },
+    "target": {
+      "type": "string",
+      "enum": [
+        "builder",
+        "auditor",
+        "release-engineer",
+        "compliance",
+        "design-research",
+        "none",
+        "hacker-high",
+        "hacker-max"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "TIER_RAISED",
+        "DIRTY_TREE",
+        "HEAD_MOVED",
+        "UNKNOWN_WORKTREE",
+        "SCOPE_VIOLATION",
+        "SIG_INVALID",
+        "SCHEMA_INVALID",
+        "CTRL_MISSING",
+        "CTRL_FAILED",
+        "NO_ACCEPTANCE_REF",
+        "BUDGET_EXCEEDED",
+        "CYCLES_EXHAUSTED",
+        "RISK_RECORD_MISSING",
+        "VERDICT_STALE",
+        "CHECKS_INCOMPLETE",
+        "TREE_MISMATCH",
+        "CI_FAILED",
+        "CI_TIMEOUT",
+        "CI_PENDING",
+        "SUBAGENT_TIMEOUT",
+        "LEDGER_CONFLICT",
+        "BUILDER_BLOCKED",
+        "RELEASE_REFUSED",
+        "POLICY_DRIFT",
+        "POLICY_DRIFT_SHADOW",
+        "ADDED_TEST_NOT_RED",
+        "NON_FALSIFIABLE",
+        "WEAK_ORACLE",
+        "GUARD_REMOVED",
+        "ARCH_VIOLATION",
+        "AUTHZ_MATRIX_GAP",
+        "BUDGET_ZERO_PROGRESS",
+        "DRAIN_UNREPRODUCIBLE",
+        "DRAIN_STAGE_MISSING",
+        "SECRET_LEAK",
+        "GATE_CONTROL_FAILURE",
+        "CONTROL_UNDERCOUNT",
+        "SUITE_FAILURE"
+      ]
+    },
+    "predicate_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^P-[A-Z]+$"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence_ref"
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "head",
+        "tree"
+      ],
+      "properties": {
+        "base": {
+          "$ref": "#/$defs/git_sha"
+        },
+        "head": {
+          "$ref": "#/$defs/git_sha"
+        },
+        "tree": {
+          "$ref": "#/$defs/git_sha"
+        }
+      }
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+      "description": "Must match capability.json capability_id (cap_ prefix). Cross-schema propagation from capability."
+    },
+    "drain_stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        null
+      ]
+    },
+    "drain_cluster_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sig_status": {
+      "const": "unsigned_local"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "git_sha": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "sha256"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

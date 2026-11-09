@@ -1,6 +1,6 @@
 # K1 container plan — tmpfs, light footprint, loopback-only
 
-**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the canonical path is `files/tools/mcp/k1/handlers.py` (`k1.up`/`k1.exec`/`k1.down`/`k1.status`, `docker.ensure`). The `scripts/*.ps1` wrappers in the §1 deprecation table are legacy/Windows-only — do not use them as the live path.
 
 Status: IMPLEMENTED and smoke-tested (2026-11-07). `k1-app:latest` is built
 locally (143.7 MB) from the product requirements; the base digest pin is still
@@ -10,21 +10,50 @@ state; the design below remains the source of truth.
 ## 1. Current footprint (measured 2026-11-07)
 
 Docker server 28.5.1, overlayfs, cgroup 2, 8.17 GB RAM, 24 CPU, root
-`/var/lib/docker`. Docker Desktop VM is running; `com.docker.service` is
-Stopped/Manual, so a cold start needs Docker Desktop.
+`/var/lib/docker`. The measured host was Windows (service + GUI VM, see the
+deprecation table in §1 below); on POSIX the engine is a native daemon and a
+cold start needs only the native daemon (see §6).
 
 | Container | Image | Data dir | Data | RSS | Limits |
 |---|---|---|---|---|---|
 | pg2a | postgres:17-alpine (423 MB) | named volume on ext4 `/dev/sdf` | 121.9 MB | 74.66 MiB | none |
 | pg2b | postgres:17-alpine (423 MB) | named volume on ext4 `/dev/sdf` | 79.5 MB | 41.62 MiB | none |
 
-Both are `bridge`, published on `0.0.0.0:5432` / `0.0.0.0:5433`, `shm=64m`,
+Both are `bridge`, published on `127.0.0.1:5432` / `127.0.0.1:5433`
+(loopback-only for host-published ports; the all-interfaces bind is
+deprecated — see the deprecation table below), `shm=64m`,
 rootfs read-write, no `cap-drop`, no `no-new-privileges`, no tmpfs. **They do
 not run on tmpfs.** Their data survives restarts because it is a named volume.
 
 Host totals: images 50.81 GB (99% reclaimable), volumes 1.643 GB (1.432 GB
 reclaimable), build cache 10.1 GB (all reclaimable), containers 49 kB. A prune
 is an owner decision; the K1 build does not depend on it.
+
+### Canonical handlers and deprecated Windows wrappers (P3-9 / P3-11)
+
+Canonical implementation is `files/tools/mcp/k1/handlers.py`
+(`k1.up` / `k1.exec` / `k1.down` / `k1.status`, `docker.ensure`). The native
+handlers are canonical on every host; the 11 `scripts/*.ps1` wrappers below
+are deprecated / Windows-only legacy and must not be invoked on POSIX.
+Host-published ports bind `127.0.0.1` only (loopback). The rows below are
+the deprecation table: every stale literal in this plan lives here, not in
+live instructions.
+
+| Deprecated artifact (Windows-only / legacy) | Status | Canonical replacement |
+|---|---|---|
+| `scripts/k1_up.ps1` | deprecated, Windows-only | `k1.up` in `files/tools/mcp/k1/handlers.py` |
+| `scripts/k1_exec.ps1` | deprecated, Windows-only | `k1.exec` in `files/tools/mcp/k1/handlers.py` |
+| `scripts/k1_down.ps1` | deprecated, Windows-only | `k1.down` in `files/tools/mcp/k1/handlers.py` |
+| `scripts/ensure_docker.ps1` | deprecated, Windows-only | `docker.ensure` in `files/tools/mcp/k1/handlers.py` |
+| `scripts/open_pr.ps1` | deprecated, Windows-only | typed `pr.open` (native handler) |
+| `scripts/push_ref.ps1` | deprecated, Windows-only | typed `git` / PR handlers (native) |
+| `scripts/merge_pr.ps1` | deprecated, Windows-only | typed `pr.open` / merge handlers (native) |
+| `scripts/sync_worktrees.ps1` | deprecated, Windows-only | typed `worktrees.sync` (native) |
+| `scripts/reconcile_lanes.ps1` | deprecated, Windows-only | typed lane handlers (native) |
+| `scripts/audit_test_runner.ps1` | deprecated, Windows-only | typed test-runner handler (native) |
+| `scripts/watch_checks.ps1` | deprecated, Windows-only | typed checks handler (native) |
+| `pg2a`/`pg2b` on `0.0.0.0:5432` / `0.0.0.0:5433` | deprecated all-interfaces bind | `127.0.0.1:5432` / `127.0.0.1:5433` loopback |
+| Docker Desktop VM / `Docker Desktop.exe` / `com.docker.service` | deprecated Windows-only engine | native daemon + `docker.ensure` |
 
 ## 2. K1 design (default: isolated, tmpfs)
 
@@ -147,31 +176,35 @@ no database volume behind.
 
 ## 5. Lifecycle scripts (IMPLEMENTED 2026-11-07)
 
-Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
+Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the canonical
+implementation is `files/tools/mcp/k1/handlers.py`
+(`k1.up` / `k1.exec` / `k1.down` / `k1.status`, `docker.ensure`). The 11
+`scripts/*.ps1` wrappers are deprecated Windows-only legacy (see the
+deprecation table in §1).
 
-- `k1.up({ run_id, base, head })` (Windows implementation: `scripts/k1_up.ps1 -RunId <id> -Base <sha> -Head <sha>`): `git archive` base
+- `k1.up({ run_id, base, head })` via `handlers.py`: `git archive` base
   and head from `<worktree>` into the run dir, create the internal network, start
   `k1-pg`, wait `pg_isready`, start `k1-app`, wait `/health`, print ids.
-- `k1.exec({ run_id, action })` (Windows implementation: `scripts/k1_exec.ps1 -RunId <id> -Command <...>`): `docker exec -u 10001` in
+- `k1.exec({ run_id, action })` via `handlers.py`: `docker exec -u 10001` in
   `/work`; captures exit and log tail.
-- `k1.down({ run_id })` (Windows implementation: `scripts/k1_down.ps1 -RunId <id>`): `docker cp` artifacts, remove both
+- `k1.down({ run_id })` via `handlers.py`: `docker cp` artifacts, remove both
   containers and the network, delete the run dir.
-- `k1.up` calls `docker.ensure({ action: "ensure" })` (Windows implementation: `ensure_docker.ps1 -EngineOnly`) first; `k1.exec` refuses when
+- `k1.up` calls `docker.ensure({ action: "ensure" })` first; `k1.exec` refuses when
   the app container is not running; `k1.down` is idempotent and never starts or
   stops Docker.
 
 ## 6. Docker start capability
 
-`docker.ensure({ action: "ensure" })` (auditor + builder only; Windows implementation: `scripts/ensure_docker.ps1`):
-- checks `docker info`; if down, starts `com.docker.service` (if present) and
-  `Docker Desktop.exe` (Windows only; on POSIX the engine is a native daemon),
+`docker.ensure({ action: "ensure" })` via `handlers.py` (auditor + builder only;
+the PowerShell wrapper is deprecated — see the deprecation table in §1):
+- checks `docker info`; if down, starts the engine service (Windows service; on POSIX the engine is a native daemon),
   waits up to 120 s, re-checks;
-- starts the named existing containers (`-Containers pg2a,pg2b` by default,
-  `-All` for every stopped container);
+- starts the named existing containers (`pg2a,pg2b` by default,
+  all stopped containers when requested);
 - `-WhatIf` prints the plan; it never pulls, builds, creates, or runs a
   container, and never touches volumes.
 
-The auditor and builder get `docker.ensure` (Windows implementation `*ensure_docker.ps1*`) + the `ensure-docker` skill.
+The auditor and builder get `docker.ensure` via `handlers.py` + the `ensure-docker` skill.
 The hacker never gets Docker; it gets `k1_exec` / `repro-run` only.
 
 ## 7. Open decisions
@@ -192,9 +225,8 @@ The hacker never gets Docker; it gets `k1_exec` / `repro-run` only.
 Status: scripts **IMPLEMENTED**; image **BUILT** locally (143.7 MB, product requirements).
 
 Files:
-- `scripts/k1_up.ps1`, `scripts/k1_exec.ps1`, `scripts/k1_down.ps1` — implemented (Windows implementation; POSIX implementation is native via `k1.up`/`k1.exec`/`k1.down`).
-- `scripts/ensure_docker.ps1` — `-EngineOnly` switch added (engine only, no
-  container loop) (Windows implementation of `docker.ensure`).
+- Canonical: `files/tools/mcp/k1/handlers.py` — `k1.up` / `k1.exec` / `k1.down` / `k1.status` and `docker.ensure` (native; see the deprecation table in §1).
+- Deprecated / Windows-only legacy: the 11 `scripts/*.ps1` wrappers listed in the §1 deprecation table (kept for historical Windows runs only).
 - `files/docker/k1/{Dockerfile,requirements.txt,fake_provider.py,seed.py,entrypoint.sh,README.md}`
   — implemented; no app code baked in.
 - `.opencode/skills/k1-sandbox/SKILL.md` — implemented.
@@ -221,11 +253,11 @@ k1.exec({ run_id: "<id>", action: "<enum>" })
 k1.down({ run_id: "<id>" })
 ```
 
-Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
-Windows implementation (historical, powershell):
-`powershell -NoProfile -File scripts\k1_up.ps1 -RunId <id> -Base <40|64hex> -Head <40|64hex>`,
-`powershell -NoProfile -File scripts\k1_exec.ps1 -RunId <id> -Command "<command line>"`,
-`powershell -NoProfile -File scripts\k1_down.ps1 -RunId <id> [-KeepArtifacts]`.
+Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the canonical
+implementation is `files/tools/mcp/k1/handlers.py` (`k1.up` / `k1.exec` /
+`k1.down` / `k1.status`, `docker.ensure`). The historical PowerShell
+invocations are deprecated Windows-only legacy and are listed only in the §1
+deprecation table; on POSIX the native daemon is used.
 
 `-WhatIf` on all three prints only. `-WhatIf` accepts abbreviated 7-64 hex
 Base/Head; real runs require 40/64 hex and resolve them with
@@ -275,7 +307,7 @@ printed `6.1.1` (Django); `k1_down` removed app/pg/network and the run dir;
 `pg2a`/`pg2b` stayed Up and Docker stayed up. The app image is 143.7 MB.
 
 Note: `pg2a`/`pg2b` were briefly stopped by a Docker engine restart during the
-K1 work (they were restarted with `docker.ensure({ action: "ensure" })` — Windows implementation: `ensure_docker.ps1 -Containers pg2a,pg2b`;
+K1 work (they were restarted with `docker.ensure({ action: "ensure" })` via `handlers.py`;
 data volumes are intact at 121.9 MB / 79.5 MB). `k1_down` never touches them.
 
 `k1_up`/`k1_exec`/`k1_down` never touch `pg2a`/`pg2b`, never stop Docker, never

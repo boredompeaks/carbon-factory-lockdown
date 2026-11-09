@@ -145,5 +145,7 @@
   "engines": [
     "sqlite",
     "postgres"
-  ]
+  ],
+  "known_equivalents": [],
+  "waivers": []
 }

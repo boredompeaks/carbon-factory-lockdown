@@ -39,7 +39,7 @@ HARNESS_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = HARNESS_ROOT / "opencode.json"
 
 SCHEMA = "https://opencode.ai/config.json"
-CARBON_ROLES = ("orchestrator", "builder", "auditor", "hacker", "compliance", "release-engineer")
+CARBON_ROLES = ("orchestrator", "builder", "auditor", "hacker", "compliance", "release-engineer", "crouton")
 CARBON_ENTRY = "files/tools/mcp/__main__.py"
 CARBON_TIMEOUT = {"startup": 60000, "catalog": 30000, "execution": 300000}
 BASEMIND_TIMEOUT = {"startup": 120000, "catalog": 30000, "execution": 120000}
