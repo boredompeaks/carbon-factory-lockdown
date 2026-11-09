@@ -59,11 +59,6 @@ def _gate_control_script() -> Path:
     return Path(__file__).resolve().parents[2] / "gate_control.py"
 
 
-def _docker_ensure_script() -> Path:
-    # <harness>/scripts/ensure_docker.ps1
-    return _harness_root() / "scripts" / "ensure_docker.ps1"
-
-
 def _ledger_tips_from_disk() -> tuple[dict[str, str], str]:
     """Initialise ledger tips from disk; per-type tips plus legacy tip."""
     try:
@@ -351,6 +346,12 @@ class Server:
                         "exit_code": 2,
                         "result": "ERROR",
                         "detail": "no gate-control record found to verify",
+                        "evidence": {
+                            "argv": list(argv),
+                            "exit_code": 2,
+                            "stdout_sha256": hashlib.sha256(b"").hexdigest(),
+                            "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+                        },
                     }
                 rec = str(records[-1])
             argv += ["--verify", str(rec)]
@@ -365,6 +366,12 @@ class Server:
                 "exit_code": 2,
                 "result": "ERROR",
                 "detail": f"gate_control.py missing at {script}",
+                "evidence": {
+                    "argv": list(argv),
+                    "exit_code": 2,
+                    "stdout_sha256": hashlib.sha256(b"").hexdigest(),
+                    "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+                },
             }
         try:
             proc = subprocess.run(
@@ -387,6 +394,12 @@ class Server:
                 "exit_code": 2,
                 "result": "ERROR",
                 "detail": "gate_control.py timed out after 300s",
+                "evidence": {
+                    "argv": list(argv),
+                    "exit_code": 2,
+                    "stdout_sha256": hashlib.sha256(b"").hexdigest(),
+                    "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+                },
             }
         except OSError as exc:
             return {
@@ -397,6 +410,12 @@ class Server:
                 "exit_code": 2,
                 "result": "ERROR",
                 "detail": f"failed to start gate_control.py: {exc}",
+                "evidence": {
+                    "argv": list(argv),
+                    "exit_code": 2,
+                    "stdout_sha256": hashlib.sha256(b"").hexdigest(),
+                    "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+                },
             }
         parsed: dict = {}
         try:
@@ -412,6 +431,12 @@ class Server:
             "exit_code": proc.returncode,
             "stdout": self._truncate(proc.stdout or ""),
             "stderr": self._truncate(proc.stderr or ""),
+            "evidence": {
+                "argv": list(argv),
+                "exit_code": proc.returncode,
+                "stdout_sha256": hashlib.sha256((proc.stdout or "").encode("utf-8")).hexdigest(),
+                "stderr_sha256": hashlib.sha256((proc.stderr or "").encode("utf-8")).hexdigest(),
+            },
         }
         if isinstance(parsed, dict) and parsed:
             out["gate_record"] = parsed
@@ -425,71 +450,17 @@ class Server:
             out["result"] = "PASS" if proc.returncode == 0 else "FAIL" if proc.returncode == 1 else "ERROR"
         return out
 
-    def _execute_docker_ensure(self, role: str, args: dict) -> dict:
-        harness = _harness_root()
-        script = _docker_ensure_script()
-        action = str(args.get("action") or "ensure")
-        if not script.is_file():
-            return {
-                "tool": "docker.ensure",
-                "action": action,
-                "executed": True,
-                "exit_code": 2,
-                "detail": f"ensure_docker.ps1 missing at {script}",
-            }
-        containers = args.get("containers") if isinstance(args, dict) else None
-        base_argv = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)]
-        if containers:
-            names = [str(c) for c in containers] if isinstance(containers, list) else [str(containers)]
-            argv = base_argv + ["-Containers", *names]
-        else:
-            argv = base_argv + ["-EngineOnly"]
-        try:
-            proc = subprocess.run(
-                argv,
-                shell=False,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                timeout=300,
-                cwd=str(harness),
-                env=self._scrubbed_env(),
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            return {
-                "tool": "docker.ensure",
-                "action": action,
-                "executed": True,
-                "exit_code": 2,
-                "detail": "ensure_docker.ps1 timed out after 300s",
-            }
-        except OSError as exc:
-            return {
-                "tool": "docker.ensure",
-                "action": action,
-                "executed": True,
-                "exit_code": 2,
-                "detail": f"failed to start ensure_docker.ps1: {exc}",
-            }
-        return {
-            "tool": "docker.ensure",
-            "action": action,
-            "executed": True,
-            "exit_code": proc.returncode,
-            "stdout": self._truncate(proc.stdout or ""),
-            "stderr": self._truncate(proc.stderr or ""),
-        }
-
     def _execute(self, tool: str, role: str, args: dict) -> dict:
-        """Host execution: gate/docker subprocesses + handler delegation."""
+        """Host execution: gate subprocess + handler delegation.
+
+        The docker engine tool is owned solely by k1/handlers (real argv
+        + evidence shape); the handler loop below reaches it.
+        """
         # Real subprocess handlers (argv-only, 300s). A FAIL exit code is a
         # real result, not a dispatch error: the dict always carries
         # executed=True and the child's exit_code.
         if tool == "gate.control":
             return self._execute_gate_control(role, args)
-        if tool == "docker.ensure":
-            return self._execute_docker_ensure(role, args)
         # Delegate to family handlers when present. Fail-closed: a
         # required handler module that cannot be imported rejects, and
         # a tool with no handler rejects instead of returning a generic
