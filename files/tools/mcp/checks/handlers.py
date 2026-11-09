@@ -6,7 +6,9 @@ One dispatcher for all 24 check ids in checks.json. Delegation is pinned:
   argv-only (no shell) with a 180s timeout and parses the tool JSON
   envelope into ``{check_id, outcome PASS|FAIL, findings[], evidence{
   argv, exit_code, stdout_sha256}, executed:true}``. A missing tool
-  file is ``Reject("REJECT_PRECONDITION", "tool missing")``.
+  file is ``Reject("REJECT_PRECONDITION", "tool missing")``; exit 2
+  (tool error) is ``Reject("REJECT_PRECONDITION", "tool error: ...")``,
+  not ``outcome: FAIL``. Exit 0/1 map to PASS/FAIL as before.
 - 15 gate_run checks via ``_build_evidence``: real repo inputs are
   gathered (``git diff --name-only``/``-U0`` base..head, added lines,
   test roster from ``git ls-tree``/``git show``, scope paths from
@@ -641,6 +643,19 @@ def _execute_tool_check(check_id: str, args: dict, base_result: dict) -> dict:
             envelope = {}
     except json.JSONDecodeError:
         envelope = {}
+    if proc.returncode == 2:
+        err2 = envelope.get("error") or envelope.get("detail")
+        if isinstance(err2, str) and err2.strip():
+            detail2 = err2.strip()[:500]
+        elif envelope.get("result_type") == "ERROR":
+            detail2 = str(envelope)[:500]
+        elif (proc.stderr or "").strip():
+            detail2 = (proc.stderr or "").strip()[:500]
+        elif stdout.strip():
+            detail2 = stdout.strip()[:500]
+        else:
+            detail2 = f"{check_id} tool exited 2 without detail"
+        raise Reject("REJECT_PRECONDITION", f"tool error: {check_id} exit 2: {detail2}")
     findings = envelope.get("findings")
     if not isinstance(findings, list):
         findings = []
