@@ -85,3 +85,17 @@ pristine-review/
 audit-scratch/
 phase6/out/6C-6/
 phase6/out/phase7-confirm/
+
+# coding-ethos generated runtime output
+.claude/settings.local.json
+.coding-ethos/cache/
+.coding-ethos/code-intel-v2/
+.coding-ethos/code-intel.duckdb
+.coding-ethos/code-intel.duckdb.wal
+.coding-ethos/events/
+.coding-ethos/hook-runs/
+.coding-ethos/lint-runs/
+.coding-ethos/prune-runs/
+.coding-ethos/state/
+.gemini/settings.json
+.mcp.json
