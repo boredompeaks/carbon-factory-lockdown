@@ -19,7 +19,7 @@ One dispatcher for all 24 check ids in checks.json. Delegation is pinned:
   ``Reject("REJECT_PRECONDITION", "no runtime: <name>")``.
 
 Never synthesises a PASS: every returned result with a tool/gate_run
-run carries ``stub: False, executed: True``; fail-closed cases are
+run carries ``executed: True``; fail-closed cases are
 Reject exceptions, never fabricated PASS dicts.
 """
 from __future__ import annotations
@@ -674,7 +674,6 @@ def _execute_tool_check(check_id: str, args: dict, base_result: dict) -> dict:
     result = dict(base_result)
     result.update({
         "outcome": outcome,
-        "stub": False,
         "executed": True,
         "exit_code": proc.returncode,
         "findings": findings,
@@ -696,25 +695,8 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
     pinned = {"ruff": "added-lines", "gitleaks": "base..head --redact",
               "semgrep": "anchored-excludes"}
 
-    def _fail_closed(outcome: str, detail: str, **extra: object) -> dict:
-        base: dict = {
-            "tool": tool,
-            "check_id": check_id,
-            "outcome": outcome,
-            "where": where,
-            "tree": args.get("tree"),
-            "engine": args.get("engine"),
-            "cache_key": key,
-            "pinned": pinned,
-            "stub": True,
-            "executed": False,
-            "detail": detail,
-        }
-        base.update(extra)
-        return base
-
     if not check_id:
-        return _fail_closed("FAIL", "check_id missing; refusing to fabricate PASS")
+        raise Reject("REJECT_PRECONDITION", "check_id missing; refusing to fabricate PASS")
     # 9 local tool checks (argv-only, 180s, JSON envelope).
     if check_id in _TOOL_CHECKS:
         base_result: dict = {
@@ -730,18 +712,10 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
         }
         return _execute_tool_check(check_id, args, base_result)
     if check_id not in _GATE_RUN_CHECKS:
-        return _fail_closed(
-            "FAIL",
-            f"check {check_id!r} has no gate_run implementation in this harness",
-            unsupported=True,
-        )
+        raise Reject("REJECT_PRECONDITION", f"check {check_id!r} has no gate_run implementation in this harness")
     gate_run_path = _gate_run_path()
     if not gate_run_path.is_file():
-        return _fail_closed(
-            "ERROR",
-            f"gate_run implementation missing at {gate_run_path}; REJECT_PRECONDITION",
-            error="gate_run body missing",
-        )
+        raise Reject("REJECT_PRECONDITION", f"gate_run implementation missing at {gate_run_path}; REJECT_PRECONDITION")
     repo = _repo_root()
     # Runtime checks raise Reject here when their runtime is absent.
     evidence = _build_evidence(check_id, args, repo)
@@ -768,22 +742,13 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
             except Exception:
                 pass
     except (OSError, subprocess.SubprocessError, subprocess.TimeoutExpired) as exc:
-        return _fail_closed(
-            "ERROR",
-            f"gate_run invocation failed: {type(exc).__name__}: {exc}",
-            error=str(exc),
-        )
+        raise Reject("REJECT_PRECONDITION", f"gate_run invocation failed: {type(exc).__name__}: {exc}") from exc
     try:
         envelope = json.loads(proc.stdout or "")
         if not isinstance(envelope, dict):
             raise ValueError("gate_run envelope is not an object")
     except (json.JSONDecodeError, ValueError) as exc:
-        return _fail_closed(
-            "ERROR",
-            f"gate_run output is not a valid envelope: {exc}",
-            error=str(exc),
-            exit_code=proc.returncode,
-        )
+        raise Reject("REJECT_PRECONDITION", f"gate_run output is not a valid envelope: {exc}") from exc
     findings = envelope.get("findings") or []
     if proc.returncode == 0:
         outcome = "PASS"
@@ -805,7 +770,6 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
         "head": args.get("head"),
         "cache_key": key,
         "pinned": pinned,
-        "stub": False,
         "executed": True,
         "exit_code": proc.returncode,
         "findings": findings,
