@@ -3,9 +3,12 @@
 Deny globs apply to every path argument (F-02, F-03, F-05, F-15, F-17,
 F-18, F-19, F-44, F-60, F-76):
   .env*, *.pem, *.key, secrets/**, policy-manifest.json, .opencode/**,
-  hacker-scratch/**, audit-scratch/**, quality/ledger/verdicts/**,
+  .agt/**, .git/**, hacker-scratch/**, audit-scratch/**,
+  quality/ledger/** wholesale (findings/, attack-logs/, dispatch/,
+  gate-control/, release/, acceptance/, verdicts/, audit/),
+  **/fuzz-evidence/**, **/schema-fuzz-evidence/**, **/*fuzz*seed*.json,
   files/policies/attack-catalog.json, skills/hacker* (hacker skills),
-  quality/ledger/** (for object reads), and test-infra paths for commits
+  and test-infra paths for commits
   (pytest.ini, tox.ini, .coveragerc, .gitleaks.toml, .github/**,
   tests_gate*.py, conftest.py).
 
@@ -54,16 +57,33 @@ def is_denied_path(path: str) -> bool:
         return True
     if ".opencode" in segs:
         return True
+    # AGT policy tree and git metadata are never readable via MCP paths.
+    if ".agt" in segs:
+        return True
+    if ".git" in segs:
+        return True
     # Scratch isolation (both directions).
     if "hacker-scratch" in segs or low.startswith("hacker-scratch/"):
         return True
     if "audit-scratch" in segs or low.startswith("audit-scratch/"):
         return True
-    # Ledger verdicts / audit records are never object-readable here.
+    # Ledger records are never object-readable here (wholesale).
+    # Covers findings/, attack-logs/, dispatch/, gate-control/,
+    # release/, acceptance/ (plus verdicts/, audit/).
+    if low == "quality/ledger" or low.startswith("quality/ledger/"):
+        return True
+    if "quality" in segs and "ledger" in segs:
+        return True
     if low.startswith("quality/ledger/verdicts/") or low.startswith("quality/ledger/audit/"):
         return True
     if low.startswith("quality/ledger/") and "verdict" in low:
         return True
+    # Fuzz seed evidence (matches .agt/policy.json no-fuzz-seed-evidence).
+    if "fuzz-evidence" in segs or "schema-fuzz-evidence" in segs:
+        return True
+    if base.endswith(".json") and "fuzz" in base and "seed" in base:
+        if base.find("fuzz") < base.find("seed"):
+            return True
     # Attack catalog is denied to object readers (F-15) and to builders (F-06).
     if "attack-catalog" in low:
         return True
@@ -96,7 +116,8 @@ def is_commit_denied(path: str) -> bool:
     """True if a staged path must be rejected for git.commit (F-05/F-07).
 
     Covers the union deny globs (.env*, *.pem, *.key, secrets/**,
-    policy-manifest.json, .opencode/**, scratch, ledger verdicts,
+    policy-manifest.json, .opencode/**, .agt/**, .git/**, scratch,
+    quality/ledger/** wholesale, fuzz-evidence seeds,
     attack-catalog, hacker skills) plus test-infra (pytest.ini,
     tox.ini, .coveragerc, .gitleaks.toml, .github/**, tests_gate*.py,
     conftest.py). Case-insensitive on Windows.

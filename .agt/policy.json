@@ -51,6 +51,41 @@
           { "source": "(^|/)[^/]*fuzz[^/]*seed[^/]*\\.json$", "flags": "i" }
         ],
         "reason": "Fuzz seed evidence is not readable by agents; the per-cycle seed lives in evidence artifacts only."
+      },
+      {
+        "id": "no-ledger-tree",
+        "effect": "deny",
+        "operation": "any",
+        "pathPatterns": [
+          { "source": "(^|/)quality/ledger(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/findings(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/attack-logs(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/dispatch(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/gate-control(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/release(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/acceptance(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/verdicts(/|$)", "flags": "i" },
+          { "source": "(^|/)quality/ledger/audit(/|$)", "flags": "i" }
+        ],
+        "reason": "quality/ledger is not directly readable by agents; records are written only via ledger.append."
+      },
+      {
+        "id": "no-agt-tree",
+        "effect": "deny",
+        "operation": "any",
+        "pathPatterns": [
+          { "source": "(^|/)\\.agt(/|$)", "flags": "i" }
+        ],
+        "reason": "The AGT policy tree reveals the allowed-tool list and must not be readable by agents."
+      },
+      {
+        "id": "no-git-tree",
+        "effect": "deny",
+        "operation": "any",
+        "pathPatterns": [
+          { "source": "(^|/)\\.git(/|$)", "flags": "i" }
+        ],
+        "reason": "Git metadata is not directly readable by agents; repo reads go through typed MCP tools."
       }
     ]
   }

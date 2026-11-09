@@ -16,8 +16,20 @@ Emission contract (spec 6C-1a):
         every role
       - secrets: **/.env*, **/*.pem, **/*.key, **/secrets/** plus the
         root-relative forms, every role
+      - ledger wholesale: quality/ledger/** (findings/, attack-logs/,
+        dispatch/, gate-control/, release/, acceptance/, verdicts/,
+        audit/), every role
+      - .agt: **/.agt, **/.agt/**, .agt, .agt/**, every role
+      - .git: **/.git, **/.git/**, .git, .git/**, every role
+      - home-opencode: **/.config/opencode/**, .config/opencode/**,
+        ~/.config/opencode/**, **/.local/share/opencode/**,
+        .local/share/opencode/**, ~/.local/share/opencode/**, every role
+      - fuzz: **/fuzz-evidence/**, **/schema-fuzz-evidence/**,
+        **/*fuzz*seed*.json plus root forms, every role
       - hacker-scratch: every role except hacker (hacker reaches scratch
         only through the scratch.write tool, not through direct paths)
+      - audit-scratch: every role except auditor (auditor reaches scratch
+        only through scratch.write; native read/grep/glob is denied)
       - attack-catalog: builder only (**/attack-catalog.json)
   * no shell/edit/write rule lines except compliance's scoped write:
       - every other role emits zero lines with action edit or write and
@@ -87,6 +99,76 @@ HACKER_SCRATCH_PATTERNS: tuple[str, ...] = (
 )
 
 ATTACK_CATALOG_PATTERNS: tuple[str, ...] = ("**/attack-catalog.json",)
+
+LEDGER_PATTERNS: tuple[str, ...] = (
+    "quality/ledger/**",
+    "**/quality/ledger/**",
+    "quality/ledger",
+    "**/quality/ledger",
+    "quality/ledger/findings/**",
+    "quality/ledger/attack-logs/**",
+    "quality/ledger/dispatch/**",
+    "quality/ledger/gate-control/**",
+    "quality/ledger/release/**",
+    "quality/ledger/acceptance/**",
+    "quality/ledger/verdicts/**",
+    "quality/ledger/audit/**",
+    "**/quality/ledger/findings/**",
+    "**/quality/ledger/attack-logs/**",
+    "**/quality/ledger/dispatch/**",
+    "**/quality/ledger/gate-control/**",
+    "**/quality/ledger/release/**",
+    "**/quality/ledger/acceptance/**",
+    "**/quality/ledger/verdicts/**",
+    "**/quality/ledger/audit/**",
+)
+
+AGT_PATTERNS: tuple[str, ...] = (
+    "**/.agt",
+    "**/.agt/**",
+    ".agt",
+    ".agt/**",
+)
+
+GIT_PATTERNS: tuple[str, ...] = (
+    "**/.git",
+    "**/.git/**",
+    ".git",
+    ".git/**",
+)
+
+AUDIT_SCRATCH_PATTERNS: tuple[str, ...] = (
+    "audit-scratch/**",
+    "**/audit-scratch/**",
+    "audit-scratch",
+    "**/audit-scratch",
+)
+
+HOME_OPENCODE_PATTERNS: tuple[str, ...] = (
+    "**/.config/opencode/**",
+    ".config/opencode/**",
+    "**/.config/opencode",
+    ".config/opencode",
+    "**/.local/share/opencode/**",
+    ".local/share/opencode/**",
+    "**/.local/share/opencode",
+    ".local/share/opencode",
+    "~/.config/opencode/**",
+    "~/.local/share/opencode/**",
+    "~/.config/opencode",
+    "~/.local/share/opencode",
+)
+
+FUZZ_PATTERNS: tuple[str, ...] = (
+    "**/fuzz-evidence/**",
+    "**/schema-fuzz-evidence/**",
+    "**/*fuzz*seed*.json",
+    "**/fuzz-evidence",
+    "**/schema-fuzz-evidence",
+    "fuzz-evidence/**",
+    "schema-fuzz-evidence/**",
+    "*fuzz*seed*.json",
+)
 
 READ_ALLOW_PATTERNS: tuple[str, ...] = ("**",)  # read/grep/glob each
 
@@ -214,9 +296,16 @@ def render_role(role: str, tools: set[str]) -> list[str]:
         ("manifest", MANIFEST_PATTERNS),
         (".opencode", OPENCODE_PATTERNS),
         ("secrets", SECRETS_PATTERNS),
+        ("ledger", LEDGER_PATTERNS),
+        (".agt", AGT_PATTERNS),
+        (".git", GIT_PATTERNS),
+        ("home-opencode", HOME_OPENCODE_PATTERNS),
+        ("fuzz", FUZZ_PATTERNS),
     ]
     if role != "hacker":
         wall_groups.append(("hacker-scratch", HACKER_SCRATCH_PATTERNS))
+    if role != "auditor":
+        wall_groups.append(("audit-scratch", AUDIT_SCRATCH_PATTERNS))
     if role == "builder":
         wall_groups.append(("attack-catalog", ATTACK_CATALOG_PATTERNS))
     for _group, patterns in wall_groups:
@@ -345,6 +434,72 @@ def validate(text: str, roles: list[str], tools_by_role: dict[str, set[str]]) ->
                     for ln in blk
                 ):
                     problems.append(f"{role}: missing {action} deny for attack-catalog")
+        # ledger wholesale read/grep/glob denies (all roles)
+        for pat in LEDGER_PATTERNS:
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and f'"{pat}"' in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for {pat}")
+        # .agt read/grep/glob denies (all roles)
+        for pat in AGT_PATTERNS:
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and f'"{pat}"' in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for {pat}")
+        # .git read/grep/glob denies (all roles)
+        for pat in GIT_PATTERNS:
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and f'"{pat}"' in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for {pat}")
+        # home-opencode tree read/grep/glob denies (all roles)
+        for pat in HOME_OPENCODE_PATTERNS:
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and f'"{pat}"' in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for {pat}")
+        # fuzz-evidence read/grep/glob denies (all roles)
+        for pat in FUZZ_PATTERNS:
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and f'"{pat}"' in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for {pat}")
+        # audit-scratch denies for non-auditors (native read hole)
+        if role != "auditor":
+            for action in WALL_ACTIONS:
+                if not any(
+                    _rule_has_action(ln, action)
+                    and "audit-scratch" in ln
+                    and "deny" in ln
+                    for ln in blk
+                ):
+                    problems.append(f"{role}: missing {action} deny for audit-scratch")
+        else:
+            # auditor itself must not carry an audit-scratch deny wall (its
+            # scratch access is the scratch.write tool only; native read is
+            # the auditor's verification path).
+            if any("audit-scratch" in ln and "deny" in ln for ln in blk):
+                problems.append("auditor: must not deny audit-scratch (tool-only)")
         # no edit/write lines except compliance scoped write
         edit_write = [
             ln for ln in blk
