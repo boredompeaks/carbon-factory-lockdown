@@ -9,6 +9,15 @@ containers are always reaped.
 from __future__ import annotations
 
 import time
+from pathlib import Path
+
+from ..core.platform import run_dir as _platform_run_dir
+
+
+def k1_run_dir(run_id: str) -> Path:
+    """Run dir for one k1 run. Cross-platform (core.platform.run_dir()):
+    handlers.py and TTL reaping resolve the same path on Windows/POSIX."""
+    return _platform_run_dir() / run_id
 
 _TTL_SECONDS = 600
 
