@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "carbon": {
+        "type": "local",
+        "command": [
+          "python",
+          "-m",
+          "carbon_mcp"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "basemind": {
+        "type": "local",
+        "command": [
+          "<absolute-path-to-basemind.exe>",
+          "serve"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "timeout": {
+          "startup": 120000,
+          "catalog": 30000,
+          "execution": 120000
+        }
+      },
+      "fe-bridge": {
+        "type": "local",
+        "command": [
+          "node",
+          "<path-to-fe-bridge>/mcp.js"
+        ],
+        "disabled": false,
+        "environment": {
+          "FE_BRIDGE_ROOT": "<path-to-fe-bridge>"
+        }
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "playwright-mcp",
+          "--allow-unrestricted-file-access"
+        ],
+        "disabled": false
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "chrome-devtools-mcp",
+          "--isolated",
+          "--viewport",
+          "1280x720"
+        ],
+        "disabled": false
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "disabled": false
+      }
+    }
+  },
+  "plugin": [
+    "./.opencode/plugins/agt.js"
+  ]
+}
