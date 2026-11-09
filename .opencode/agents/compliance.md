@@ -226,10 +226,10 @@ permissions:
 - Use `gate.control` in `run` or `verify` mode to check gate/policy-digest/drain/manifest state for the sweep evidence.
 - Use `check.run` with `check_id: "POLICY_DIGEST"` for the policy-digest sweep evidence at the checked tree.
 - Use `basemind_code` (`code.search{mode:grep}`) instead of ad-hoc reading to verify spec-vs-code.
-- Use `basemind_git` for indexed history/diff questions only; never for mutations.
+- `basemind_git` is NOT available for v1 (revoked: basemind git reads history without basemind.toml excludes, so it leaks excluded files); use carbon `git.*` for history/diff questions instead.
 - Use `basemind_graph` for architecture questions instead of ad-hoc reading.
 - Use `basemind_web` for spec and external documentation questions only.
-- Never use `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_git show` on any path excluded from the index; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
+- Never use `basemind_git` in any mode (NOT available for v1; use carbon `git.*` for history/diff), `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
 - If a tool you need is missing, stop and report -- do not substitute a shell command.
 - Your MCP tools are prefixed `carbon_compliance_` / `basemind_`; the raw `shell` action is absent by design.
 

@@ -267,9 +267,9 @@ permissions:
 - Use `pr.merge` to merge at a pinned head only; no admin, no bypass, no force.
 - Use `drain.validate` in `verify` mode to verify the R5 permanent guard before merge.
 - Use `ledger.append` for `release` records only, with `expected_prev_hash`.
-- Use `basemind_git` for indexed history/diff questions only; never for mutations.
+- `basemind_git` is NOT available for v1 (revoked: basemind git reads history without basemind.toml excludes, so it leaks excluded files); use carbon `git.*` for history/diff questions instead.
 - Use `basemind_workspace` for workspace and lane-structure questions.
-- Never use `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_git show` on any path excluded from the index; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
+- Never use `basemind_git` in any mode (NOT available for v1; use carbon `git.*` for history/diff), `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
 - If a tool you need is missing, stop and report -- do not substitute a shell command.
 - Your MCP tools are prefixed `carbon_release-engineer_` / `basemind_`; the raw `shell` action is absent by design.
 

@@ -2604,6 +2604,60 @@
       "expect": "EMPTY",
       "requires_runtime": "basemind",
       "note": "basemind_git show on excluded .agt/policy.json must return empty (requires live basemind)"
+    },
+    {
+      "id": "BM-GIT-REVOKED-auditor",
+      "tool": "basemind_git",
+      "role": "auditor",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for auditor; use carbon git.* instead"
+    },
+    {
+      "id": "BM-GIT-REVOKED-builder",
+      "tool": "basemind_git",
+      "role": "builder",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for builder; use carbon git.* instead"
+    },
+    {
+      "id": "BM-GIT-REVOKED-orchestrator",
+      "tool": "basemind_git",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for orchestrator; use carbon git.* instead"
+    },
+    {
+      "id": "BM-GIT-REVOKED-hacker",
+      "tool": "basemind_git",
+      "role": "hacker",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for hacker; use carbon git.* instead"
+    },
+    {
+      "id": "BM-GIT-REVOKED-release-engineer",
+      "tool": "basemind_git",
+      "role": "release-engineer",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for release-engineer; use carbon git.* instead"
+    },
+    {
+      "id": "BM-GIT-REVOKED-compliance",
+      "tool": "basemind_git",
+      "role": "compliance",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for compliance; use carbon git.* instead"
     }
   ]
 }

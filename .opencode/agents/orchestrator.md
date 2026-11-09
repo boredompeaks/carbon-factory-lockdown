@@ -272,10 +272,10 @@ permissions:
 - Use `drain.validate` to verify a drain stage in verify mode before advancing the lineage.
 - Use `harness.verify` to verify `harness_config` or `policy_manifest` before routing forward.
 - Use `gate.control` in `verify` mode only to check gate/drain/manifest state; never `run`.
-- Use `basemind_git` for indexed history/diff questions only; never for mutations.
+- `basemind_git` is NOT available for v1 (revoked: basemind git reads history without basemind.toml excludes, so it leaks excluded files); use carbon `git.*` for history/diff questions instead.
 - Use `basemind_graph` for architecture questions instead of ad-hoc reading.
 - Use `basemind_workspace` for workspace and lane-structure questions.
-- Never use `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_git show` on any path excluded from the index; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
+- Never use `basemind_git` in any mode (NOT available for v1; use carbon `git.*` for history/diff), `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
 - If a tool you need is missing, stop and report -- do not substitute a shell command.
 - Your MCP tools are prefixed `carbon_orchestrator_` / `basemind_`; the raw `shell` action is absent by design.
 
