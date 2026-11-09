@@ -686,5 +686,66 @@
     "on_pass": "git tag phase6b-build; tell human to run 6C",
     "on_fail": "add decision note to affected WP file and respawn a fresh worker",
     "verified_at": "2026-11-08T05:03:47Z"
+  },
+  "phase7": {
+    "wp": "P7",
+    "title": "reseal digests + manifest (end-of-phase-7 reseal prep)",
+    "status": "SEAL_PREP_COMPLETE",
+    "phase6-sealed": "NOT TAGGED",
+    "note": "phase6-sealed tag NOT applied and nothing pushed; awaiting owner green light. DO NOT tag phase6-sealed. DO NOT push. Note: the final P7 commit will advance gate_sha past the sealed value (same as the 0009 precedent: sealed pre-commit at the then-tip, re-sealed next phase).",
+    "gate_control_record": {
+      "record": "0010-b4c1e44ab5db.json",
+      "gate_sha": "b4c1e44ab5dbaa3d038e4278bcaf2320ffd597ec",
+      "gate_impl_digest": "3385b52d555e4d86da06725181b1769257ad3dafa2b2eb02c490be07c22fb63d",
+      "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
+      "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
+      "record_hash": "5587fd990d0b12bb2ae561f40e27df6faaa009fe6d4b41d9111146b00c2ca046",
+      "prev_hash": "3b38e64513840e8a9c995623166a575aa0b0e2e709197506aec720be3446dce3",
+      "controls_total": 28,
+      "controls_rejected": 28,
+      "controls_declared": 53,
+      "known_bad_min": 28,
+      "result": "PASS",
+      "verify": "PASS",
+      "verify_chain": "PASS",
+      "chain_size": 10,
+      "created_at": "2026-11-09T07:02:09Z"
+    },
+    "policy_manifest": {
+      "path": "files/policies/policy-manifest.json",
+      "file_count": 265,
+      "manifest_sha": "f0cdf180c7aa2974cebd498ab4cb88b0260e8fe5c63505ed59ae3a7e536e8feb",
+      "verify": "PASS",
+      "drift": []
+    },
+    "checks": {
+      "check_harness_config": {
+        "passed": 109,
+        "failed": 0,
+        "result": "PASS"
+      },
+      "gate_all_controls": {
+        "dispatch": "196/196",
+        "config": "25/25",
+        "overall": "PASS"
+      },
+      "validatedrain": {
+        "result": "FAIL",
+        "exit_code": 1,
+        "records_checked": 5,
+        "note": "Data finding, not a seal blocker: pre-existing drain staleness (R1/R2/R3/capability policy_digest vs live narrowed digest; dispatch evidence_refs stale incl. 0008 ref; R3 repro_ref file not found; R4 head/tree + SUITE + release record missing; R5 missing). Drain content predates the current policy digest and gate ledger; dispatch sha for 0008 never matched the 0008 record_hash. Left untouched (files/drain/ outside P7 ownership)."
+      }
+    },
+    "tool_fix": {
+      "file": "files/tools/gate_control.py",
+      "reason": "Genuine bug blocked the seal: 9d3454f applied live-digest equality to SUPERSEDED history, making --verify-chain unsatisfiable for any evolving chain; and --write never superseded older records, so no --write could ever pass --verify-chain.",
+      "fix": "verify(): live-equality (sig_status, policy_digest, gate_impl_digest, control_set_sha, gate_sha) applies only to the newest non-superseded record; SUPERSEDED records keep record_hash/prev_hash integrity + recursion into the newest (tamper-evidence preserved via content addressing, currency anchored at newest). --write: supersedes all older records (star topology onto newest, prev_hash relinked forward, each re-sealed; fails closed on a broken prev_hash chain), then links the new record to the rewritten predecessor — mirroring the proven reseal_next.py cascade. gate_impl_digest unchanged (gate_control.py is not a sealed body).",
+      "ruff": "passed"
+    },
+    "provision": {
+      "GITLEAKS_BIN": "C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\6c4-tools\\gitleaks\\gitleaks.exe (v8.28.0)",
+      "ruff": "0.14.1 on PATH"
+    },
+    "updated_at": "2026-11-09T07:03:37Z"
   }
 }

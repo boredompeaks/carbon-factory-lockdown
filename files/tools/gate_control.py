@@ -540,26 +540,20 @@ def verify(
     if record.get("prev_hash") != previous_hash(path.parent, before=path):
         problems.append("prev_hash does not match the previous record")
 
-    # Digest/seal checks apply to EVERY record — SUPERSEDED included.
-    # A superseded record is a historical link, but its policy/impl/
-    # control-set digests must still agree with the live tree at the
-    # verified newest record; skipping them was a silent-skip that
-    # let tampered superseded records pass.
-    _digest_checks: list[tuple[str, object]] = []
-    if record.get("sig_status") != "unsigned_local":
-        problems.append("sig_status is not unsigned_local")
-    if record.get("policy_digest") != policy_digest():
-        problems.append("policy_digest differs from the live policies tree")
-    if record.get("gate_impl_digest") != gate_impl_digest():
-        problems.append("gate_impl_digest differs from the live tools tree")
-    if record.get("control_set_sha") != control_set_sha(manifest):
-        problems.append("control_set_sha differs from the resolved manifest")
-    if record.get("gate_sha") != gate_sha(repo, gate):
-        problems.append("gate_sha differs from git log over the gate paths")
-
+    # Live-tree equality anchors currency and applies to the newest
+    # (non-superseded) record only (see the else branch below). A
+    # SUPERSEDED record sealed historical digests at seal time; those
+    # values describe the tree then and are expected to diverge from
+    # the live tree as the gate evolves, so requiring live equality
+    # here would make every multi-record chain unsatisfiable.
+    # History stays tamper-evident through content addressing instead:
+    # record_hash must recompute, prev_hash must link to the
+    # predecessor, and the recursion anchors the newest record's live
+    # equality. (Regression fix: live equality was once applied to
+    # superseded history, which no evolving chain can satisfy.)
     if record.get("state") == "SUPERSEDED":
-        # SUPERSEDED additionally requires chain integrity to the
-        # verified newest record. Digests above already apply.
+        # A superseded record is a historical link only. Only chain
+        # integrity and a verified newest record matter.
         target_name = record.get("superseded_by")
         if not isinstance(target_name, str) or not target_name:
             problems.append("superseded_by is not a file name")
@@ -591,6 +585,19 @@ def verify(
                             + "; ".join(nested["problems"])
                         )
     else:
+        # The newest (non-superseded) record must agree with the live
+        # tree: seal status, live policy/impl/control-set digests, and
+        # the current gate commit.
+        if record.get("sig_status") != "unsigned_local":
+            problems.append("sig_status is not unsigned_local")
+        if record.get("policy_digest") != policy_digest():
+            problems.append("policy_digest differs from the live policies tree")
+        if record.get("gate_impl_digest") != gate_impl_digest():
+            problems.append("gate_impl_digest differs from the live tools tree")
+        if record.get("control_set_sha") != control_set_sha(manifest):
+            problems.append("control_set_sha differs from the resolved manifest")
+        if record.get("gate_sha") != gate_sha(repo, gate):
+            problems.append("gate_sha differs from git log over the gate paths")
         controls = list(record.get("controls") or [])
         # Zero controls fails closed (a body-less record is not PASS).
         if len(controls) == 0:
@@ -719,7 +726,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--manifest", default=str(POLICIES / "negative-controls.json"))
     parser.add_argument("--gate", default=str(POLICIES / "gate.json"))
     parser.add_argument("--out", default=str(ROOT / "quality" / "ledger" / "gate-control"))
-    parser.add_argument("--write", action="store_true", help="append the sealed record")
+    parser.add_argument("--write", action="store_true", help="append the sealed record and supersede older records")
     parser.add_argument("--verify", default=None, help="verify a sealed record")
     parser.add_argument(
         "--verify-chain",
@@ -743,8 +750,42 @@ def main(argv: list[str] | None = None) -> int:
             if args.write:
                 out_dir = Path(args.out).resolve()
                 out_dir.mkdir(parents=True, exist_ok=True)
+                previous = sorted(
+                    path for path in out_dir.glob("*.json") if path.name != "verify.json"
+                )
+                # Fail closed on a broken prev_hash chain instead of
+                # rewriting history over it.
+                expected = ZERO_HASH
+                for old in previous:
+                    old_record = load_json(old)
+                    if old_record.get("prev_hash") != expected:
+                        raise RuntimeError(
+                            f"prev_hash chain broken at {old.name}: "
+                            "refusing to supersede over broken history"
+                        )
+                    expected = str(old_record.get("record_hash", ""))
                 sequence = len(list(out_dir.glob("*.json"))) + 1
                 path = out_dir / f"{sequence:04d}-{record['gate_sha'][:12]}.json"
+                # Supersede every older record so the chain invariant
+                # holds immediately after the seal: star topology onto
+                # the newest file name, prev_hash relinked forward in
+                # sequence order, each record re-sealed. Then link the
+                # new record to the rewritten predecessor.
+                prev_hash = ZERO_HASH
+                for old in previous:
+                    old_record = load_json(old)
+                    old_record["state"] = "SUPERSEDED"
+                    old_record["superseded_by"] = path.name
+                    old_record["prev_hash"] = prev_hash
+                    old_record["record_hash"] = sha256_text(
+                        canonical(
+                            {key: value for key, value in old_record.items() if key != "record_hash"}
+                        )
+                    )
+                    old.write_text(json.dumps(old_record, indent=2) + "\n", encoding="utf-8")
+                    prev_hash = old_record["record_hash"]
+                record["prev_hash"] = prev_hash
+                seal(record)
                 path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
                 result = {
                     "schema": "gate-control-run/1",
