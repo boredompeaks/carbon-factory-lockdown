@@ -1,4 +1,4 @@
-"""Git tool execution. 6B-1, hardened 6B-fix2.
+"""Git tool execution. 6B-1, hardened 6B-fix2, real handlers P3a.
 
 git.commit is a real host-side handler, not a stub: it runs
 `git diff --cached --name-only --no-renames` against the live index,
@@ -10,8 +10,27 @@ scope/deny globs (.env*, pytest.ini, tox.ini, .coveragerc,
 universal deny set), and then runs `git commit` with shell=False
 and never --no-verify.
 
-Other git tools remain bounded stubs: they verify 40-hex revs name
-commit objects when a repo is present.
+All other git tools are real argv-only handlers (shell=False,
+cwd = repo via -C, 30s timeout via _timeout):
+  git.state  -> rev-parse HEAD, rev-parse HEAD^{tree},
+                rev-parse --abbrev-ref HEAD, status --porcelain,
+                merge-base <rev> HEAD,
+                merge-base --is-ancestor <rev> HEAD,
+                ls-tree -r <rev> [-- <path>]
+  git.status -> status --porcelain=v2 --branch (parsed)
+  git.log    -> log -n <limit> --format=%H%x09%an%x09%aI%x09%s
+                [<ref>] [-- <path>]
+  git.diff   -> diff --no-ext-diff --no-textconv <base> <head>
+                [-- <path>]
+  git.read_file -> cat-file blob <rev>:<path>
+  git.push_ref  -> rev-parse <ref> must equal expected_head, then
+                   push --porcelain origin <ref>:<ref>
+  code.write    -> real write under deny.check_code_write scope,
+                   utf-8, size cap
+
+Every real result carries executed:true and
+evidence:{argv, exit_code, stdout_sha256}. Non-zero exit maps to
+Reject("REJECT_PRECONDITION") with the stderr tail.
 """
 from __future__ import annotations
 
@@ -22,9 +41,10 @@ from pathlib import Path
 
 from ..core.validate import Reject, is_traversal_or_absolute
 
-from .deny import get_capability, is_commit_denied, is_in_scope
+from .deny import check_code_write, get_capability, is_commit_denied, is_denied_path, is_in_scope
 
 _TIMEOUT_FALLBACK = 30
+_CODE_WRITE_MAX_BYTES = 262144
 
 
 def _is_absolute_or_escape(path: str) -> bool:
@@ -46,8 +66,14 @@ def _is_placeholder(rev: str | None) -> bool:
 
 
 def _repo_cwd() -> str:
-    """Working directory from which git discovers the harness repo."""
-    return str(Path(__file__).resolve().parents[3])
+    """Working directory from which git discovers the harness repo.
+
+    handlers.py is files/tools/mcp/git/handlers.py; parents[4] is the
+    harness repo root (parents[3] is files/). The root is required so
+    repo-relative path filters (ls-tree/log/diff -- <path> with
+    files/... paths) resolve correctly under `git -C <cwd>`.
+    """
+    return str(Path(__file__).resolve().parents[4])
 
 
 def _git_exe(server) -> str:
@@ -106,6 +132,57 @@ def _run_git(server, argv: list[str]) -> subprocess.CompletedProcess:
         timeout=_timeout(server),
         env=_env(server),
     )
+
+
+def _full_argv(server, subargv: list[str]) -> list[str]:
+    """Full argv as executed: [git, -C, repo_cwd, *subargv]."""
+    return [_git_exe(server), "-C", _repo_cwd(), *subargv]
+
+
+def _sha256_str(text: str) -> str:
+    return hashlib.sha256((text or "").encode("utf-8")).hexdigest()
+
+
+def _evidence_entry(server, subargv: list[str], proc: subprocess.CompletedProcess) -> dict:
+    return {
+        "argv": _full_argv(server, subargv),
+        "exit_code": proc.returncode,
+        "stdout_sha256": _sha256_str(proc.stdout or ""),
+    }
+
+
+def _stderr_tail(proc: subprocess.CompletedProcess) -> str:
+    raw = ((proc.stderr or "").strip() or (proc.stdout or "").strip())
+    # Tail (no secrets): last 200 chars.
+    if len(raw) > 200:
+        raw = raw[-200:]
+    return raw
+
+
+def _run_checked(server, subargv: list[str]) -> subprocess.CompletedProcess:
+    """Run git subargv with shell=False; non-zero exit -> REJECT_PRECONDITION."""
+    try:
+        proc = _run_git(server, subargv)
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as exc:
+        raise Reject("REJECT_PRECONDITION", f"git {subargv[0]} spawn failed: {exc}")
+    except Exception as exc:
+        raise Reject("REJECT_PRECONDITION", f"git {subargv[0]} spawn failed: {exc}")
+    if proc.returncode != 0:
+        tail = _stderr_tail(proc)
+        raise Reject("REJECT_PRECONDITION", f"git {' '.join(subargv)} failed (exit {proc.returncode}): {tail}")
+    return proc
+
+
+def _repo_root(server) -> Path:
+    """Authoritative repo toplevel for code.write destinations."""
+    try:
+        proc = _run_git(server, ["rev-parse", "--show-toplevel"])
+        if proc.returncode == 0 and (proc.stdout or "").strip():
+            return Path(proc.stdout.strip())
+    except Exception:
+        pass
+    # Fallback: handlers.py is files/tools/mcp/git/handlers.py, parents[4] is root.
+    return Path(__file__).resolve().parents[4]
 
 
 def _commit_object_exists(rev: str) -> bool | None:
@@ -298,19 +375,373 @@ def _execute_commit(server, args: dict) -> dict:
     }
 
 
+def _execute_state(server, args: dict) -> dict:
+    rev = args.get("rev")
+    path = args.get("path")
+    if path is not None:
+        if not isinstance(path, str):
+            raise Reject("REJECT_ARG", "path must be a string")
+        if is_traversal_or_absolute("git.state", "path", path):
+            raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
+        if is_denied_path(path):
+            raise Reject("REJECT_PATH", f"path denied: {path!r}")
+    if rev is not None and not isinstance(rev, str):
+        raise Reject("REJECT_ARG", "rev must be a string")
+
+    executed: list[tuple[list[str], subprocess.CompletedProcess]] = []
+
+    def run(subargv: list[str]) -> subprocess.CompletedProcess:
+        proc = _run_checked(server, subargv)
+        executed.append((subargv, proc))
+        return proc
+
+    head = run(["rev-parse", "HEAD"]).stdout.strip()
+    tree = run(["rev-parse", "HEAD^{tree}"]).stdout.strip()
+    branch = run(["rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
+    porcelain = run(["status", "--porcelain"]).stdout
+    dirty = bool(porcelain.strip())
+
+    merge_base: str | None = None
+    ancestor: bool | None = None
+    files: list[str] = []
+    if rev is not None:
+        merge_base = run(["merge-base", rev, "HEAD"]).stdout.strip() or None
+        # --is-ancestor: exit 0 => True, exit 1 => False, else fail.
+        subargv = ["merge-base", "--is-ancestor", rev, "HEAD"]
+        try:
+            proc = _run_git(server, subargv)
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as exc:
+            raise Reject("REJECT_PRECONDITION", f"git merge-base spawn failed: {exc}")
+        executed.append((subargv, proc))
+        if proc.returncode == 0:
+            ancestor = True
+        elif proc.returncode == 1:
+            ancestor = False
+        else:
+            tail = _stderr_tail(proc)
+            raise Reject("REJECT_PRECONDITION", f"git {' '.join(subargv)} failed (exit {proc.returncode}): {tail}")
+        ls_argv = ["ls-tree", "-r", rev]
+        if path is not None:
+            ls_argv = ["ls-tree", "-r", rev, "--", path]
+        ls_out = run(ls_argv).stdout
+        for line in ls_out.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            # "<mode> <type> <sha>\t<path>"
+            if "\t" in line:
+                files.append(line.split("\t", 1)[1])
+            else:
+                parts = line.split()
+                if parts:
+                    files.append(parts[-1])
+
+    combined_stdout = "".join((proc.stdout or "") for _, proc in executed)
+    commands = [_evidence_entry(server, subargv, proc) for subargv, proc in executed]
+    evidence = {
+        "argv": [c["argv"] for c in commands],
+        "exit_code": 0,
+        "stdout_sha256": _sha256_str(combined_stdout),
+        "commands": commands,
+    }
+    return {
+        "tool": "git.state",
+        "head": head,
+        "tree": tree,
+        "branch": branch,
+        "dirty": dirty,
+        "merge_base": merge_base,
+        "ancestor": ancestor,
+        "files": files,
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
+def _execute_status(server, args: dict) -> dict:
+    ref = args.get("ref")
+    subargv = ["status", "--porcelain=v2", "--branch"]
+    proc = _run_checked(server, subargv)
+    raw = proc.stdout or ""
+    branch_oid: str | None = None
+    branch_head: str | None = None
+    upstream: str | None = None
+    ahead = 0
+    behind = 0
+    entries: list[dict] = []
+    for line in raw.splitlines():
+        if line.startswith("# branch.oid "):
+            branch_oid = line[len("# branch.oid "):].strip()
+        elif line.startswith("# branch.head "):
+            branch_head = line[len("# branch.head "):].strip()
+        elif line.startswith("# branch.upstream "):
+            upstream = line[len("# branch.upstream "):].strip()
+        elif line.startswith("# branch.ab "):
+            rest = line[len("# branch.ab "):].strip()
+            try:
+                plus, minus = rest.split()
+                ahead = int(plus.lstrip("+"))
+                behind = int(minus.lstrip("-"))
+            except Exception:
+                pass
+        elif line.startswith("? "):
+            entries.append({"kind": "untracked", "path": line[2:]})
+        elif line.startswith("! "):
+            entries.append({"kind": "ignored", "path": line[2:]})
+        elif line.startswith("1 "):
+            # 1 <XY> <sub> <mH> <mI> <mW> <hH> <hI> <path>
+            parts = line.split(" ", 8)
+            if len(parts) >= 9:
+                entries.append({"kind": "tracked", "xy": parts[1], "path": parts[8]})
+            elif len(parts) >= 2:
+                entries.append({"kind": "tracked", "xy": parts[1], "path": ""})
+        elif line.startswith("2 "):
+            # 2 <XY> <sub> <mH> <mI> <mW> <hH> <hI> <Xstep> <path><sep><orig>
+            parts = line.split(" ", 9)
+            if len(parts) >= 10:
+                raw_path = parts[9]
+                p = raw_path.split("\t")[0] if "\t" in raw_path else raw_path
+                entries.append({"kind": "renamed", "xy": parts[1], "path": p})
+            elif len(parts) >= 2:
+                entries.append({"kind": "renamed", "xy": parts[1], "path": ""})
+        elif line.startswith("u "):
+            parts = line.split(" ", 10)
+            if len(parts) >= 11:
+                entries.append({"kind": "unmerged", "xy": parts[1], "path": parts[10]})
+            elif len(parts) >= 2:
+                entries.append({"kind": "unmerged", "xy": parts[1], "path": ""})
+    evidence = _evidence_entry(server, subargv, proc)
+    return {
+        "tool": "git.status",
+        "ref": ref,
+        "branch_oid": branch_oid,
+        "branch": branch_head,
+        "upstream": upstream,
+        "ahead": ahead,
+        "behind": behind,
+        "entries": entries,
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
+def _execute_log(server, args: dict) -> dict:
+    limit = args.get("limit")
+    if limit is None:
+        limit = 10
+    if not isinstance(limit, int) or isinstance(limit, bool):
+        raise Reject("REJECT_ARG", "limit must be an integer")
+    ref = args.get("ref")
+    path = args.get("path")
+    if path is not None:
+        if not isinstance(path, str):
+            raise Reject("REJECT_ARG", "path must be a string")
+        if is_traversal_or_absolute("git.log", "path", path):
+            raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
+        if is_denied_path(path):
+            raise Reject("REJECT_PATH", f"path denied: {path!r}")
+    if ref is not None and not isinstance(ref, str):
+        raise Reject("REJECT_ARG", "ref must be a string")
+    subargv = ["log", "-n", str(limit), "--format=%H%x09%an%x09%aI%x09%s"]
+    if ref is not None:
+        subargv.append(ref)
+    if path is not None:
+        subargv.extend(["--", path])
+    proc = _run_checked(server, subargv)
+    entries: list[dict] = []
+    for line in (proc.stdout or "").splitlines():
+        if not line:
+            continue
+        parts = line.split("\t", 3)
+        if len(parts) < 4:
+            continue
+        entries.append({"sha": parts[0], "author": parts[1], "date": parts[2], "subject": parts[3]})
+    evidence = _evidence_entry(server, subargv, proc)
+    result: dict = {
+        "tool": "git.log",
+        "entries": entries,
+        "count": len(entries),
+        "limit": limit,
+        "executed": True,
+        "evidence": evidence,
+    }
+    if ref is not None:
+        result["ref"] = ref
+    if path is not None:
+        result["path"] = path
+    return result
+
+
+def _execute_diff(server, args: dict) -> dict:
+    base = args.get("base")
+    head = args.get("head")
+    path = args.get("path")
+    if not isinstance(base, str) or not isinstance(head, str):
+        raise Reject("REJECT_ARG", "git.diff requires base and head")
+    if path is not None:
+        if not isinstance(path, str):
+            raise Reject("REJECT_ARG", "path must be a string")
+        if is_traversal_or_absolute("git.diff", "path", path):
+            raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
+        if is_denied_path(path):
+            raise Reject("REJECT_PATH", f"path denied: {path!r}")
+    subargv = ["diff", "--no-ext-diff", "--no-textconv", base, head]
+    if path is not None:
+        subargv.extend(["--", path])
+    proc = _run_checked(server, subargv)
+    evidence = _evidence_entry(server, subargv, proc)
+    return {
+        "tool": "git.diff",
+        "base": base,
+        "head": head,
+        "diff": proc.stdout or "",
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
+def _execute_read_file(server, args: dict) -> dict:
+    rev = args.get("rev")
+    path = args.get("path")
+    if not isinstance(rev, str) or not isinstance(path, str):
+        raise Reject("REJECT_ARG", "git.read_file requires rev and path")
+    if is_traversal_or_absolute("git.read_file", "path", path):
+        raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
+    # Defence in depth: deny globs already applied upstream.
+    if is_denied_path(path):
+        raise Reject("REJECT_PATH", f"path denied: {path!r}")
+    subargv = ["cat-file", "blob", f"{rev}:{path}"]
+    proc = _run_checked(server, subargv)
+    content = proc.stdout or ""
+    evidence = _evidence_entry(server, subargv, proc)
+    return {
+        "tool": "git.read_file",
+        "rev": rev,
+        "path": path,
+        "content": content,
+        "bytes": len(content.encode("utf-8")),
+        "sha256": _sha256_str(content),
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
+def _execute_push_ref(server, args: dict) -> dict:
+    ref = args.get("ref")
+    expected_head = args.get("expected_head")
+    if not isinstance(ref, str) or not isinstance(expected_head, str):
+        raise Reject("REJECT_ARG", "git.push_ref requires ref and expected_head")
+    if not ref.startswith("refs/heads/"):
+        raise Reject("REJECT_PATH", f"push ref must be refs/heads/*: {ref!r}")
+    # resolvable, must equal expected_head.
+    subargv_parse = ["rev-parse", ref]
+    try:
+        proc_parse = _run_git(server, subargv_parse)
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as exc:
+        raise Reject("REJECT_PRECONDITION", f"git rev-parse spawn failed: {exc}")
+    if proc_parse.returncode != 0:
+        tail = _stderr_tail(proc_parse)
+        raise Reject("REJECT_PRECONDITION", f"git {' '.join(subargv_parse)} failed (exit {proc_parse.returncode}): {tail}")
+    resolved = (proc_parse.stdout or "").strip()
+    if resolved.lower() != expected_head.lower():
+        raise Reject("REJECT_PRECONDITION", f"ref {ref} resolves to {resolved} != expected_head {expected_head}")
+    # push --porcelain origin <ref>:<ref>; no force flag exists.
+    subargv_push = ["push", "--porcelain", "origin", f"{ref}:{ref}"]
+    try:
+        proc_push = _run_git(server, subargv_push)
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as exc:
+        raise Reject("REJECT_PRECONDITION", f"git push spawn failed: {exc}")
+    if proc_push.returncode != 0:
+        tail = _stderr_tail(proc_push)
+        raise Reject("REJECT_PRECONDITION", f"git {' '.join(subargv_push)} failed (exit {proc_push.returncode}): {tail}")
+    parse_entry = _evidence_entry(server, subargv_parse, proc_parse)
+    push_entry = _evidence_entry(server, subargv_push, proc_push)
+    evidence = {
+        "argv": push_entry["argv"],
+        "exit_code": push_entry["exit_code"],
+        "stdout_sha256": push_entry["stdout_sha256"],
+        "commands": [parse_entry, push_entry],
+    }
+    return {
+        "tool": "git.push_ref",
+        "ref": ref,
+        "expected_head": expected_head,
+        "resolved": resolved,
+        "pushed": True,
+        "fast_forward_only": True,
+        "force": False,
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
+def _execute_code_write(server, role: str, args: dict) -> dict:
+    path = args.get("path")
+    content = args.get("content")
+    encoding = args.get("encoding", "utf-8") or "utf-8"
+    if not isinstance(path, str):
+        raise Reject("REJECT_ARG", "code.write requires path")
+    if not isinstance(content, str):
+        raise Reject("REJECT_ARG", "code.write requires content")
+    if encoding != "utf-8":
+        raise Reject("REJECT_ARG", f"encoding must be utf-8: {encoding!r}")
+    if is_traversal_or_absolute("code.write", "path", path):
+        raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
+    # Real scope enforcement under deny.check_code_write.
+    check_code_write(role, path)
+    # Defence in depth: universal deny also checked here.
+    if is_denied_path(path):
+        raise Reject("REJECT_PATH", f"path denied for code.write: {path!r}")
+    data = content.encode("utf-8")
+    if len(data) > _CODE_WRITE_MAX_BYTES:
+        raise Reject("REJECT_ARG", f"content exceeds {_CODE_WRITE_MAX_BYTES} bytes")
+    root = _repo_root(server)
+    dest = (root / Path(path)).resolve()
+    try:
+        dest.relative_to(root.resolve())
+    except ValueError:
+        raise Reject("REJECT_PATH", f"path escapes repo: {path!r}")
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+    except OSError as exc:
+        raise Reject("REJECT_PRECONDITION", f"code.write failed: {exc}")
+    sha = hashlib.sha256(data).hexdigest()
+    evidence = {
+        "argv": ["code.write", path],
+        "exit_code": 0,
+        "stdout_sha256": sha,
+    }
+    return {
+        "tool": "code.write",
+        "path": path,
+        "bytes": len(data),
+        "sha256": sha,
+        "encoding": "utf-8",
+        "written": True,
+        "executed": True,
+        "evidence": evidence,
+    }
+
+
 def execute(server, tool: str, role: str, args: dict) -> dict | None:
     if not tool.startswith("git.") and tool not in ("code.write",):
         return None
     if tool == "git.commit":
         return _execute_commit(server, args)
+    if tool == "git.state":
+        return _execute_state(server, args)
+    if tool == "git.status":
+        return _execute_status(server, args)
+    if tool == "git.log":
+        return _execute_log(server, args)
+    if tool == "git.diff":
+        return _execute_diff(server, args)
+    if tool == "git.read_file":
+        return _execute_read_file(server, args)
     if tool == "git.push_ref":
-        # refs/heads/<branch> only, fast-forward only (no force arg exists).
-        return {"tool": tool, "ref": args.get("ref"), "expected_head": args.get("expected_head"),
-                "fast_forward_only": True, "force": False}
+        return _execute_push_ref(server, args)
     if tool == "code.write":
-        return {"tool": tool, "path": args.get("path"), "bytes": len(str(args.get("content", "")).encode()),
-                "encoding": args.get("encoding", "utf-8"), "written": False, "stub": True}
-    # Read-only git views.
-    rev = args.get("rev") or args.get("ref") or args.get("head") or args.get("base") or ""
-    return {"tool": tool, "rev": rev, "commit_verified": _commit_object_exists(rev) if rev else None,
-            "stub": True}
+        return _execute_code_write(server, role, args)
+    return None
+
