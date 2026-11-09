@@ -50,6 +50,7 @@ import argparse
 import json
 import os
 import queue
+import shutil
 import subprocess
 import sys
 import threading
@@ -91,6 +92,37 @@ def fail(message: str) -> int:
     return 2
 
 
+def resolve_python_argv(command: list[str]) -> list[str]:
+    """Map a bare python name that is missing on this host to the stable interpreter.
+
+    Same resolution as ``scripts/gen_opencode_config.py``: ``sys.executable``
+    when it is a stable path (absolute and an existing file), otherwise
+    ``python3`` on POSIX / ``python`` on Windows. A stale ``opencode.json``
+    with bare ``python`` would otherwise fail to spawn on Ubuntu >=22.04,
+    where only ``python3`` exists. Bare names that are on PATH are kept
+    as-is; absolute or otherwise-pathed argv[0] is never rewritten.
+    """
+    head = command[0]
+    if os.path.sep in head or (os.path.altsep and os.path.altsep in head):
+        return command
+    name = head.lower()
+    if name.endswith((".exe", ".bat", ".cmd")):
+        name = name[:-4]
+    if name not in ("python", "python3", "py"):
+        return command
+    if shutil.which(head):
+        return command
+    exe = sys.executable or ""
+    if exe and os.path.isabs(exe) and os.path.isfile(exe):
+        replacement = exe
+    else:
+        replacement = "python" if sys.platform.startswith("win") else "python3"
+    if replacement == head:
+        return command
+    print(f"note: {head!r} not on PATH; using {replacement!r} for server command", file=sys.stderr)
+    return [replacement, *command[1:]]
+
+
 def find_config(override: str | None) -> Path:
     if override:
         return Path(override)
@@ -123,6 +155,7 @@ def load_server(config_path: Path, name: str) -> tuple[list[str], str, dict[str,
     command = server.get("command")
     if not isinstance(command, list) or not command or not all(isinstance(x, str) for x in command):
         raise ValueError(f"server {name!r} has no valid command argv")
+    command = resolve_python_argv(command)
     cwd_raw = server.get("cwd", ".")
     if not isinstance(cwd_raw, str) or not cwd_raw:
         cwd_raw = "."
