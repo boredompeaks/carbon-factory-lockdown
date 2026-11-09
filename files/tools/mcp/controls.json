@@ -1988,6 +1988,622 @@
       },
       "expect": "REJECT_ARG",
       "note": "leading-dash values are rejected"
+    },
+    {
+      "id": "CF-HOLE-01",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/dispatch/x/capability.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A1: auditor git.read_file of ledger dispatch capability record must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-02",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/findings/x.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A2: auditor git.read_file of quality/ledger/findings/x.json must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-03",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/attack-logs/x.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A2: auditor git.read_file of quality/ledger/attack-logs/x.json must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-04",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/gate-control/x.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A2: auditor git.read_file of quality/ledger/gate-control/x.json must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-05",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/release/x.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A2: auditor git.read_file of quality/ledger/release/x.json must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-06",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "quality/ledger/acceptance/x.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A2: auditor git.read_file of quality/ledger/acceptance/x.json must deny (quality/ledger wholesale)"
+    },
+    {
+      "id": "CF-HOLE-07",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A3 auditor: git.read_file of audit-scratch must deny (audit-scratch isolation)"
+    },
+    {
+      "id": "CF-HOLE-08",
+      "tool": "git.read_file",
+      "role": "builder",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A3 builder: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-09",
+      "tool": "git.read_file",
+      "role": "hacker",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A3 hacker: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-10",
+      "tool": "git.read_file",
+      "role": "orchestrator",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A3 orchestrator: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-11",
+      "tool": "git.read_file",
+      "role": "release-engineer",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A3 release-engineer: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-12",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "audit-scratch/x.py"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A3 compliance: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-13",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A4 auditor: git.read_file of .agt/policy.json must deny (.agt tree)"
+    },
+    {
+      "id": "CF-HOLE-14",
+      "tool": "git.read_file",
+      "role": "builder",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 builder: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-15",
+      "tool": "git.read_file",
+      "role": "hacker",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 hacker: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-16",
+      "tool": "git.read_file",
+      "role": "orchestrator",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 orchestrator: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-17",
+      "tool": "git.read_file",
+      "role": "release-engineer",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 release-engineer: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-18",
+      "tool": "git.read_file",
+      "role": "compliance",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 compliance: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-19",
+      "tool": "git.read_file",
+      "role": "crouton",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".agt/policy.json"
+      },
+      "expect": "REJECT_ROLE",
+      "note": "A4 crouton: git.read_file is auditor-only so REJECT_ROLE fires before path deny (any grant-holder would hit REJECT_PATH)"
+    },
+    {
+      "id": "CF-HOLE-20",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": ".git/config"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A5: auditor git.read_file of .git/config must deny (.git tree)"
+    },
+    {
+      "id": "CF-HOLE-21",
+      "tool": "scratch.write",
+      "role": "auditor",
+      "args": {
+        "namespace": "auditor",
+        "capability_id": "cap-a",
+        "path": "quality/ledger/dispatch/x.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A6: scratch.write into quality/ledger must deny"
+    },
+    {
+      "id": "CF-HOLE-22",
+      "tool": "scratch.write",
+      "role": "hacker",
+      "args": {
+        "namespace": "hacker",
+        "capability_id": "cap-h",
+        "path": "quality/ledger/findings/x.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A6: scratch.write into quality/ledger must deny"
+    },
+    {
+      "id": "CF-HOLE-23",
+      "tool": "code.write",
+      "role": "builder",
+      "args": {
+        "path": "quality/ledger/x.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A6: code.write into quality/ledger must deny (outside builder backend scope + ledger deny)"
+    },
+    {
+      "id": "CF-HOLE-24",
+      "tool": "code.write",
+      "role": "compliance",
+      "args": {
+        "path": "quality/ledger/dispatch/x.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A6: code.write into quality/ledger must deny (outside compliance scope + ledger deny)"
+    },
+    {
+      "id": "CF-HOLE-25",
+      "tool": "code.write",
+      "role": "crouton",
+      "args": {
+        "path": "quality/ledger/x.json",
+        "content": "x"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A6: code.write into quality/ledger must deny (outside crouton scope + ledger deny)"
+    },
+    {
+      "id": "CF-HOLE-26",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "fuzz-evidence/seed.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A7: git.read_file of fuzz-evidence must deny"
+    },
+    {
+      "id": "CF-HOLE-27",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "a/fuzz-evidence/b/seed.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A7: git.read_file of nested fuzz-evidence must deny (**/fuzz-evidence/**)"
+    },
+    {
+      "id": "CF-HOLE-28",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "fuzz-seed.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A7: git.read_file of fuzz seed json must deny (*fuzz*seed*.json)"
+    },
+    {
+      "id": "CF-HOLE-29",
+      "tool": "git.read_file",
+      "role": "auditor",
+      "args": {
+        "rev": "0000000000000000000000000000000000000000",
+        "path": "x-fuzz-seed.json"
+      },
+      "expect": "REJECT_PATH",
+      "note": "A7: git.read_file of fuzz seed json must deny (*fuzz*seed*.json)"
+    },
+    {
+      "id": "BM-SHELL-auditor",
+      "tool": "basemind_shell",
+      "role": "auditor",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for auditor (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-SHELL-builder",
+      "tool": "basemind_shell",
+      "role": "builder",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for builder (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-SHELL-orchestrator",
+      "tool": "basemind_shell",
+      "role": "orchestrator",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for orchestrator (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-SHELL-hacker",
+      "tool": "basemind_shell",
+      "role": "hacker",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for hacker (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-SHELL-release-engineer",
+      "tool": "basemind_shell",
+      "role": "release-engineer",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for release-engineer (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-SHELL-compliance",
+      "tool": "basemind_shell",
+      "role": "compliance",
+      "args": {
+        "required_effect": "ask"
+      },
+      "expect": "ASK_ONLY",
+      "requires_runtime": "basemind",
+      "note": "basemind_shell must be ask never allow for compliance (config assertion; basemind has no carbon handler)"
+    },
+    {
+      "id": "BM-ADMIN-auditor",
+      "tool": "basemind_admin",
+      "role": "auditor",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for auditor"
+    },
+    {
+      "id": "BM-ADMIN-builder",
+      "tool": "basemind_admin",
+      "role": "builder",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for builder"
+    },
+    {
+      "id": "BM-ADMIN-orchestrator",
+      "tool": "basemind_admin",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for orchestrator"
+    },
+    {
+      "id": "BM-ADMIN-hacker",
+      "tool": "basemind_admin",
+      "role": "hacker",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for hacker"
+    },
+    {
+      "id": "BM-ADMIN-release-engineer",
+      "tool": "basemind_admin",
+      "role": "release-engineer",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for release-engineer"
+    },
+    {
+      "id": "BM-ADMIN-compliance",
+      "tool": "basemind_admin",
+      "role": "compliance",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_admin must be absent (NOT_GRANTED) for compliance"
+    },
+    {
+      "id": "BM-AGENTS-auditor",
+      "tool": "basemind_agents",
+      "role": "auditor",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for auditor"
+    },
+    {
+      "id": "BM-AGENTS-builder",
+      "tool": "basemind_agents",
+      "role": "builder",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for builder"
+    },
+    {
+      "id": "BM-AGENTS-orchestrator",
+      "tool": "basemind_agents",
+      "role": "orchestrator",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for orchestrator"
+    },
+    {
+      "id": "BM-AGENTS-hacker",
+      "tool": "basemind_agents",
+      "role": "hacker",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for hacker"
+    },
+    {
+      "id": "BM-AGENTS-release-engineer",
+      "tool": "basemind_agents",
+      "role": "release-engineer",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for release-engineer"
+    },
+    {
+      "id": "BM-AGENTS-compliance",
+      "tool": "basemind_agents",
+      "role": "compliance",
+      "args": {},
+      "expect": "NOT_GRANTED",
+      "requires_runtime": "basemind",
+      "note": "basemind_agents must be absent (NOT_GRANTED) for compliance"
+    },
+    {
+      "id": "BM-MATRIX-memory",
+      "tool": "basemind_memory",
+      "role": "all",
+      "args": {
+        "allowed_roles": [
+          "auditor",
+          "hacker"
+        ],
+        "denied_roles": [
+          "builder",
+          "orchestrator",
+          "release-engineer",
+          "compliance"
+        ]
+      },
+      "expect": "ROLE_MATRIX",
+      "requires_runtime": "basemind",
+      "note": "basemind_memory granted only to auditor+hacker"
+    },
+    {
+      "id": "BM-MATRIX-web",
+      "tool": "basemind_web",
+      "role": "all",
+      "args": {
+        "allowed_roles": [
+          "auditor",
+          "compliance"
+        ],
+        "denied_roles": [
+          "builder",
+          "orchestrator",
+          "release-engineer",
+          "hacker"
+        ]
+      },
+      "expect": "ROLE_MATRIX",
+      "requires_runtime": "basemind",
+      "note": "basemind_web granted only to auditor+compliance"
+    },
+    {
+      "id": "BM-MATRIX-workspace",
+      "tool": "basemind_workspace",
+      "role": "all",
+      "args": {
+        "allowed_roles": [
+          "orchestrator",
+          "release-engineer"
+        ],
+        "denied_roles": [
+          "auditor",
+          "builder",
+          "hacker",
+          "compliance"
+        ]
+      },
+      "expect": "ROLE_MATRIX",
+      "requires_runtime": "basemind",
+      "note": "basemind_workspace granted only to orchestrator+release-engineer"
+    },
+    {
+      "id": "BM-MATRIX-graph",
+      "tool": "basemind_graph",
+      "role": "all",
+      "args": {
+        "allowed_roles": [
+          "auditor",
+          "orchestrator",
+          "hacker",
+          "compliance"
+        ],
+        "denied_roles": [
+          "builder",
+          "release-engineer"
+        ]
+      },
+      "expect": "ROLE_MATRIX",
+      "requires_runtime": "basemind",
+      "note": "basemind_graph not builder/release-engineer"
+    },
+    {
+      "id": "BM-GIT-ledger",
+      "tool": "basemind_git",
+      "role": "auditor",
+      "args": {
+        "action": "show",
+        "path": "quality/ledger/dispatch/x/capability.json",
+        "expected": "empty"
+      },
+      "expect": "EMPTY",
+      "requires_runtime": "basemind",
+      "note": "basemind_git show on excluded ledger path must return empty (requires live basemind; basemind.toml excludes quality/ledger)"
+    },
+    {
+      "id": "BM-GIT-env",
+      "tool": "basemind_git",
+      "role": "auditor",
+      "args": {
+        "action": "show",
+        "path": ".env",
+        "expected": "empty"
+      },
+      "expect": "EMPTY",
+      "requires_runtime": "basemind",
+      "note": "basemind_git show on excluded .env must return empty (requires live basemind)"
+    },
+    {
+      "id": "BM-GIT-agt",
+      "tool": "basemind_git",
+      "role": "auditor",
+      "args": {
+        "action": "show",
+        "path": ".agt/policy.json",
+        "expected": "empty"
+      },
+      "expect": "EMPTY",
+      "requires_runtime": "basemind",
+      "note": "basemind_git show on excluded .agt/policy.json must return empty (requires live basemind)"
     }
   ]
 }

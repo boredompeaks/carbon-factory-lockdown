@@ -61,7 +61,24 @@
           },
           "expect": {
             "type": "string",
-            "pattern": "^REJECT_[A-Z]+$"
+            "enum": [
+              "REJECT_ARG",
+              "REJECT_ENUM",
+              "REJECT_PATH",
+              "REJECT_PATTERN",
+              "REJECT_PRECONDITION",
+              "REJECT_POLICY",
+              "REJECT_REDACTION",
+              "REJECT_ROLE",
+              "ACCEPT",
+              "ASK_ONLY",
+              "NOT_GRANTED",
+              "ROLE_MATRIX",
+              "EMPTY"
+            ]
+          },
+          "requires_runtime": {
+            "type": "string"
           },
           "note": {
             "type": "string"
