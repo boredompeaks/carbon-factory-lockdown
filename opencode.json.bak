@@ -1,0 +1,178 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrator",
+  "mcp": {
+    "servers": {
+      "carbon-orchestrator": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "orchestrator"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-builder": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "builder"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-auditor": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "auditor"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-hacker": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "hacker"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-compliance": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "compliance"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-release-engineer": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "release-engineer"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "basemind": {
+        "type": "local",
+        "command": [
+          "/home/boredompeaks/.local/bin/basemind",
+          "serve"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "timeout": {
+          "startup": 120000,
+          "catalog": 30000,
+          "execution": 120000
+        }
+      },
+      "coding-ethos": {
+        "type": "local",
+        "command": [
+          "/home/boredompeaks/coding_ethos_pull/bin/coding-ethos-run",
+          "mcp"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false
+      },
+      "fe-bridge": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Admin/Downloads/backend/.opencode-web/fe-bridge/mcp.js"
+        ],
+        "disabled": false,
+        "environment": {
+          "FE_BRIDGE_ROOT": "C:/Users/Admin/Downloads/backend/.opencode-web/fe-bridge"
+        }
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "playwright-mcp",
+          "--allow-unrestricted-file-access"
+        ],
+        "disabled": false
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "chrome-devtools-mcp",
+          "--isolated",
+          "--viewport",
+          "1280x720"
+        ],
+        "disabled": false
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "disabled": false
+      }
+    }
+  },
+  "plugin": [
+    "./.opencode/plugins/agt.js"
+  ]
+}

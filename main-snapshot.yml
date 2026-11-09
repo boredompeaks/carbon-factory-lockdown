@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - generic [aria-hidden]:
+    - generic: VIEW
+  - complementary "Loading portfolio experience" [ref=e2]:
+    - generic:
+      - generic:
+        - generic: "087"
+        - generic:
+          - generic: U
+          - generic: Z
+          - generic: .
+  - banner:
+    - navigation "Primary site navigation" [ref=e5]:
+      - link "Uzair home" [ref=e6] [cursor=pointer]:
+        - /url: "#top"
+        - text: U
+        - generic [ref=e7]: /
+        - text: M
+      - generic [ref=e8]:
+        - link "About" [ref=e9] [cursor=pointer]:
+          - /url: "#about"
+        - link "Things" [ref=e10] [cursor=pointer]:
+          - /url: "#things"
+        - link "Experiments" [ref=e11] [cursor=pointer]:
+          - /url: "#experiments"
+        - link "Contact" [ref=e12] [cursor=pointer]:
+          - /url: "#contact"
+      - button "Open full index" [ref=e14]: INDEX ↗
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - generic: "01"
+        - generic: CATEGORY
+      - generic:
+        - generic: Project Name
+        - generic: Exploration
+  - main [ref=e15]:
+    - region "Hero Introduction" [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]: Uzair Malkani · Creative Developer
+        - heading "B U I L D T H I N G S . U n d e r s t a n d ." [level=1] [ref=e20]:
+          - generic [ref=e21]:
+            - generic [ref=e22]: B
+            - generic [ref=e23]: U
+            - generic [ref=e24]: I
+            - generic [ref=e25]: L
+            - generic [ref=e26]: D
+          - generic [ref=e27]:
+            - generic [ref=e28]: T
+            - generic [ref=e29]: H
+            - generic [ref=e30]: I
+            - generic [ref=e31]: "N"
+            - generic [ref=e32]: G
+            - generic [ref=e33]: S
+            - generic [ref=e34]: .
+          - generic [ref=e35]:
+            - generic [ref=e36]: U
+            - generic [ref=e37]: "n"
+            - generic [ref=e38]: d
+            - generic [ref=e39]: e
+            - generic [ref=e40]: r
+            - generic [ref=e41]: s
+            - generic [ref=e42]: t
+            - generic [ref=e43]: a
+            - generic [ref=e44]: "n"
+            - generic [ref=e45]: d
+            - generic [ref=e46]: .
+        - paragraph [ref=e48]: developer, builder, and systems thinker. Exploring code, graphics, architecture, and anything interesting enough to pull apart.
+    - region "Philosophy Manifesto" [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e51]: Working Philosophy
+        - blockquote [ref=e52]: "\"Most things in software are accidents of history. Once you realize that, you realize you can build better ones.\""
+        - generic [ref=e53]: First principles. Rigorous systems. No boilerplate thinking.
+    - region "About Uzair" [ref=e54]:
+      - generic [ref=e55]:
+        - generic:
+          - generic: Selected Principles
+          - heading "THE STACK." [level=2]
+          - paragraph: Curiosity as an engineering methodology. Designing interfaces and systems that reward deep scrutiny.
+        - generic:
+          - article [ref=e93]:
+            - generic [ref=e94]: 01 / foundation
+            - heading "CODE IS CRAFT" [level=3] [ref=e96]
+            - paragraph [ref=e97]: Every abstraction has a cost. Understanding the layers underneath is the only reliable way to build software that actually lasts.
+          - article [ref=e98]:
+            - generic [ref=e99]: 02 / approach
+            - heading "FROM ZERO" [level=3] [ref=e101]
+            - paragraph [ref=e102]: The best way to understand an algorithm or system is to construct it without libraries. If you cannot implement it from memory, you do not own it.
+          - article [ref=e103]:
+            - generic [ref=e104]: 03 / philosophy
+            - heading "SYSTEMS THINKING" [level=3] [ref=e106]
+            - paragraph [ref=e107]: Components do not exist in isolation. Software is state machines, network latency, human psychology, and memory caches colliding in real time.
+          - article [ref=e108]:
+            - generic [ref=e109]: 04 / ambition
+            - heading "PERPETUAL ITERATION" [level=3] [ref=e111]
+            - paragraph [ref=e112]: Shipping is an inflection point, not a destination. What matters is the velocity of feedback loops and unrelenting refinement.
+    - region "Selected Projects" [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]: Index of Works
+            - heading "THINGS." [level=2] [ref=e61]
+          - paragraph [ref=e62]: A selection of applications, systems experiments, and deep visual investigations built over the past several years.
+        - generic [ref=e63]:
+          - link "01 SecureChat End-to-end encrypted messaging with zero-knowledge architecture, ephemeral keys, and forward secrecy. cryptography / systems EXPLORE ↗" [ref=e113]:
+            - /url: "#"
+            - generic [ref=e114]: "01"
+            - heading "SecureChat" [level=3] [ref=e116]
+            - generic [ref=e117]: End-to-end encrypted messaging with zero-knowledge architecture, ephemeral keys, and forward secrecy.
+            - generic [ref=e118]:
+              - generic [ref=e119]: cryptography / systems
+              - generic [ref=e120]: EXPLORE ↗
+          - link "02 Limbus Deep learning vision system for autonomous anomaly detection and spatial tracking in dense visual feeds. vision / neural EXPLORE ↗" [ref=e121]:
+            - /url: "#"
+            - generic [ref=e122]: "02"
+            - heading "Limbus" [level=3] [ref=e124]
+            - generic [ref=e125]: Deep learning vision system for autonomous anomaly detection and spatial tracking in dense visual feeds.
+            - generic [ref=e126]:
+              - generic [ref=e127]: vision / neural
+              - generic [ref=e128]: EXPLORE ↗
+          - link "03 The Store High-throughput commerce engine built for sub-50ms catalog indexing, live inventory sync, and instant checkout. infrastructure / commerce EXPLORE ↗" [ref=e129]:
+            - /url: "#"
+            - generic [ref=e130]: "03"
+            - heading "The Store" [level=3] [ref=e132]
+            - generic [ref=e133]: High-throughput commerce engine built for sub-50ms catalog indexing, live inventory sync, and instant checkout.
+            - generic [ref=e134]:
+              - generic [ref=e135]: infrastructure / commerce
+              - generic [ref=e136]: EXPLORE ↗
+          - link "04 Nexus An experimental ML-powered Android keyboard exploring glide input, personalization, prediction and on-device intelligence. android / ML EXPLORE ↗" [ref=e137]:
+            - /url: "#"
+            - generic [ref=e138]: "04"
+            - heading "Nexus" [level=3] [ref=e140]
+            - generic [ref=e141]: An experimental ML-powered Android keyboard exploring glide input, personalization, prediction and on-device intelligence.
+            - generic [ref=e142]:
+              - generic [ref=e143]: android / ML
+              - generic [ref=e144]: EXPLORE ↗
+          - link "05 Other Things Visual experiments, diagrams, prototypes and ideas that don't quite belong anywhere else. experiments / unknown EXPLORE ↗" [ref=e145]:
+            - /url: "#"
+            - generic [ref=e146]: "05"
+            - heading "Other Things" [level=3] [ref=e148]
+            - generic [ref=e149]: Visual experiments, diagrams, prototypes and ideas that don't quite belong anywhere else.
+            - generic [ref=e150]:
+              - generic [ref=e151]: experiments / unknown
+              - generic [ref=e152]: EXPLORE ↗
+    - region "Interactive Experiments" [ref=e64]:
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - generic [ref=e67]: The Laboratory
+          - heading "EXPERIMENTS." [level=2] [ref=e68]
+        - generic [ref=e69]:
+          - article [ref=e153]:
+            - generic [ref=e154]:
+              - generic [ref=e155]: 001 / visual
+              - generic [ref=e156]: ◌
+            - heading "MAKE A PICTURE." [level=3] [ref=e157]
+            - paragraph [ref=e159]: Diagrams, compositions, strange visual experiments and anything else that refuses to remain inside a code editor.
+          - article [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: 002 / systems
+              - generic [ref=e163]: ⌁
+            - heading "BREAK THE THING." [level=3] [ref=e164]
+            - paragraph [ref=e165]: Build it. Test it. Try to make it fail. Understand the failure. Build it again.
+          - article [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: 003 / unknown
+              - generic [ref=e169]: "?"
+            - heading "WHAT IF?" [level=3] [ref=e170]
+            - paragraph [ref=e172]: The most dangerous two words in the vocabulary of someone with too much curiosity and a computer.
+    - region "Contact and Info" [ref=e70]:
+      - generic [ref=e71]:
+        - heading "LET'S BUILD SOMETHING REAL." [level=2] [ref=e72]:
+          - generic [ref=e73]: LET'S BUILD
+          - generic [ref=e74]: SOMETHING REAL.
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: Biography
+            - paragraph [ref=e78]:
+              - text: Uzair is a builder interested in
+              - emphasis [ref=e79]: novel interaction models
+              - text: ", cryptographic networks, machine learning interfaces, and high-performance digital engines."
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - generic [ref=e82]: Direct Channel
+              - link "uzairmalkani2010@gmail.com ↗" [ref=e83] [cursor=pointer]:
+                - /url: mailto:uzairmalkani2010@gmail.com
+            - generic [ref=e84]:
+              - generic [ref=e85]: Digital Presence
+              - generic [ref=e86]:
+                - link "GitHub ↗" [ref=e87]:
+                  - /url: https://github.com/boredompeaks
+                - link "Twitter / X ↗" [ref=e88]:
+                  - /url: https://x.com/uzair_malkani
+        - generic [ref=e89]:
+          - generic [ref=e90]: Uzair Malkani · All Systems Operational
+          - generic [ref=e91]: © 2026 · boredompeaks

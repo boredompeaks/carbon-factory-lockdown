@@ -1,0 +1,125 @@
+- generic [active] [ref=f5e1]:
+  - link "Skip to content" [ref=f5e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=f5e3]:
+    - generic [ref=f5e4]:
+      - navigation "Primary" [ref=f5e6]:
+        - link "Shop" [ref=f5e7] [cursor=pointer]:
+          - /url: /products
+        - link "New arrivals" [ref=f5e8] [cursor=pointer]:
+          - /url: /products?ordering=-created_at
+      - link "Maison Aurel" [ref=f5e9] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f5e10]:
+        - link "Sign in" [ref=f5e11] [cursor=pointer]:
+          - /url: /login
+        - link "Cart, 0 items" [ref=f5e12] [cursor=pointer]:
+          - /url: /cart
+          - generic [ref=f5e16]: 0 items
+  - main [ref=f5e17]:
+    - generic [ref=f5e18]:
+      - generic [aria-hidden]: A
+      - generic [ref=f5e20]:
+        - paragraph [ref=f5e21]: Eau de parfum · Small batches
+        - heading [level=1] [ref=f5e22]:
+          - text: Perfumes composed with
+          - emphasis [ref=f5e23]: restraint
+          - text: .
+        - paragraph [ref=f5e24]: Maison Aurel is a small perfume house. Fewer materials, longer macerations, no seasonal noise — fragrances built to be worn often.
+        - generic [ref=f5e25]:
+          - link "Shop all fragrances" [ref=f5e26] [cursor=pointer]:
+            - /url: /products
+          - link "See new arrivals" [ref=f5e27] [cursor=pointer]:
+            - /url: /products?ordering=-created_at
+    - region [ref=f5e29]:
+      - generic [ref=f5e30]:
+        - generic [ref=f5e31]:
+          - paragraph [ref=f5e32]: Formulations 2024
+          - heading "New arrivals" [level=2] [ref=f5e33]
+        - generic [ref=f5e34]:
+          - paragraph [aria-hidden] [ref=f5e35]: 01/01
+          - generic [ref=f5e36]:
+            - button "Previous slide" [disabled]
+            - button "Next slide" [disabled]
+      - paragraph [ref=f5e37]: "Slide 1 of 1: Oud"
+      - group "1 of 1" [ref=f5e40]:
+        - generic [ref=f5e41]:
+          - generic [ref=f5e42]:
+            - img "Oud" [ref=f5e43]
+            - generic [ref=f5e44]: N° 01 · Perfume
+          - generic [ref=f5e45]:
+            - generic [ref=f5e46]:
+              - generic [ref=f5e47]:
+                - generic [ref=f5e48]: Perfume · 20 ml
+                - generic [ref=f5e49]: ₹1,299.00
+              - heading "Oud" [level=3] [ref=f5e50]
+              - paragraph [ref=f5e51]: Oud
+              - generic [ref=f5e52]:
+                - term [ref=f5e53]: Volume
+                - definition [ref=f5e54]: 20 ml
+                - term [ref=f5e55]: Availability
+                - definition [ref=f5e56]: In stock
+            - 'link "View flacon : Oud" [ref=f5e58] [cursor=pointer]':
+              - /url: /products/oud
+              - text: View flacon
+              - generic [ref=f5e59]: ": Oud"
+      - generic [ref=f5e60]:
+        - button "Go to slide 1" [ref=f5e62]
+        - link "View all" [ref=f5e64] [cursor=pointer]:
+          - /url: /products?ordering=-created_at
+    - generic [ref=f5e66]:
+      - generic [ref=f5e67]:
+        - paragraph [ref=f5e68]: The house position
+        - heading "Built around a single idea, worked until it holds." [level=2] [ref=f5e69]
+      - generic [ref=f5e70]:
+        - paragraph [ref=f5e71]: Every fragrance is built around a single idea, worked until it holds. We would rather release three perfumes we stand behind than thirty that fill a catalogue.
+        - paragraph [ref=f5e72]: "What you read on the page is what you get: the materials, the concentration, the volume. Nothing is implied that we cannot show."
+    - paragraph [ref=f5e74]:
+      - generic [ref=f5e75]: Ships across India
+      - generic [aria-hidden] [ref=f5e76]: ·
+      - generic [ref=f5e77]: Secure Razorpay payments
+      - generic [aria-hidden] [ref=f5e78]: ·
+      - generic [ref=f5e79]: 30-day returns
+  - contentinfo [ref=f5e80]:
+    - generic [ref=f5e81]:
+      - generic [ref=f5e82]:
+        - paragraph [ref=f5e83]: Maison Aurel™
+        - paragraph [ref=f5e84]: Perfumes composed with restraint. Fewer materials, longer macerations, no seasonal noise.
+        - paragraph [ref=f5e85]: Get in touch
+        - list [ref=f5e86]:
+          - listitem [ref=f5e87]:
+            - link "Email biochem1981@gmail.com" [ref=f5e88] [cursor=pointer]:
+              - /url: mailto:biochem1981@gmail.com?subject=Maison%20Aurel%20%E2%80%94%20support
+      - navigation "Shop" [ref=f5e92]:
+        - paragraph [ref=f5e93]: Shop
+        - link "Shop all" [ref=f5e94] [cursor=pointer]:
+          - /url: /products
+        - link "New arrivals" [ref=f5e95] [cursor=pointer]:
+          - /url: /products?ordering=-created_at
+        - link "Cart" [ref=f5e96] [cursor=pointer]:
+          - /url: /cart
+        - link "Orders" [ref=f5e97] [cursor=pointer]:
+          - /url: /orders
+        - link "Sign in" [ref=f5e98] [cursor=pointer]:
+          - /url: /login
+      - navigation "Help" [ref=f5e99]:
+        - paragraph [ref=f5e100]: Help
+        - link "Contact" [ref=f5e101] [cursor=pointer]:
+          - /url: /contact
+        - link "Shipping" [ref=f5e102] [cursor=pointer]:
+          - /url: /shipping
+        - link "Returns & Refunds" [ref=f5e103] [cursor=pointer]:
+          - /url: /returns
+        - link "Email support" [ref=f5e104] [cursor=pointer]:
+          - /url: mailto:biochem1981@gmail.com
+      - navigation "Legal" [ref=f5e105]:
+        - paragraph [ref=f5e106]: Legal
+        - link "Privacy Policy" [ref=f5e107] [cursor=pointer]:
+          - /url: /privacy
+        - link "Terms & Conditions" [ref=f5e108] [cursor=pointer]:
+          - /url: /terms
+        - paragraph [ref=f5e109]: Payments secured by Razorpay
+    - generic [ref=f5e111]:
+      - paragraph [ref=f5e112]: © 2026 Maison Aurel™. All rights reserved.
+      - paragraph [ref=f5e113]: Maison Aurel and the Maison Aurel wordmark are trademarks of Maison Aurel. Prices in INR · Payments via Razorpay
+  - alert [ref=f5e114]
