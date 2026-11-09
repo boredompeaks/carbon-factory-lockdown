@@ -32,7 +32,18 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import re
+
 from ..core.validate import Reject
+
+CAPABILITY_ID_PATTERN = r"^cap_[A-Za-z0-9_-]{8,64}$"
+_CAPABILITY_RE = re.compile(CAPABILITY_ID_PATTERN)
+
+
+def is_valid_capability_id(value: object) -> bool:
+    """True iff value is a ledger capability_id (files/policies/schemas/capability.json)."""
+    return isinstance(value, str) and _CAPABILITY_RE.fullmatch(value) is not None
+
 
 _HEADER_DENYLIST = ("host", "content-length", "transfer-encoding", "authorization")
 
@@ -277,6 +288,12 @@ eligible_for_refuted = can_refute
 
 def check_extra(server, tool: str, role: str, args: dict) -> None:
     if tool == "hacker.probe":
+        # Capability binding: ledger capability_id (cap_ prefix, single
+        # canonical pattern shared with registry.json + capability.json).
+        # Registry already raises REJECT_PATTERN; this is defense-in-depth.
+        _cap = args.get("capability_id")
+        if _cap is not None and not is_valid_capability_id(_cap):
+            raise Reject("REJECT_PATTERN", "capability_id must match ^cap_[A-Za-z0-9_-]{8,64}$")
         # No redirects and no out-of-band channels: endpoint is already
         # anchored by the registry pattern; an interior "://" or "@"
         # would be a smuggled absolute URL.

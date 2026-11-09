@@ -137,7 +137,7 @@
       "args": {
         "item_id": "AUTHZ-ROUTE",
         "actor": "hacker-high",
-        "capability_id": "00000000-0000-0000-0000-000000000000"
+        "capability_id": "cap_f09_12345678"
       },
       "expect": "REJECT_ROLE",
       "note": "orchestrator cannot probe directly; capability creation is via ledger.append capability",
@@ -166,7 +166,7 @@
       "role": "hacker",
       "args": {
         "namespace": "auditor",
-        "capability_id": "cap-01",
+        "capability_id": "cap_f11_12345678",
         "path": "audit-scratch/x.py",
         "content": "x",
         "extension": "py"
@@ -430,7 +430,7 @@
       "args": {
         "item_id": "AUTHZ-ROUTE",
         "actor": "human-directive",
-        "capability_id": "00000000-0000-0000-0000-000000000000"
+        "capability_id": "cap_f29_12345678"
       },
       "expect": "REJECT_ENUM",
       "note": "actor enum is machine actors only; no human impersonation (finding: question-channel relay)",
@@ -458,7 +458,7 @@
       "args": {
         "item_id": "ROOT-ACCESS",
         "actor": "hacker-high",
-        "capability_id": "00000000-0000-0000-0000-000000000000"
+        "capability_id": "cap_f31_12345678"
       },
       "expect": "REJECT_ENUM",
       "note": "item_id enum comes from attack-catalog only (finding: catalog self-selection)",
@@ -530,7 +530,7 @@
       "args": {
         "item_id": "AUTHZ-ROUTE",
         "actor": "hacker-high",
-        "capability_id": "00000000-0000-0000-0000-000000000000",
+        "capability_id": "cap_f36_12345678",
         "endpoint": "/__exec?cmd=id"
       },
       "expect": "REJECT_PATTERN",
@@ -792,7 +792,7 @@
       "args": {
         "item_id": "AUTHZ-ROUTE",
         "actor": "hacker-high",
-        "capability_id": "00000000-0000-0000-0000-000000000000",
+        "capability_id": "cap_f54_12345678",
         "endpoint": "/api/x"
       },
       "expect": "REJECT_ROLE",
@@ -2270,7 +2270,7 @@
       "role": "auditor",
       "args": {
         "namespace": "auditor",
-        "capability_id": "cap-a",
+        "capability_id": "cap_hole21_12345678",
         "path": "quality/ledger/dispatch/x.json",
         "content": "x"
       },
@@ -2283,7 +2283,7 @@
       "role": "hacker",
       "args": {
         "namespace": "hacker",
-        "capability_id": "cap-h",
+        "capability_id": "cap_hole22_12345678",
         "path": "quality/ledger/findings/x.json",
         "content": "x"
       },
@@ -2713,6 +2713,32 @@
       "expect": "NOT_GRANTED",
       "requires_runtime": "basemind",
       "note": "basemind_git revoked for v1 (reads history without basemind.toml excludes; leaks .agt/policy.json, policy-manifest.json) — must be absent (NOT_GRANTED) for compliance; use carbon git.* instead"
+    },
+    {
+      "id": "CTRL-CAP-1",
+      "tool": "scratch.write",
+      "role": "auditor",
+      "args": {
+        "namespace": "auditor",
+        "capability_id": "cap_smoke_12345678",
+        "path": "a.txt",
+        "content": "x",
+        "extension": "txt"
+      },
+      "expect": "ACCEPT",
+      "note": "ledger capability cap_smoke_12345678 is ACCEPTed at validation level (registry pattern ^cap_[A-Za-z0-9_-]{8,64}$); same pattern admits hacker.probe capability_id (probe reaches REJECT_PRECONDITION no-runtime, past pattern). Scratch ACCEPT proves pattern admission; writes only to scratch namespace, no ledger mutation."
+    },
+    {
+      "id": "CTRL-CAP-2",
+      "tool": "hacker.probe",
+      "role": "hacker",
+      "args": {
+        "item_id": "AUTHZ-ROUTE",
+        "actor": "hacker-high",
+        "capability_id": "not-a-cap"
+      },
+      "expect": "REJECT_PATTERN",
+      "note": "malformed capability_id not-a-cap (no cap_ prefix) is REJECT_PATTERN against ledger pattern ^cap_[A-Za-z0-9_-]{8,64}$"
     }
   ]
 }

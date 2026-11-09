@@ -114,8 +114,8 @@ def _execute_scratch_write(role: str, args: dict) -> dict:
         raise Reject("REJECT_ARG", f"namespace must be one of {sorted(_SCRATCH_DIR)}: {namespace!r}")
     if namespace != role:
         raise Reject("REJECT_ROLE", f"namespace {namespace!r} != caller role {role!r}")
-    if not isinstance(capability_id, str) or not re.fullmatch(r"[a-z0-9-]{1,64}", capability_id):
-        raise Reject("REJECT_ARG", f"capability_id must match ^[a-z0-9-]{{1,64}}$: {capability_id!r}")
+    if not isinstance(capability_id, str) or not re.fullmatch(r"cap_[A-Za-z0-9_-]{8,64}", capability_id):
+        raise Reject("REJECT_PATTERN", f"capability_id must match ^cap_[A-Za-z0-9_-]{{8,64}}$: {capability_id!r}")
     if not isinstance(rel_path, str) or not rel_path:
         raise Reject("REJECT_ARG", "path must be a non-empty string")
     if not isinstance(content, str):

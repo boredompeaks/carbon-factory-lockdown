@@ -1179,8 +1179,8 @@
         },
         "capability_id": {
           "type": "string",
-          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
-          "maxLength": 36
+          "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+          "maxLength": 68
         },
         "endpoint": {
           "type": "string",
@@ -1392,8 +1392,8 @@
         },
         "capability_id": {
           "type": "string",
-          "pattern": "^[a-z0-9-]{1,64}$",
-          "maxLength": 64
+          "pattern": "^cap_[A-Za-z0-9_-]{8,64}$",
+          "maxLength": 68
         },
         "path": {
           "type": "string",
