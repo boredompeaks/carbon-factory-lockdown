@@ -2,16 +2,108 @@
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "servers": {
-      "carbon": {
+      "carbon-orchestrator": {
         "type": "local",
         "command": [
           "python",
-          "-m",
-          "carbon_mcp"
+          "files/tools/mcp/__main__.py"
         ],
         "cwd": ".",
         "disabled": false,
         "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "orchestrator"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-builder": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "builder"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-auditor": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "auditor"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-hacker": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "hacker"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-compliance": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "compliance"
+        },
+        "timeout": {
+          "startup": 60000,
+          "catalog": 30000,
+          "execution": 300000
+        }
+      },
+      "carbon-release-engineer": {
+        "type": "local",
+        "command": [
+          "python",
+          "files/tools/mcp/__main__.py"
+        ],
+        "cwd": ".",
+        "disabled": false,
+        "codemode": false,
+        "environment": {
+          "CARBON_ROLE": "release-engineer"
+        },
         "timeout": {
           "startup": 60000,
           "catalog": 30000,
