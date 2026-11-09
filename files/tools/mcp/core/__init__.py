@@ -4,6 +4,7 @@ from .validate import validate_args  # noqa: F401
 from .redact import redact_value, UnredactableSecret  # noqa: F401
 from .config import ExecConfig, scrub_environment, validate_executable  # noqa: F401
 from .trace import TraceLog  # noqa: F401
+from .platform import IS_WINDOWS, PYTHON, POWERSHELL, run_dir, venv_python, tool_binary, harness_root, git_binary  # noqa: F401
 
 __all__ = [
     "Server",
@@ -15,4 +16,12 @@ __all__ = [
     "scrub_environment",
     "validate_executable",
     "TraceLog",
+    "IS_WINDOWS",
+    "PYTHON",
+    "POWERSHELL",
+    "run_dir",
+    "venv_python",
+    "tool_binary",
+    "harness_root",
+    "git_binary",
 ]

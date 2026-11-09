@@ -119,6 +119,23 @@ def main() -> None:
     assert "DATABASE_URL" not in env and env.get("LANG") == "en"
     PASS += 1
 
+    # U1 platform abstraction: harness_root, PYTHON, run_dir, venv, POWERSHELL.
+    from files.tools.mcp.core import platform as _plat
+    _repo_root = Path(__file__).resolve().parents[4]
+    assert _plat.harness_root() == _repo_root
+    PASS += 1
+    assert Path(_plat.PYTHON).is_absolute()
+    PASS += 1
+    _run = _plat.run_dir()
+    assert _run.is_absolute()
+    # run_dir is created lazily by callers; this test must not mkdir it.
+    PASS += 1
+    _venv = _plat.venv_python(_repo_root)
+    assert _venv is None or Path(_venv).is_file()
+    PASS += 1
+    assert _plat.POWERSHELL is None or Path(_plat.POWERSHELL).is_file()
+    PASS += 1
+
     # Trace records every call.
     assert len(srv.trace.records) >= 22
     print(f"PASS {PASS} checks (6B-0 exec core)")
