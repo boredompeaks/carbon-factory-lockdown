@@ -1,11 +1,13 @@
 # Builder SOP — extracted from R4 / R4.1 / R4.2 (2026-11-06)
 
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+
 Every step names a command that ran in this lineage. Paths: `$REPO` = the
-audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
-`$H` = `C:\Users\Admin\Documents\umairnlp`.
+audited worktree; `$PY` = `$REPO/backend/venv/bin/python` on Linux, `$REPO\backend\venv\Scripts\python.exe` on Windows;
+`$H` = the harness root.
 
 0. **Docker preflight (only if the lane database is down).**
-   `powershell -NoProfile -File $H\scripts\ensure_docker.ps1 -Containers pg2a,pg2b`
+   `docker.ensure({ action: "ensure" })` — prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
    Expected: `docker engine: ready <version>` then `container pg2a: running`
    and `container pg2b: running`; exit 0. Parse: the engine version and each
    container line. Failure: exit 2 → stop; do not pull, build, create, or run a
@@ -21,12 +23,11 @@ audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
    Parse: the 40-char SHA string. Stop if it differs from the capability record.
 
 2. **Fingerprint the acceptance test before touching anything.**
-   `Get-FileHash $REPO\backend\orders\tests_gate0_refund_race.py -Algorithm SHA256`.
+   `evidence.hash({ rev: "<capability.head>", path: "backend/orders/tests_gate0_refund_race.py" })`.
    Expected: a SHA-256. Parse: the hash. Stop if the file is absent.
 
 3. **Map the call sites you will touch.**
-   `Select-String -Path $REPO\backend\orders\*.py -Pattern "issue_refund\("` and
-   `Select-String -Path $REPO\backend\orders\**\*.py -Pattern "refund_payment\("`.
+   `basemind_code` (`code.search{mode:grep}`) for `issue_refund\(` in `backend/orders/*.py` and for `refund_payment\(` in `backend/orders/**/*.py` (cross-platform; `grep`/`glob` tools are equivalent).
    Expected: every production caller and its key source. Parse: `path:line`.
    Decision: a production caller with no operator action id is a BLOCK (refuse
    or derive one), never a silent keyless path.
@@ -36,7 +37,7 @@ audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
    Expected: `git -C $REPO status --porcelain` lists only scoped paths.
    Parse: the porcelain lines. Stop if an out-of-scope file appears.
 
-5. **Migration state.** `cd $REPO\backend; $PY manage.py makemigrations --check --dry-run`.
+5. **Migration state.** `cd $REPO/backend; $PY manage.py makemigrations --check --dry-run`.
    Expected: `No changes detected`, exit 0. Parse: that line.
    Stop if it proposes a change you did not write by hand.
 
@@ -54,13 +55,12 @@ audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
    Expected: `All checks passed!` and `N files already formatted`. Parse both.
 
 9. **Concurrency on the real engine.**
-   `$env:DATABASE_URL='postgresql://perfume:pg2a_local_test_only@127.0.0.1:5432/perfume_store';
-   $PY manage.py test <race class> --keepdb -v 2 --noinput`.
+   `DATABASE_URL='postgresql://perfume:pg2a_local_test_only@127.0.0.1:5432/perfume_store' $PY manage.py test <race class> --keepdb -v 2 --noinput`.
    Expected per run: `Ran 1 test` + `OK`. Repeat N times (high: 5 builder reps).
    Decision: any flake or red rep is a BLOCK; do not average it away.
 
 10. **Prove the acceptance test is untouched.**
-    `Get-FileHash $REPO\backend\orders\tests_gate0_refund_race.py -Algorithm SHA256`.
+    `evidence.hash({ rev: "<capability.head>", path: "backend/orders/tests_gate0_refund_race.py" })`.
     Expected: identical to step 2. Stop if it differs.
 
 11. **Commit only the change set.**

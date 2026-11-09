@@ -1,5 +1,7 @@
 # Orchestrator SOP — extracted, with unproven parts marked
 
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+
 Status legend: **PROVEN** = a command below ran in the R4 lineage;
 **UNPROVEN** = no successful execution exists yet (kept explicit, not dressed
 as procedure). The orchestrator dispatches; it does not write product code and
@@ -9,7 +11,7 @@ does not merge.
    Expected: `RESULT: PASS (<n> checks)`, exit 0. Parse: that line. PROVEN.
    Stop if FAIL — a role/model/permission invariant is broken.
 
-2. **Lineage check.** `python files\tools\validatedrain.py`.
+2. **Lineage check.** `python files/tools/validatedrain.py`.
    Expected: PASS with the newest gate-control seal named. Parse: the summary +
    `problems:[]`. PROVEN at seal time — PASS against the newest gate-control
    record (live `policy_digest` / `gate_impl_digest` / `control_set_sha` per

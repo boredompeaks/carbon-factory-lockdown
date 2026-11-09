@@ -1,5 +1,7 @@
 # Factory policy map, hash tiers, and edit procedure
 
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+
 Owner/FDE document. This is the answer to "what is hashed, what depends on
 what, and where do I change things so the factory does not drift."
 
@@ -73,15 +75,15 @@ files/<role>.md  ──byte-identical──>  .opencode/agents/<role>.md
 1. Edit the file.
 2. If `negative-controls.json` changed: recompute `control_set_sha`
    (`gate_control.control_set_sha`) and write it into the file; run
-   `python scripts\control_mutation.py --all`.
-3. Dry-run `python files\tools\gate_control.py`; require `result=PASS`.
-4. Back up `files\quality\ledger\gate-control` outside the scan directory.
-5. `python files\tools\gate_control.py --write` → new record.
+   `python scripts/control_mutation.py --all`.
+3. Dry-run `python files/tools/gate_control.py`; require `result=PASS`.
+4. Back up `files/quality/ledger/gate-control` outside the scan directory.
+5. `python files/tools/gate_control.py --write` → new record.
 6. Re-seal the drain chain to the new `policy_digest`: R1 → R2 → R3
    (`prev_hash` then `record_hash`), capability, dispatch evidence, R4 artifact.
 7. Append `SIGNING.md` (old → new digest, record id, reason).
 8. `gate_control.py --verify <new>`, `--verify-chain`, `validatedrain.py`.
-9. `python scripts\policy_manifest.py --write`.
+9. `python scripts/policy_manifest.py --write`.
 10. If `.agt/policy.json`, `opencode.json`, a tool body, or a fixture also
     changed, the same seal covers `gate_impl_digest`.
 
@@ -89,29 +91,29 @@ files/<role>.md  ──byte-identical──>  .opencode/agents/<role>.md
 1. Edit the file.
 2. Find its consumer in §2; run that consumer’s control (`gate_run.py --check
    <ID> --control`, `semgrep_runner.py --control`, validator tests).
-3. `python scripts\policy_manifest.py --write`.
+3. `python scripts/policy_manifest.py --write`.
 4. **No re-seal** unless the file is one of the five, a tool body/fixture, or
    `opencode.json`/`.agt/policy.json`.
 
 ### C. An agent permission
-1. Edit `files\<role>.md` (source).
-2. Copy it byte-identically to `.opencode\agents\<role>.md`. `check_harness_config.py`
+1. Edit `files/<role>.md` (source).
+2. Copy it byte-identically to `.opencode/agents/<role>.md`. `check_harness_config.py`
    fails on any drift.
-3. If a new skill is granted, add `.opencode\skills\<id>\SKILL.md` and the
+3. If a new skill is granted, add `.opencode/skills/<id>/SKILL.md` and the
    `skill` allow.
 4. If a new tool name is used, add it to `.agt/policy.json`
    `toolPolicies.allowedTools` (this changes `gate_impl_digest` → re-seal).
-5. If the invariant itself changes, update `scripts\check_harness_config.py`.
-6. Run `python scripts\check_harness_config.py` and the permission controls
+5. If the invariant itself changes, update `scripts/check_harness_config.py`.
+6. Run `python scripts/check_harness_config.py` and the permission controls
    (negative probe must deny, positive probe must allow).
-7. `python scripts\policy_manifest.py --write`.
+7. `python scripts/policy_manifest.py --write`.
 8. Re-seal **only** if step 4 or `opencode.json` changed.
 
 ### D. A wrapper or skill
-1. Add/edit `scripts\<name>.ps1` or `.opencode\skills\<id>\SKILL.md`.
+1. Add/edit `scripts/<name>.ps1` (Windows implementation; POSIX implementation is native — prefer the typed tool) or `.opencode/skills/<id>/SKILL.md`.
 2. Add the wrapper/skill to the owning role’s shell/skill allow, in source **and**
    installed twin.
-3. Update the role contract and `files\sop\<role>.md`.
+3. Update the role contract and `files/sop/<role>.md`.
 4. Parse the wrapper, run `-WhatIf`, run `check_harness_config.py`.
 5. `policy_manifest.py --write`.
 6. No re-seal (wrappers/skills are not in `gate_impl_digest`).
@@ -193,8 +195,9 @@ image source. Push, merge, and PR remain hard-denied.
 
 ### K1 lifecycle is auditor-owned
 
-The auditor holds the only `shell` allows for `scripts/k1_up.ps1`,
-`scripts/k1_exec.ps1`, and `scripts/k1_down.ps1`, plus the `k1-sandbox` skill;
+Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
+The auditor holds the only `k1.up`/`k1.exec`/`k1.down` allows (Windows implementation: `shell` allows for `scripts/k1_up.ps1`,
+`scripts/k1_exec.ps1`, and `scripts/k1_down.ps1`), plus the `k1-sandbox` skill;
 the hacker gets `k1_exec`, never Docker. `k1_up` runs before every
 `hacker_dispatch`; a non-zero exit is BLOCKED `K1_UP_FAILED` and nothing is
 dispatched. `k1_down` runs on the `finally` path after the hacker returns, times
@@ -232,7 +235,7 @@ image, no create step, no `hacker-scratch` mount, and Postgres is published on
 
 ### Docker start (auditor/builder)
 
-`scripts/ensure_docker.ps1` is the only Docker action granted to the auditor
+`docker.ensure({ action: "ensure" })` (Windows implementation: `scripts/ensure_docker.ps1`) is the only Docker action granted to the auditor
 and builder. It starts the Docker engine (service + Docker Desktop) if
 `docker info` is down and starts the named existing containers
 (`pg2a,pg2b` by default; `-All` for every stopped container). It never pulls,
@@ -242,11 +245,11 @@ builds, creates, runs, or deletes a container or volume. The K1 plan (tmpfs app
 
 ## 7. Drift checklist (run before every factory start)
 
-```powershell
-python scripts\policy_manifest.py --verify
-python scripts\check_harness_config.py
-python files\tools\gate_control.py --verify-chain
-python files\tools\validatedrain.py
+```bash
+python scripts/policy_manifest.py --verify
+python scripts/check_harness_config.py
+python files/tools/gate_control.py --verify-chain
+python files/tools/validatedrain.py
 git -C <worktree> status --porcelain
 ```
 

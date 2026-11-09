@@ -1,8 +1,10 @@
 # Auditor SOP — extracted from the GLM R4 / R4.1 / R4.2 audit (2026-11-06)
 
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+
 The auditor receives the artifact and the requirements, never the builder's
-reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO\backend\venv\Scripts\python.exe`;
-`$H` = the harness root (`C:\Users\Admin\Documents\umairnlp`).
+reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO/backend/venv/bin/python` on Linux, `$REPO\backend\venv\Scripts\python.exe` on Windows;
+`$H` = the harness root.
 
 1. **Pin the tree.** `git -C $REPO rev-parse HEAD`; `git -C $REPO branch --show-current`;
    `git -C $REPO status --porcelain`.
@@ -10,7 +12,7 @@ reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO\backend\venv\Script
    Parse: 40-char SHA + branch. Stop if the SHA differs from the dispatch record.
 
 1a. **Docker preflight (before DAST/THREAD_RACE).**
-   `powershell -NoProfile -File $H\scripts\ensure_docker.ps1 -Containers pg2a,pg2b`
+   `docker.ensure({ action: "ensure" })` — prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
    Expected: `docker engine: ready <version>`, `container pg2a: running`,
    `container pg2b: running`; exit 0. Parse: the engine version and each
    container line. Failure: exit 2 → BLOCKED, not PASS; do not pull, build,
@@ -19,12 +21,12 @@ reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO\backend\venv\Script
 
 1b. **K1 lifecycle (mandatory around the hacker).**
     Before `hacker_dispatch`, run
-    `powershell -NoProfile -File $H\scripts\k1_up.ps1 -RunId <task_id>-<cycle> -Base <capability.base> -Head <capability.head>`.
+    `k1.up({ run_id: "<task_id>-<cycle>", base: "<capability.base>", head: "<capability.head>" })` — prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
     Expected: exit 0 and the `k1-<id>-app`/`k1-<id>-pg` containers on the
     internal network. Parse: the run id and both container names.
     Failure: exit non-zero → record BLOCKED `K1_UP_FAILED` and dispatch nothing.
     After the hacker returns, times out, or errors, run
-    `powershell -NoProfile -File $H\scripts\k1_down.ps1 -RunId <id>` in a
+    `k1.down({ run_id: "<id>" })` — prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native, in a
     `finally` block. Expected: exit 0 with both containers and the network
     removed. Parse: the removed container/network names. `k1_down` removes only
     that run's `k1-<id>-app`/`k1-<id>-pg` pair and its network; it never stops
@@ -38,30 +40,30 @@ reasoning. Paths: `$REPO` = audited worktree; `$PY` = `$REPO\backend\venv\Script
    Expected: a written predicate you can test. Parse: the property list.
    Decision: if the requirement has no observable assertion, BLOCK.
 
-3. **Semgrep.** `cd $H; python files\tools\semgrep_runner.py --paths <file> --repo $REPO`.
+3. **Semgrep.** `cd $H; python files/tools/semgrep_runner.py --paths <file> --repo $REPO`.
    Expected: `"engine":"semgrep"`, `"findings":[]`, exit 0.
    Parse: the JSON fields. Stop/FAIL if the engine is `fallback` or a finding
    remains; a missing binary is BLOCKED, never PASS.
 
-4. **Oracle provenance.** `python files\tools\oracle_provenance.py --control`
-   then `python files\tools\oracle_provenance.py --diff <tests.diff> --repo $REPO`.
+4. **Oracle provenance.** `python files/tools/oracle_provenance.py --control`
+   then `python files/tools/oracle_provenance.py --diff <tests.diff> --repo $REPO`.
    Expected: every control case passes; `findings":[]` on the diff.
    Parse: `passed`, per-case classes, `assertions_scanned`.
    Decision: a finding is a BLOCK unless the policy text itself exempts it —
    "the heuristic looked wrong" is not an exemption.
 
-5. **Architecture.** `python files\tools\arch_check.py --repo $REPO --base <base> --head <head>`.
+5. **Architecture.** `python files/tools/arch_check.py --repo $REPO --base <base> --head <head>`.
    Expected: `findings":[]`, exit 0. Parse: files/imports scanned + findings.
 
-6. **Guard delta.** `python files\tools\guard_delta.py --repo $REPO --base <base> --head <head> --coverage <coverage.json>`.
+6. **Guard delta.** `python files/tools/guard_delta.py --repo $REPO --base <base> --head <head> --coverage <coverage.json>`.
    Expected: `guard_removals` all covered, `findings":[]`. Parse: covered/total.
 
-7. **Test set.** `python files\tools\gate_run.py --check TEST_SET --input <roster.json>`.
+7. **Test set.** `python files/tools/gate_run.py --check TEST_SET --input <roster.json>`.
    Expected: `removals` only allowed ones, `findings":[]`. Parse: base/head counts.
    Decision: an unexplained removal is a BLOCK; an allowed one cites
    `test-removal-reasons.json`.
 
-8. **Authz matrix.** `<repo venv>\python.exe $H\files\tools\authz_matrix.py --repo $REPO`.
+8. **Authz matrix.** `$PY $H/files/tools/authz_matrix.py --repo $REPO`.
    Expected: `missing=0`, `UNKNOWN=0`, exit 0. Parse: routes/rows; check any new
    route's derivation.
 
@@ -94,7 +96,7 @@ verdict would be SHIP.
   (`wt-async`), or `spec-comp` (`<worktree>`). `feat/add-frontend` is never
   audited directly.
 - On SHIP, push exactly the audited branch once:
-  `scripts/push_ref.ps1 -Branch <branch>`. Lane branches get no PR;
+  `git.push_ref({ ref: "refs/heads/<branch>", expected_head: "<head>" })` — prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native. Lane branches get no PR;
   `spec-comp` is the promotion PR head.
 - Never merge, never create/close/comment a PR, never push
   `feat/add-frontend` or any ref other than the audited branch.

@@ -1,5 +1,7 @@
 # K1 container plan — tmpfs, light footprint, loopback-only
 
+**Host:** OS-agnostic — typed tools are canonical (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is Windows-only (powershell) — the Windows implementation; the POSIX implementation is native.
+
 Status: IMPLEMENTED and smoke-tested (2026-11-07). `k1-app:latest` is built
 locally (143.7 MB) from the product requirements; the base digest pin is still
 TODO. Section 8 records the exact invocation, limits and image
@@ -104,26 +106,26 @@ CMD ["sleep", "infinity"]
 
 Run shape:
 
-```powershell
+```bash
 docker network create --internal k1-internal
-docker run -d --name k1-pg --network k1-internal `
-  --tmpfs /var/lib/postgresql/data:rw,nosuid,nodev,size=96m `
-  --memory 256m --cpus 0.5 --shm-size 32m --cap-drop ALL `
-  --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER `
-  --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges `
-  -e POSTGRES_PASSWORD=$pgPass -e POSTGRES_DB=k1 `
+docker run -d --name k1-pg --network k1-internal \
+  --tmpfs /var/lib/postgresql/data:rw,nosuid,nodev,size=96m \
+  --memory 256m --cpus 0.5 --shm-size 32m --cap-drop ALL \
+  --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER \
+  --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges \
+  -e POSTGRES_PASSWORD=$pgPass -e POSTGRES_DB=k1 \
   postgres:17-alpine@sha256:<pin>
-docker run -d --name k1-app --network k1-internal `
-  --read-only --user 10001:10001 --cap-drop ALL `
-  --security-opt no-new-privileges `
-  --memory 384m --memory-swap 384m --cpus 1 --pids-limit 256 `
-  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=32m,uid=10001,gid=10001,mode=1777 `
-  --tmpfs /run:rw,noexec,nosuid,nodev,size=8m `
-  --tmpfs /work:rw,exec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0755 `
-  --tmpfs /home/k1:rw,noexec,nosuid,nodev,size=8m,uid=10001,gid=10001,mode=0755 `
-  -v "$run\repo-base:/repo/base:ro" -v "$run\repo-head:/repo/head:ro" `
-  -e DATABASE_URL="postgresql://postgres:$pgPass@k1-pg:5432/k1" `
-  -e FAKE_PROVIDER_URL="http://127.0.0.1:8081" `
+docker run -d --name k1-app --network k1-internal \
+  --read-only --user 10001:10001 --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --memory 384m --memory-swap 384m --cpus 1 --pids-limit 256 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=32m,uid=10001,gid=10001,mode=1777 \
+  --tmpfs /run:rw,noexec,nosuid,nodev,size=8m \
+  --tmpfs /work:rw,exec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0755 \
+  --tmpfs /home/k1:rw,noexec,nosuid,nodev,size=8m,uid=10001,gid=10001,mode=0755 \
+  -v "$run/repo-base:/repo/base:ro" -v "$run/repo-head:/repo/head:ro" \
+  -e DATABASE_URL="postgresql://postgres:$pgPass@k1-pg:5432/k1" \
+  -e FAKE_PROVIDER_URL="http://127.0.0.1:8081" \
   k1-app:latest
 ```
 
@@ -145,28 +147,31 @@ no database volume behind.
 
 ## 5. Lifecycle scripts (IMPLEMENTED 2026-11-07)
 
-- `scripts/k1_up.ps1 -RunId <id> -Base <sha> -Head <sha>`: `git archive` base
+Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
+
+- `k1.up({ run_id, base, head })` (Windows implementation: `scripts/k1_up.ps1 -RunId <id> -Base <sha> -Head <sha>`): `git archive` base
   and head from `<worktree>` into the run dir, create the internal network, start
   `k1-pg`, wait `pg_isready`, start `k1-app`, wait `/health`, print ids.
-- `scripts/k1_exec.ps1 -RunId <id> -Command <...>`: `docker exec -u 10001` in
+- `k1.exec({ run_id, action })` (Windows implementation: `scripts/k1_exec.ps1 -RunId <id> -Command <...>`): `docker exec -u 10001` in
   `/work`; captures exit and log tail.
-- `scripts/k1_down.ps1 -RunId <id>`: `docker cp` artifacts, remove both
+- `k1.down({ run_id })` (Windows implementation: `scripts/k1_down.ps1 -RunId <id>`): `docker cp` artifacts, remove both
   containers and the network, delete the run dir.
-- `k1_up` calls `ensure_docker.ps1 -EngineOnly` first; `k1_exec` refuses when
-  the app container is not running; `k1_down` is idempotent and never starts or
+- `k1.up` calls `docker.ensure({ action: "ensure" })` (Windows implementation: `ensure_docker.ps1 -EngineOnly`) first; `k1.exec` refuses when
+  the app container is not running; `k1.down` is idempotent and never starts or
   stops Docker.
 
 ## 6. Docker start capability
 
-`scripts/ensure_docker.ps1` (auditor + builder only):
+`docker.ensure({ action: "ensure" })` (auditor + builder only; Windows implementation: `scripts/ensure_docker.ps1`):
 - checks `docker info`; if down, starts `com.docker.service` (if present) and
-  `Docker Desktop.exe`, waits up to 120 s, re-checks;
+  `Docker Desktop.exe` (Windows only; on POSIX the engine is a native daemon),
+  waits up to 120 s, re-checks;
 - starts the named existing containers (`-Containers pg2a,pg2b` by default,
   `-All` for every stopped container);
 - `-WhatIf` prints the plan; it never pulls, builds, creates, or runs a
   container, and never touches volumes.
 
-The auditor and builder get `*ensure_docker.ps1*` + the `ensure-docker` skill.
+The auditor and builder get `docker.ensure` (Windows implementation `*ensure_docker.ps1*`) + the `ensure-docker` skill.
 The hacker never gets Docker; it gets `k1_exec` / `repro-run` only.
 
 ## 7. Open decisions
@@ -187,9 +192,9 @@ The hacker never gets Docker; it gets `k1_exec` / `repro-run` only.
 Status: scripts **IMPLEMENTED**; image **BUILT** locally (143.7 MB, product requirements).
 
 Files:
-- `scripts/k1_up.ps1`, `scripts/k1_exec.ps1`, `scripts/k1_down.ps1` — implemented.
+- `scripts/k1_up.ps1`, `scripts/k1_exec.ps1`, `scripts/k1_down.ps1` — implemented (Windows implementation; POSIX implementation is native via `k1.up`/`k1.exec`/`k1.down`).
 - `scripts/ensure_docker.ps1` — `-EngineOnly` switch added (engine only, no
-  container loop).
+  container loop) (Windows implementation of `docker.ensure`).
 - `files/docker/k1/{Dockerfile,requirements.txt,fake_provider.py,seed.py,entrypoint.sh,README.md}`
   — implemented; no app code baked in.
 - `.opencode/skills/k1-sandbox/SKILL.md` — implemented.
@@ -211,16 +216,22 @@ Dockerfile (observed local digest
 Exact invocations:
 
 ```
-powershell -NoProfile -File scripts\k1_up.ps1 -RunId <id> -Base <40|64hex> -Head <40|64hex>
-powershell -NoProfile -File scripts\k1_exec.ps1 -RunId <id> -Command "<command line>"
-powershell -NoProfile -File scripts\k1_down.ps1 -RunId <id> [-KeepArtifacts]
+k1.up({ run_id: "<id>", base: "<40|64hex>", head: "<40|64hex>" })
+k1.exec({ run_id: "<id>", action: "<enum>" })
+k1.down({ run_id: "<id>" })
 ```
+
+Prefer the typed tool (`pr.open`, `k1.up`, `worktrees.sync`, …); the `.ps1` wrapper is the Windows implementation, the POSIX implementation is native.
+Windows implementation (historical, powershell):
+`powershell -NoProfile -File scripts\k1_up.ps1 -RunId <id> -Base <40|64hex> -Head <40|64hex>`,
+`powershell -NoProfile -File scripts\k1_exec.ps1 -RunId <id> -Command "<command line>"`,
+`powershell -NoProfile -File scripts\k1_down.ps1 -RunId <id> [-KeepArtifacts]`.
 
 `-WhatIf` on all three prints only. `-WhatIf` accepts abbreviated 7-64 hex
 Base/Head; real runs require 40/64 hex and resolve them with
 `git cat-file -e <sha>^{commit}`.
 
-Names: run dir `%LOCALAPPDATA%\Temp\opencode\k1\<RunId>`, network
+Names: run dir `%LOCALAPPDATA%\Temp\opencode` (Windows) / `$XDG_CACHE_HOME/opencode` or `/tmp/opencode` (Linux) + `/k1/<RunId>` (POSIX) or `\k1\<RunId>` (Windows), network
 `k1-<id>-net` (internal), pg `k1-<id>-pg`, app `k1-<id>-app`.
 
 Limits/tmpfs actually implemented:
@@ -236,15 +247,15 @@ Limits/tmpfs actually implemented:
   `/run:rw,noexec,nosuid,nodev,size=8m`,
   `/work:rw,exec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0755`,
   `/home/k1:rw,noexec,nosuid,nodev,size=8m,uid=10001,gid=10001,mode=0755`;
-  read-only mounts `<run>\repo-base:/repo/base:ro` and
-  `<run>\repo-head:/repo/head:ro`; `--log-driver local --log-opt max-size=1m
+  read-only mounts `<run>/repo-base:/repo/base:ro` and
+  `<run>/repo-head:/repo/head:ro`; `--log-driver local --log-opt max-size=1m
   --log-opt max-file=1 --log-opt compress=false`.
   (Plan §2's `--ulimit nofile=1024:1024` is not applied; the log opts are.)
 - `k1_exec` runs the command string through `/bin/sh -c` so quoting/pipes work;
   the shell exit code is propagated.
 - `k1_down` attempts `docker cp` first; Docker cannot read tmpfs mounts, so when
   cp reports missing and the app is still running it streams `/work/artifacts`
-  with `docker exec ... tar` and extracts it to `<run>\artifacts` (use
+  with `docker exec ... tar` and extracts it to `<run>/artifacts` (use
   `-KeepArtifacts` to keep the run dir and therefore the copy).
 - Archives use `git archive --output=<tar>` + `tar -x -f` (no binary pipeline);
   `.env*`, `quality/**`, `venv/` are removed after extraction.
@@ -264,7 +275,7 @@ printed `6.1.1` (Django); `k1_down` removed app/pg/network and the run dir;
 `pg2a`/`pg2b` stayed Up and Docker stayed up. The app image is 143.7 MB.
 
 Note: `pg2a`/`pg2b` were briefly stopped by a Docker engine restart during the
-K1 work (they were restarted with `ensure_docker.ps1 -Containers pg2a,pg2b`;
+K1 work (they were restarted with `docker.ensure({ action: "ensure" })` — Windows implementation: `ensure_docker.ps1 -Containers pg2a,pg2b`;
 data volumes are intact at 121.9 MB / 79.5 MB). `k1_down` never touches them.
 
 `k1_up`/`k1_exec`/`k1_down` never touch `pg2a`/`pg2b`, never stop Docker, never
