@@ -48,15 +48,182 @@ permissions:
   - { action: read, resource: "secrets/**", effect: deny }
   - { action: grep, resource: "secrets/**", effect: deny }
   - { action: glob, resource: "secrets/**", effect: deny }
+  - { action: read, resource: "quality/ledger/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/**", effect: deny }
+  - { action: read, resource: "quality/ledger", effect: deny }
+  - { action: grep, resource: "quality/ledger", effect: deny }
+  - { action: glob, resource: "quality/ledger", effect: deny }
+  - { action: read, resource: "**/quality/ledger", effect: deny }
+  - { action: grep, resource: "**/quality/ledger", effect: deny }
+  - { action: glob, resource: "**/quality/ledger", effect: deny }
+  - { action: read, resource: "quality/ledger/findings/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/findings/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/findings/**", effect: deny }
+  - { action: read, resource: "quality/ledger/attack-logs/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/attack-logs/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/attack-logs/**", effect: deny }
+  - { action: read, resource: "quality/ledger/dispatch/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/dispatch/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/dispatch/**", effect: deny }
+  - { action: read, resource: "quality/ledger/gate-control/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/gate-control/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/gate-control/**", effect: deny }
+  - { action: read, resource: "quality/ledger/release/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/release/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/release/**", effect: deny }
+  - { action: read, resource: "quality/ledger/acceptance/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/acceptance/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/acceptance/**", effect: deny }
+  - { action: read, resource: "quality/ledger/verdicts/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/verdicts/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/verdicts/**", effect: deny }
+  - { action: read, resource: "quality/ledger/audit/**", effect: deny }
+  - { action: grep, resource: "quality/ledger/audit/**", effect: deny }
+  - { action: glob, resource: "quality/ledger/audit/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/findings/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/findings/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/findings/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/attack-logs/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/attack-logs/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/attack-logs/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/dispatch/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/dispatch/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/dispatch/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/gate-control/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/gate-control/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/gate-control/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/release/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/release/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/release/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/acceptance/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/acceptance/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/acceptance/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/verdicts/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/verdicts/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/verdicts/**", effect: deny }
+  - { action: read, resource: "**/quality/ledger/audit/**", effect: deny }
+  - { action: grep, resource: "**/quality/ledger/audit/**", effect: deny }
+  - { action: glob, resource: "**/quality/ledger/audit/**", effect: deny }
+  - { action: read, resource: "**/.agt", effect: deny }
+  - { action: grep, resource: "**/.agt", effect: deny }
+  - { action: glob, resource: "**/.agt", effect: deny }
+  - { action: read, resource: "**/.agt/**", effect: deny }
+  - { action: grep, resource: "**/.agt/**", effect: deny }
+  - { action: glob, resource: "**/.agt/**", effect: deny }
+  - { action: read, resource: ".agt", effect: deny }
+  - { action: grep, resource: ".agt", effect: deny }
+  - { action: glob, resource: ".agt", effect: deny }
+  - { action: read, resource: ".agt/**", effect: deny }
+  - { action: grep, resource: ".agt/**", effect: deny }
+  - { action: glob, resource: ".agt/**", effect: deny }
+  - { action: read, resource: "**/.git", effect: deny }
+  - { action: grep, resource: "**/.git", effect: deny }
+  - { action: glob, resource: "**/.git", effect: deny }
+  - { action: read, resource: "**/.git/**", effect: deny }
+  - { action: grep, resource: "**/.git/**", effect: deny }
+  - { action: glob, resource: "**/.git/**", effect: deny }
+  - { action: read, resource: ".git", effect: deny }
+  - { action: grep, resource: ".git", effect: deny }
+  - { action: glob, resource: ".git", effect: deny }
+  - { action: read, resource: ".git/**", effect: deny }
+  - { action: grep, resource: ".git/**", effect: deny }
+  - { action: glob, resource: ".git/**", effect: deny }
+  - { action: read, resource: "**/.config/opencode/**", effect: deny }
+  - { action: grep, resource: "**/.config/opencode/**", effect: deny }
+  - { action: glob, resource: "**/.config/opencode/**", effect: deny }
+  - { action: read, resource: ".config/opencode/**", effect: deny }
+  - { action: grep, resource: ".config/opencode/**", effect: deny }
+  - { action: glob, resource: ".config/opencode/**", effect: deny }
+  - { action: read, resource: "**/.config/opencode", effect: deny }
+  - { action: grep, resource: "**/.config/opencode", effect: deny }
+  - { action: glob, resource: "**/.config/opencode", effect: deny }
+  - { action: read, resource: ".config/opencode", effect: deny }
+  - { action: grep, resource: ".config/opencode", effect: deny }
+  - { action: glob, resource: ".config/opencode", effect: deny }
+  - { action: read, resource: "**/.local/share/opencode/**", effect: deny }
+  - { action: grep, resource: "**/.local/share/opencode/**", effect: deny }
+  - { action: glob, resource: "**/.local/share/opencode/**", effect: deny }
+  - { action: read, resource: ".local/share/opencode/**", effect: deny }
+  - { action: grep, resource: ".local/share/opencode/**", effect: deny }
+  - { action: glob, resource: ".local/share/opencode/**", effect: deny }
+  - { action: read, resource: "**/.local/share/opencode", effect: deny }
+  - { action: grep, resource: "**/.local/share/opencode", effect: deny }
+  - { action: glob, resource: "**/.local/share/opencode", effect: deny }
+  - { action: read, resource: ".local/share/opencode", effect: deny }
+  - { action: grep, resource: ".local/share/opencode", effect: deny }
+  - { action: glob, resource: ".local/share/opencode", effect: deny }
+  - { action: read, resource: "~/.config/opencode/**", effect: deny }
+  - { action: grep, resource: "~/.config/opencode/**", effect: deny }
+  - { action: glob, resource: "~/.config/opencode/**", effect: deny }
+  - { action: read, resource: "~/.local/share/opencode/**", effect: deny }
+  - { action: grep, resource: "~/.local/share/opencode/**", effect: deny }
+  - { action: glob, resource: "~/.local/share/opencode/**", effect: deny }
+  - { action: read, resource: "~/.config/opencode", effect: deny }
+  - { action: grep, resource: "~/.config/opencode", effect: deny }
+  - { action: glob, resource: "~/.config/opencode", effect: deny }
+  - { action: read, resource: "~/.local/share/opencode", effect: deny }
+  - { action: grep, resource: "~/.local/share/opencode", effect: deny }
+  - { action: glob, resource: "~/.local/share/opencode", effect: deny }
+  - { action: read, resource: "**/fuzz-evidence/**", effect: deny }
+  - { action: grep, resource: "**/fuzz-evidence/**", effect: deny }
+  - { action: glob, resource: "**/fuzz-evidence/**", effect: deny }
+  - { action: read, resource: "**/schema-fuzz-evidence/**", effect: deny }
+  - { action: grep, resource: "**/schema-fuzz-evidence/**", effect: deny }
+  - { action: glob, resource: "**/schema-fuzz-evidence/**", effect: deny }
+  - { action: read, resource: "**/*fuzz*seed*.json", effect: deny }
+  - { action: grep, resource: "**/*fuzz*seed*.json", effect: deny }
+  - { action: glob, resource: "**/*fuzz*seed*.json", effect: deny }
+  - { action: read, resource: "**/fuzz-evidence", effect: deny }
+  - { action: grep, resource: "**/fuzz-evidence", effect: deny }
+  - { action: glob, resource: "**/fuzz-evidence", effect: deny }
+  - { action: read, resource: "**/schema-fuzz-evidence", effect: deny }
+  - { action: grep, resource: "**/schema-fuzz-evidence", effect: deny }
+  - { action: glob, resource: "**/schema-fuzz-evidence", effect: deny }
+  - { action: read, resource: "fuzz-evidence/**", effect: deny }
+  - { action: grep, resource: "fuzz-evidence/**", effect: deny }
+  - { action: glob, resource: "fuzz-evidence/**", effect: deny }
+  - { action: read, resource: "schema-fuzz-evidence/**", effect: deny }
+  - { action: grep, resource: "schema-fuzz-evidence/**", effect: deny }
+  - { action: glob, resource: "schema-fuzz-evidence/**", effect: deny }
+  - { action: read, resource: "*fuzz*seed*.json", effect: deny }
+  - { action: grep, resource: "*fuzz*seed*.json", effect: deny }
+  - { action: glob, resource: "*fuzz*seed*.json", effect: deny }
   - { action: read, resource: "hacker-scratch/**", effect: deny }
   - { action: grep, resource: "hacker-scratch/**", effect: deny }
   - { action: glob, resource: "hacker-scratch/**", effect: deny }
   - { action: read, resource: "**/hacker-scratch/**", effect: deny }
   - { action: grep, resource: "**/hacker-scratch/**", effect: deny }
   - { action: glob, resource: "**/hacker-scratch/**", effect: deny }
+  - { action: read, resource: "audit-scratch/**", effect: deny }
+  - { action: grep, resource: "audit-scratch/**", effect: deny }
+  - { action: glob, resource: "audit-scratch/**", effect: deny }
+  - { action: read, resource: "**/audit-scratch/**", effect: deny }
+  - { action: grep, resource: "**/audit-scratch/**", effect: deny }
+  - { action: glob, resource: "**/audit-scratch/**", effect: deny }
+  - { action: read, resource: "audit-scratch", effect: deny }
+  - { action: grep, resource: "audit-scratch", effect: deny }
+  - { action: glob, resource: "audit-scratch", effect: deny }
+  - { action: read, resource: "**/audit-scratch", effect: deny }
+  - { action: grep, resource: "**/audit-scratch", effect: deny }
+  - { action: glob, resource: "**/audit-scratch", effect: deny }
   - { action: edit, resource: "backend/docs/compliance/*", effect: allow }
   - { action: write, resource: "backend/docs/compliance/*", effect: allow }
 ---
+
+## Tool surface
+
+- Use `code.write` for the section table only under `backend/docs/compliance/*`; no other writes.
+- Use `basemind_code` (`code.search{mode:grep}`) instead of ad-hoc reading to verify spec-vs-code.
+- Use `basemind_git` for indexed history/diff questions only; never for mutations.
+- Use `basemind_graph` for architecture questions instead of ad-hoc reading.
+- Use `basemind_web` for spec and external documentation questions only.
+- Never use `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_git show` on any path excluded from the index; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.
+- If a tool you need is missing, stop and report -- do not substitute a shell command.
+- Your MCP tools are prefixed `carbon_compliance_` / `basemind_`; the raw `shell` action is absent by design.
 
 # Role
 
