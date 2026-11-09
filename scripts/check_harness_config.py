@@ -13,14 +13,16 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import yaml
 
-HARNESS = Path(r"C:\Users\Admin\Documents\umairnlp")
+HARNESS = Path(os.environ.get("HARNESS_ROOT") or Path(__file__).resolve().parent.parent)
 FACTORY = HARNESS / "files"
 AGENTS = HARNESS / ".opencode" / "agents"
 CONFIG = HARNESS / "opencode.json"
@@ -519,10 +521,16 @@ check(
 # --- builder asks before risky actions ----------------------------------
 # Last-match-wins ask rules: a risky action prompts once instead of being
 # silently denied. The hard denies are re-asserted after these in the file.
+# Portable globs: POSIX forms derived from the resolved harness root and the
+# platform temp dir. On Windows these reproduce the historical literals
+# (C:/Users/.../umairnlp/** and C:/Users/.../Temp/opencode/**); on POSIX they
+# yield /home/... and /tmp/opencode/** respectively.
+_TEMP_OPENCODE_GLOB = (Path(tempfile.gettempdir()) / "opencode").as_posix() + "/**"
+_HARNESS_GLOB = HARNESS.as_posix() + "/**"
 BUILDER_ASKS = (
     ("read", "../**"),
-    ("read", "C:/Users/Admin/AppData/Local/Temp/opencode/**"),
-    ("read", "C:/Users/Admin/Documents/umairnlp/**"),
+    ("read", _TEMP_OPENCODE_GLOB),
+    ("read", _HARNESS_GLOB),
     ("shell", "*docker pull*"),
     ("shell", "*docker build*"),
     ("shell", "*docker run*"),

@@ -903,8 +903,24 @@ def envelope(result_type: str, findings: list, control_doc: dict, exit_code: int
 def maybe_reexec(repo: str | None) -> None:
     if not repo or os.environ.get("FACTORY_REEXEC") == "1":
         return
-    venv = Path(repo) / "backend" / "venv" / "Scripts" / "python.exe"
-    if not venv.is_file():
+    candidates = [
+        Path(repo) / "backend" / "venv" / "Scripts" / "python.exe",
+        Path(repo) / "backend" / "venv" / "bin" / "python",
+        Path(repo) / "backend" / ".venv" / "Scripts" / "python.exe",
+        Path(repo) / "backend" / ".venv" / "bin" / "python",
+        Path(repo) / ".venv" / "Scripts" / "python.exe",
+        Path(repo) / ".venv" / "bin" / "python",
+    ]
+    venv = next((c for c in candidates if c.is_file()), None)
+    if venv is None:
+        print(
+            f"factory: no venv python found under {repo} "
+            "(checked backend/venv/Scripts/python.exe, backend/venv/bin/python, "
+            "backend/.venv/Scripts/python.exe, backend/.venv/bin/python, "
+            ".venv/Scripts/python.exe, .venv/bin/python); "
+            f"continuing with {sys.executable}",
+            file=sys.stderr,
+        )
         return
     if Path(sys.executable).resolve() == venv.resolve():
         return

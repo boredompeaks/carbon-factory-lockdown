@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-REGISTER = Path(r"C:\Users\Admin\Documents\umairnlp\quality-scan\QUALITY-BUGS.md")
+REGISTER = Path(__file__).resolve().parent.parent / "quality-scan" / "QUALITY-BUGS.md"
 SHA = "1ffe926e6ab04e48dc1ad27fc844203d45e88781"
 
 
@@ -26,8 +26,23 @@ def _split_ending(line: str) -> tuple[str, str]:
     return body, line[len(body):]
 
 
+def _register_path() -> Path:
+    # Optional argv override: ``backfill_register.py [path]`` or
+    # ``--register <path>`` / ``--register=<path>`` (mirrors bug_lint).
+    args = sys.argv[1:]
+    for i, arg in enumerate(args):
+        if arg == "--register" and i + 1 < len(args):
+            return Path(args[i + 1])
+        if arg.startswith("--register="):
+            return Path(arg.split("=", 1)[1])
+    if args and args[0] and not args[0].startswith("-"):
+        return Path(args[0])
+    return REGISTER
+
+
 def main() -> int:
-    text = REGISTER.read_text(encoding="utf-8")
+    register = _register_path()
+    text = register.read_text(encoding="utf-8")
 
     if "Verified@" in text:
         print("already backfilled")
@@ -87,7 +102,7 @@ def main() -> int:
     if anchor in text:
         text = text.replace(anchor, notice + anchor, 1)
 
-    REGISTER.write_text(text, encoding="utf-8")
+    register.write_text(text, encoding="utf-8")
     print(f"backfilled 263 rows with {SHA}")
     return 0
 
