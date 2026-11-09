@@ -1,9 +1,10 @@
-"""Ledger policy: typed records, severity, redaction, hash chain. 6B-5.
+"""Ledger policy: typed records, severity, redaction, hash chain. 6B-5 + P2.
 
 - ledger.append: per-role record-type allowlist (core.server), schema
-  validation, expected_prev_hash chaining, expected record types per
-  role (orchestrator dispatch/capability; auditor verdict/finding/
-  attack-log/gate-control; release-engineer release).
+  validation (ledger.store), expected_prev_hash chaining against the
+  durable on-disk tip per record type (ledger.store), expected record
+  types per role (orchestrator dispatch/capability; auditor verdict/
+  finding/attack-log; release-engineer release).
 - F-72: unknown severity classes fail closed (severity.json
   unknown_class = reject).
 - F-59 / F-75: PII/secret in a record fails closed at the output
@@ -15,7 +16,6 @@
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from pathlib import Path
@@ -69,12 +69,32 @@ def _contains_unredactable(record) -> bool:
     return False
 
 
+def _disk_tip(record_type: str) -> str:
+    """Fresh on-disk tip for the type (never a per-instance counter)."""
+    try:
+        from .store import tip_for
+
+        return tip_for(record_type)
+    except Reject:
+        raise
+    except Exception:
+        # Store unavailable: fall back to genesis so the precondition
+        # check still runs (and fails closed for non-genesis callers).
+        return _GENESIS
+
+
 def _check_hash_chain(server, args: dict) -> None:
     expected = args.get("expected_prev_hash", "")
-    current = getattr(server, "_ledger_prev_hash", _GENESIS)
+    record_type = str(args.get("record_type", ""))
+    # Prev-hash source is the durable store, not a dynamic server counter.
+    # Server._ledger_prev_hash is initialised from disk in __init__ only
+    # as a compatibility snapshot; it is never advanced per-append.
+    current = _disk_tip(record_type) if record_type else _GENESIS
     if expected != current:
-        raise Reject("REJECT_PRECONDITION",
-                     f"expected_prev_hash does not match ledger head")
+        raise Reject(
+            "REJECT_PRECONDITION",
+            "expected_prev_hash does not match ledger head",
+        )
 
 
 def check_extra(server, tool: str, role: str, args: dict) -> None:
@@ -104,7 +124,29 @@ def check_extra(server, tool: str, role: str, args: dict) -> None:
 
 
 def next_prev_hash(server, record_type: str, record) -> str:
-    payload = json.dumps({"t": record_type, "r": record},
-                         sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
-    prev = getattr(server, "_ledger_prev_hash", _GENESIS)
-    return hashlib.sha256(prev.encode() + payload).hexdigest()
+    """Prospective record_hash for (record_type, record) against disk tip.
+
+    Kept for backward compatibility (handlers now call ``store.append``
+    directly). The hash matches the durable store sealing: sha256 of the
+    canonical JSON of the record with ``prev_hash`` set to the on-disk tip
+    and ``record_hash`` removed.
+    """
+    try:
+        from .store import canonical, sha256_text, tip_for
+    except Exception:
+        # Legacy fallback when the store is unavailable: deterministic
+        # hash of the payload (never a server-side counter).
+        payload = json.dumps(
+            {"t": record_type, "r": record},
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+        )
+        import hashlib
+
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    prev = tip_for(record_type)
+    body = dict(record) if isinstance(record, dict) else {"value": record}
+    body.pop("record_hash", None)
+    body["prev_hash"] = prev
+    return sha256_text(canonical(body))

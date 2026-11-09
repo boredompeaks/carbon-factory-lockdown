@@ -1,4 +1,4 @@
-"""Typed MCP server skeleton. 6B-0.
+"""Typed MCP server skeleton. 6B-0 + P2 durable dispatch.
 
 Role binding: the server instance is bound to one role at construction
 (a harness-injected token or a per-role instance). The role is NEVER a
@@ -24,6 +24,9 @@ import hashlib
 import importlib
 import importlib.util
 import json
+import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -46,6 +49,44 @@ def _registry_tools(registry: dict) -> dict[str, dict]:
     return {t["name"]: t for t in registry.get("tools", [])}
 
 
+def _harness_root() -> Path:
+    # server.py -> core -> mcp -> tools -> files -> <harness>
+    return Path(__file__).resolve().parents[4]
+
+
+def _gate_control_script() -> Path:
+    # files/tools/gate_control.py (server.py parents[2] is tools/).
+    return Path(__file__).resolve().parents[2] / "gate_control.py"
+
+
+def _docker_ensure_script() -> Path:
+    # <harness>/scripts/ensure_docker.ps1
+    return _harness_root() / "scripts" / "ensure_docker.ps1"
+
+
+def _ledger_tips_from_disk() -> tuple[dict[str, str], str]:
+    """Initialise ledger tips from disk; per-type tips plus legacy tip."""
+    try:
+        mod = importlib.import_module("files.tools.mcp.ledger.store")
+        genesis = "0" * 64
+        tips: dict[str, str] = {}
+        known = getattr(mod, "KNOWN_RECORD_TYPES", ())
+        for rt in known:
+            try:
+                tips[rt] = mod.tip_for(rt)
+            except Exception:
+                tips[rt] = genesis
+        legacy = genesis
+        try:
+            legacy = mod.global_tip()
+        except Exception:
+            legacy = genesis
+        return tips, legacy
+    except Exception:
+        genesis = "0" * 64
+        return {}, genesis
+
+
 class Server:
     """One instance per role (or bound via harness token)."""
 
@@ -59,6 +100,11 @@ class Server:
         self._watched: set[tuple[int, str]] = set()
         self._opened_prs: set[int] = set()
         self._k1_leases: dict[str, dict] = {}
+        # P2 durable ledger: tip(s) initialised from disk at construction.
+        # _ledger_prev_hash is a compatibility snapshot only; the durable
+        # store (ledger.store) reads the live tip fresh per operation and
+        # is never advanced by a per-instance counter.
+        self._ledger_tips, self._ledger_prev_hash = _ledger_tips_from_disk()
         self._startup_check()
 
     # -- startup / listing ------------------------------------------------
@@ -221,6 +267,7 @@ class Server:
             "files.tools.mcp.git.deny",
             "files.tools.mcp.checks.policy",
             "files.tools.mcp.ledger.chain",
+            "files.tools.mcp.ledger.store",
             "files.tools.mcp.release.watch",
             "files.tools.mcp.k1.leases",
             "files.tools.mcp.hacker.probe",
@@ -236,21 +283,213 @@ class Server:
                     f"required family module {mod_name!r} unavailable: {e}",
                 ) from e
 
+    def _scrubbed_env(self) -> dict[str, str]:
+        try:
+            from .config import scrub_environment
+            from .config import _ENV_BLOCKLIST
+
+            env = dict(scrub_environment())
+        except Exception:
+            env = {"PYTHONNOUSERSITE": "1"}
+        # Host subprocesses (gate_control.py spawns git via PATH; the
+        # docker helper runs powershell.exe) need the Windows shell
+        # essentials even though the sealed core uses absolute execs.
+        # Restore PATH / SystemRoot / COMSPEC etc. from the parent while
+        # keeping every blocklisted secret scrubbed.
+        wanted = {
+            "PATH",
+            "PATHEXT",
+            "SYSTEMROOT",
+            "WINDIR",
+            "COMSPEC",
+            "TEMP",
+            "TMP",
+            "TMPDIR",
+            "LANG",
+            "LC_ALL",
+        }
+        try:
+            block = set(_ENV_BLOCKLIST) if "_ENV_BLOCKLIST" in locals() else set()
+        except NameError:
+            block = set()
+        for key, val in os.environ.items():
+            if key in block:
+                continue
+            if key.upper() in wanted and key not in env:
+                env[key] = val
+        env.setdefault("PYTHONNOUSERSITE", "1")
+        return env
+
+    def _truncate(self, text: str) -> str:
+        cap = getattr(self.config, "output_cap_bytes", 65536)
+        if len(text.encode("utf-8", errors="replace")) > cap:
+            return text[: max(0, cap // 2)] + "\n[OUTPUT_TRUNCATED]"
+        return text
+
+    def _execute_gate_control(self, role: str, args: dict) -> dict:
+        harness = _harness_root()
+        script = _gate_control_script()
+        repo = harness
+        mode = str(args.get("mode") or "run")
+        target = str(args.get("target") or "gate")
+        argv: list[str] = [sys.executable, str(script), "--repo", str(repo)]
+        if mode == "verify":
+            rec = args.get("rec") or args.get("record") or args.get("path")
+            if not isinstance(rec, str) or not rec:
+                gate_dir = harness / "files" / "quality" / "ledger" / "gate-control"
+                records = sorted(
+                    (gate_dir.glob("*.json") if gate_dir.is_dir() else []),
+                    key=lambda p: p.name,
+                )
+                records = [p for p in records if p.name != "verify.json"]
+                if not records:
+                    return {
+                        "tool": "gate.control",
+                        "target": target,
+                        "mode": mode,
+                        "executed": True,
+                        "exit_code": 2,
+                        "result": "ERROR",
+                        "detail": "no gate-control record found to verify",
+                    }
+                rec = str(records[-1])
+            argv += ["--verify", str(rec)]
+        else:
+            argv += ["--write"]
+        if not script.is_file():
+            return {
+                "tool": "gate.control",
+                "target": target,
+                "mode": mode,
+                "executed": True,
+                "exit_code": 2,
+                "result": "ERROR",
+                "detail": f"gate_control.py missing at {script}",
+            }
+        try:
+            proc = subprocess.run(
+                argv,
+                shell=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=300,
+                cwd=str(harness),
+                env=self._scrubbed_env(),
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "tool": "gate.control",
+                "target": target,
+                "mode": mode,
+                "executed": True,
+                "exit_code": 2,
+                "result": "ERROR",
+                "detail": "gate_control.py timed out after 300s",
+            }
+        except OSError as exc:
+            return {
+                "tool": "gate.control",
+                "target": target,
+                "mode": mode,
+                "executed": True,
+                "exit_code": 2,
+                "result": "ERROR",
+                "detail": f"failed to start gate_control.py: {exc}",
+            }
+        parsed: dict = {}
+        try:
+            parsed = json.loads(proc.stdout or "")
+        except ValueError:
+            parsed = {}
+        result_name = parsed.get("result") if isinstance(parsed, dict) else None
+        out: dict = {
+            "tool": "gate.control",
+            "target": target,
+            "mode": mode,
+            "executed": True,
+            "exit_code": proc.returncode,
+            "stdout": self._truncate(proc.stdout or ""),
+            "stderr": self._truncate(proc.stderr or ""),
+        }
+        if isinstance(parsed, dict) and parsed:
+            out["gate_record"] = parsed
+            if result_name is not None:
+                out["result"] = result_name
+            if "record_hash" in parsed:
+                out["record_hash"] = parsed["record_hash"]
+            if "record" in parsed:
+                out["record"] = parsed["record"]
+        else:
+            out["result"] = "PASS" if proc.returncode == 0 else "FAIL" if proc.returncode == 1 else "ERROR"
+        return out
+
+    def _execute_docker_ensure(self, role: str, args: dict) -> dict:
+        harness = _harness_root()
+        script = _docker_ensure_script()
+        action = str(args.get("action") or "ensure")
+        if not script.is_file():
+            return {
+                "tool": "docker.ensure",
+                "action": action,
+                "executed": True,
+                "exit_code": 2,
+                "detail": f"ensure_docker.ps1 missing at {script}",
+            }
+        containers = args.get("containers") if isinstance(args, dict) else None
+        base_argv = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)]
+        if containers:
+            names = [str(c) for c in containers] if isinstance(containers, list) else [str(containers)]
+            argv = base_argv + ["-Containers", *names]
+        else:
+            argv = base_argv + ["-EngineOnly"]
+        try:
+            proc = subprocess.run(
+                argv,
+                shell=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=300,
+                cwd=str(harness),
+                env=self._scrubbed_env(),
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "tool": "docker.ensure",
+                "action": action,
+                "executed": True,
+                "exit_code": 2,
+                "detail": "ensure_docker.ps1 timed out after 300s",
+            }
+        except OSError as exc:
+            return {
+                "tool": "docker.ensure",
+                "action": action,
+                "executed": True,
+                "exit_code": 2,
+                "detail": f"failed to start ensure_docker.ps1: {exc}",
+            }
+        return {
+            "tool": "docker.ensure",
+            "action": action,
+            "executed": True,
+            "exit_code": proc.returncode,
+            "stdout": self._truncate(proc.stdout or ""),
+            "stderr": self._truncate(proc.stderr or ""),
+        }
+
     def _execute(self, tool: str, role: str, args: dict) -> dict:
-        """Stub execution: deterministic echo + handler delegation."""
-        # Record pr.open / pr.watch state for the precondition above.
-        if tool == "pr.open":
-            # pr numbering is server-assigned in real deployments; the
-            # stub derives it from the head hash for determinism.
-            head = args.get("head", "")
-            pr_no = 1 + (int(hashlib.sha256(head.encode()).hexdigest()[:4], 16) % 997)
-            self._opened_prs.add(pr_no)
-            # Harness may also watch the conventional pr=1; keep both.
-            self._opened_prs.add(1)
-            return {"pr": pr_no, "head": head, "state": "open"}
-        if tool == "pr.watch":
-            self._watched.add((args.get("pr"), args.get("head")))
-            return {"pr": args.get("pr"), "head": args.get("head"), "watching": True}
+        """Host execution: gate/docker subprocesses + handler delegation."""
+        # Real subprocess handlers (argv-only, 300s). A FAIL exit code is a
+        # real result, not a dispatch error: the dict always carries
+        # executed=True and the child's exit_code.
+        if tool == "gate.control":
+            return self._execute_gate_control(role, args)
+        if tool == "docker.ensure":
+            return self._execute_docker_ensure(role, args)
         # Delegate to family handlers when present. Fail-closed: a
         # required handler module that cannot be imported rejects, and
         # a tool with no handler rejects instead of returning a generic
@@ -258,6 +497,7 @@ class Server:
         for mod_name in (
             "files.tools.mcp.git.handlers",
             "files.tools.mcp.checks.handlers",
+            "files.tools.mcp.ledger.store",
             "files.tools.mcp.ledger.handlers",
             "files.tools.mcp.release.handlers",
             "files.tools.mcp.k1.handlers",
@@ -269,6 +509,10 @@ class Server:
                 if callable(executor):
                     out = executor(self, tool, role, args)
                     if out is not None:
+                        if not isinstance(out, dict):
+                            out = {"tool": tool, "value": out}
+                        if "executed" not in out:
+                            out["executed"] = True
                         return out
             except ModuleNotFoundError as e:
                 raise Reject(
