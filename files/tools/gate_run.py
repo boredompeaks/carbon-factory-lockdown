@@ -89,7 +89,12 @@ _STRING_KEYS = ("output", "content", "text", "stdout", "stderr", "body", "data",
 
 
 def _evidence_hash_findings(node: object, locus: str = "evidence") -> list[dict]:
-    """Verify embedded SHA-256 claims against strings/file bytes; mismatch -> finding."""
+    """Verify embedded SHA-256 claims against strings/file bytes; mismatch -> finding.
+
+    Fail-closed on missing bytes: a hash claim whose actual string/file
+    cannot be read (missing path, missing output) emits
+    EVIDENCE_HASH_MISSING instead of silently passing.
+    """
     out: list[dict] = []
     if isinstance(node, dict):
         for key, value in node.items():
@@ -99,17 +104,27 @@ def _evidence_hash_findings(node: object, locus: str = "evidence") -> list[dict]
                 if expected.startswith("sha256:"):
                     expected = expected[len("sha256:") :]
                 actual = None
+                has_string = False
                 for skey in _STRING_KEYS:
                     if isinstance(node.get(skey), str):
                         actual = hashlib.sha256(str(node[skey]).encode("utf-8")).hexdigest()
+                        has_string = True
                         break
                 if actual is None and isinstance(node.get("path"), str):
                     try:
                         actual = hashlib.sha256(Path(str(node["path"])).read_bytes()).hexdigest()
                     except OSError:
                         actual = None
-                if actual is not None and actual != expected:
+                if actual is None:
+                    out.append(finding("EVIDENCE_HASH_MISSING", f"{locus}.{key}", "sha256 claim present but the claimed bytes/output are missing"))
+                elif actual != expected:
                     out.append(finding("EVIDENCE_HASH_MISMATCH", f"{locus}.{key}", "sha256 does not match actual bytes/output"))
+            elif ("sha256" in k or k in ("hash", "digest")) and (value is None or (isinstance(value, str) and not value.strip())):
+                # Explicit empty hash claim with claimed bytes present is
+                # a missing hash (fail closed). Nodes without any claimed
+                # bytes and without a hash key do not trigger here.
+                if any(isinstance(node.get(skey), str) for skey in _STRING_KEYS) or isinstance(node.get("path"), str):
+                    out.append(finding("EVIDENCE_HASH_MISSING", f"{locus}.{key}", "sha256 claim missing but bytes/output are present"))
         for key, value in node.items():
             out.extend(_evidence_hash_findings(value, f"{locus}.{key}"))
     elif isinstance(node, list):
@@ -124,7 +139,16 @@ def _evidence_hash_findings(node: object, locus: str = "evidence") -> list[dict]
 
 
 def check_scope(data: dict) -> list[dict]:
+    # Fail-closed on missing evidence: missing/empty scope or paths is
+    # SCOPE_MISSING, never a vacuous PASS.
+    if "scope" not in data or "paths" not in data:
+        return [finding("SCOPE_MISSING", "evidence", "scope/paths evidence is missing")]
     scope = list(data.get("scope") or [])
+    paths = list(data.get("paths") or [])
+    if not scope:
+        return [finding("SCOPE_MISSING", "scope", "scope is missing/empty")]
+    if not paths:
+        return [finding("SCOPE_MISSING", "paths", "paths is missing/empty")]
     return [
         finding("SCOPE_VIOLATION", str(path), "path is outside capability.scope")
         for path in data.get("paths") or []
@@ -137,6 +161,11 @@ def _test_map(items: list[dict]) -> dict[str, dict]:
 
 
 def check_test_set(data: dict) -> list[dict]:
+    # Fail-closed on missing evidence.
+    if "base" not in data or "head" not in data:
+        return [finding("TEST_SET_MISSING", "evidence", "base/head test evidence is missing")]
+    if not data.get("base") and not data.get("head"):
+        return [finding("TEST_SET_MISSING", "base/head", "base/head are missing/empty")]
     findings: list[dict] = []
     base = _test_map(list(data.get("base") or []))
     head = _test_map(list(data.get("head") or []))
@@ -199,6 +228,14 @@ def check_test_set(data: dict) -> list[dict]:
 
 
 def check_test_infra(data: dict) -> list[dict]:
+    if "paths" not in data or "scope" not in data or "test_infra_globs" not in data:
+        return [finding("TEST_INFRA_MISSING", "evidence", "paths/scope/test_infra_globs evidence is missing")]
+    if not data.get("paths"):
+        return [finding("TEST_INFRA_MISSING", "paths", "paths is missing/empty")]
+    if not data.get("scope"):
+        return [finding("TEST_INFRA_MISSING", "scope", "scope is missing/empty")]
+    if not data.get("test_infra_globs"):
+        return [finding("TEST_INFRA_MISSING", "test_infra_globs", "test_infra_globs is missing/empty")]
     globs = list(data.get("test_infra_globs") or [])
     scope = list(data.get("scope") or [])
     findings: list[dict] = []
@@ -216,6 +253,11 @@ def check_test_infra(data: dict) -> list[dict]:
 
 
 def check_changelog(data: dict) -> list[dict]:
+    # Fail-closed on missing evidence.
+    if "paths" not in data or "rows" not in data:
+        return [finding("CHANGELOG_MISSING", "evidence", "paths/rows changelog evidence is missing")]
+    if not data.get("paths"):
+        return [finding("CHANGELOG_MISSING", "paths", "paths is missing/empty")]
     paths = {normalise(str(path)) for path in data.get("paths") or []}
     exempt = list(data.get("exempt") or [])
     findings: list[dict] = []
@@ -335,6 +377,10 @@ def _gitleaks_findings(
 
 
 def check_secrets(data: dict) -> list[dict]:
+    # Fail-closed on missing evidence: missing/empty paths is FAIL,
+    # never a vacuous PASS over an empty temp dir.
+    if "paths" not in data or not data.get("paths"):
+        return [finding("SECRETS_MISSING_PATHS", "paths", "paths is missing/empty")]
     paths = [Path(str(path)) for path in data.get("paths") or []]
     remap: dict[str, str] = {}
     with tempfile.TemporaryDirectory(prefix="gate-run-secrets-") as tmp:
@@ -373,12 +419,15 @@ def _ruff_binary() -> str | None:
 
 
 def check_convention(data: dict) -> tuple[list[dict], str | None]:
+    # Fail-closed on missing evidence: missing/empty files is FAIL,
+    # never a vacuous PASS. The missing-files check runs before the
+    # ruff-availability error so empty input is always FAIL.
+    files = [str(path) for path in data.get("files") or []]
+    if "files" not in data or not files:
+        return [finding("CONVENTION_MISSING_FILES", "files", "files is missing/empty")], None
     ruff = _ruff_binary()
     if ruff is None:
         return [], "ruff is not on PATH"
-    files = [str(path) for path in data.get("files") or []]
-    if not files:
-        return [], None
     added = {
         normalise(str(path)): {int(line) for line in lines or []}
         for path, lines in (data.get("added_lines") or {}).items()
@@ -560,6 +609,9 @@ def check_suite(data: dict) -> list[dict]:
 
 def check_base_fail_head_pass(data: dict) -> list[dict]:
     """BASE_FAIL_HEAD_PASS: added tests must be red on base and green on head."""
+    # Fail-closed on missing evidence.
+    if "added_tests" not in data or not data.get("added_tests"):
+        return [finding("BASE_FAIL_HEAD_PASS_MISSING", "added_tests", "added_tests is missing/empty")]
     findings: list[dict] = []
     for index, test in enumerate(data.get("added_tests") or []):
         test_id = str(test.get("id") or f"added_tests[{index}]")
@@ -617,13 +669,13 @@ def _locus(value: object) -> str:
 
 def check_mutation(data: dict) -> list[dict]:
     """MUTATION: kill ratio above threshold and no survivor on a changed line."""
+    # Fail-closed on missing evidence: MUTATION {} (or any missing
+    # score/threshold) is MUTATION_MISSING, never a vacuous PASS.
+    if data.get("score") is None or data.get("threshold") is None:
+        return [finding("MUTATION_MISSING", "evidence", "score/threshold mutation evidence is missing")]
     findings: list[dict] = []
     score = float(data.get("score", 0.0) or 0.0)
     threshold = float(data.get("threshold", 0.0) or 0.0)
-    if data.get("score") is None:
-        findings.append(finding("MUTATION_MISSING_SCORE", "score", "mutation score is missing"))
-    if data.get("threshold") is None:
-        findings.append(finding("MUTATION_MISSING_THRESHOLD", "threshold", "mutation threshold is missing"))
     total_mutatable = data.get("total_mutatable")
     total_generated = data.get("total_generated")
     if total_mutatable is not None and total_generated is not None and total_mutatable != total_generated:
@@ -653,8 +705,15 @@ def check_mutation(data: dict) -> list[dict]:
 
 
 def check_thread_race(data: dict) -> list[dict]:
-    """THREAD_RACE: postgres repetitions must be complete, clean, and stable."""
+    """THREAD_RACE: postgres repetitions must be complete, clean, and stable.
+
+    Fail-closed: a postgres engine without workers/reps evidence is
+    THREAD_RACE_MISSING, never a vacuous PASS.
+    """
     engine = str(data.get("engine") or "").lower()
+    if engine == "postgres":
+        if data.get("workers") is None or data.get("required_workers") is None or data.get("reps") is None or data.get("required_reps") is None:
+            return [finding("THREAD_RACE_MISSING", "evidence", "workers/reps evidence is missing for postgres")]
     if engine != "postgres":
         if engine == "sqlite":
             detail = (
@@ -738,6 +797,9 @@ def _at_or_above(severity: object, threshold: str) -> bool:
 
 def check_schema_fuzz(data: dict) -> list[dict]:
     """SCHEMA_FUZZ: schemathesis must run cases and observe no failure or error."""
+    # Fail-closed on missing spec.
+    if not data.get("spec"):
+        return [finding("SCHEMA_MISSING", "spec", "spec is missing")]
     findings: list[dict] = []
     engine = str(data.get("engine") or "")
     if engine != "schemathesis":
@@ -812,6 +874,8 @@ def check_boottest(data: dict) -> list[dict]:
 
 def check_zizmor(data: dict) -> list[dict]:
     """ZIZMOR: no workflow finding at or above the policy threshold."""
+    if "findings" not in data:
+        return [finding("ZIZMOR_MISSING", "findings", "findings evidence is missing")]
     threshold, valid = _threshold(data.get("threshold"))
     findings: list[dict] = []
     if not valid:
@@ -843,6 +907,8 @@ def check_zizmor(data: dict) -> list[dict]:
 
 def check_dast_baseline(data: dict) -> list[dict]:
     """DAST_BASELINE: docker + zap runtime, no alert at/above threshold."""
+    if "alerts" not in data:
+        return [finding("DAST_MISSING", "alerts", "alerts evidence is missing")]
     runtime = str(data.get("runtime") or "").strip().lower()
     if runtime == "none":
         return [

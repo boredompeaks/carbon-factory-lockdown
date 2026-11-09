@@ -916,7 +916,9 @@ def collect(
         for fd in parse_diff(diff_text):
             fd_by_path[fd.path] = fd
         if not fd_by_path:
-            raise ToolError("no file changes found in diff")
+            # Empty diff fails closed (PASS=False): it is BLOCKED
+            # (exit 2), never a PASS. Documented strict behavior.
+            raise ToolError("no file changes found in diff (empty diff fails closed; PASS=False)")
         for path, fd in fd_by_path.items():
             candidate = (repo_root / path).resolve()
             if candidate.is_file():
@@ -995,8 +997,12 @@ def collect(
             findings.extend(hits)
             preexisting += suppressed
 
+    # Syntax warnings: files that do not parse as Python are analyzed
+    # via the regex fallback (fail-closed parity), but the syntax
+    # failure is recorded as a warning instead of passing silently.
+    syntax_warnings = sum(1 for src in sources.values() if not _parses(src.text))
     findings.sort(key=lambda f: (f["path"], f["line"], f["rule_id"], f["fingerprint"]))
-    stats = {"mode": mode, "files": len(sources)}
+    stats = {"mode": mode, "files": len(sources), "syntax_warnings": syntax_warnings}
     return findings, preexisting, len(sources), engine, stats
 
 
@@ -1265,6 +1271,13 @@ def main(argv: list[str] | None = None) -> int:
                 "engine": engine,
                 "files_scanned": files,
                 "mode": stats["mode"],
+                "syntax_warnings": stats.get("syntax_warnings", 0),
+                "warning": (
+                    "syntax warnings indicate files that did not parse as Python; "
+                    "analyzed via regex fallback, recorded for visibility"
+                    if stats.get("syntax_warnings", 0)
+                    else None
+                ),
             },
         )
         sys.stdout.write(json.dumps(doc, sort_keys=True, separators=(",", ":")) + "\n")

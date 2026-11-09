@@ -20,11 +20,25 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from ..core.validate import Reject
+from ..core.validate import Reject, is_traversal_or_absolute
 
 from .deny import get_capability, is_commit_denied, is_in_scope
 
 _TIMEOUT_FALLBACK = 30
+
+
+def _is_absolute_or_escape(path: str) -> bool:
+    """True for absolute, drive, UNC, traversal or non-normalised paths.
+
+    Absolute deny on the staged set: the index is authoritative, and a
+    staged path that is absolute or escapes the repo root is denied
+    unconditionally, regardless of capability/scope state.
+    """
+    if not isinstance(path, str):
+        return True
+    if is_traversal_or_absolute("git.commit", "paths", path):
+        return True
+    return False
 
 
 def _is_placeholder(rev: str | None) -> bool:
@@ -164,11 +178,25 @@ def _execute_commit(server, args: dict) -> dict:
     if message.lstrip().startswith("-"):
         raise Reject("REJECT_PATTERN", "message must not start with a dash")
 
-    # 1) HEAD / tree / branch binding. When a capability is bound,
-    # enforce HEAD == capability.head and branch == task_branch
+    # 1) HEAD / tree / branch binding (scope/deny absolute). A bound
+    # capability is mandatory: without one there is no scope allowlist,
+    # so the commit fails closed instead of silently skipping scope.
+    # HEAD == capability.head and branch == task_branch are enforced
     # strictly; args.tree must always equal HEAD^{tree} (stale tree).
     head, live_tree, branch = _git_head(server)
     capability = get_capability(server)
+    if not isinstance(capability, dict):
+        raise Reject(
+            "REJECT_PRECONDITION",
+            "git.commit requires a bound capability (no silent scope skip)",
+        )
+    # Scope allowlist is mandatory and absolute.
+    _cap_scope = capability.get("scope") if isinstance(capability, dict) else None
+    if not _cap_scope:
+        raise Reject(
+            "REJECT_PRECONDITION",
+            "git.commit requires a non-empty capability.scope (no silent scope skip)",
+        )
     if isinstance(capability, dict):
         cap_head = capability.get("head")
         cap_tree = capability.get("tree")
@@ -202,27 +230,43 @@ def _execute_commit(server, args: dict) -> dict:
     # 2) Live staged-diff validation (TOCTOU firewall). The caller-
     # declared args.paths were already checked in deny.check_extra;
     # the index is authoritative so an evil file staged after
-    # declaration still rejects here.
+    # declaration still rejects here. Deny and scope are absolute:
+    # absolute/escape paths are denied unconditionally, deny globs
+    # apply to every staged path, and every staged path must be in
+    # capability.scope (no optional-scope skip).
     staged = _staged_paths(server)
     if not staged:
         raise Reject("REJECT_PRECONDITION", "nothing staged to commit")
     scope = capability.get("scope") if isinstance(capability, dict) else None
-    for staged_path in staged:
+    for s_idx, staged_path in enumerate(staged):
+        if not isinstance(staged_path, str) or _is_absolute_or_escape(staged_path):
+            raise Reject(
+                "REJECT_PATH",
+                f"staged path is absolute/escaped, denied: {staged_path!r}",
+            )
         if is_commit_denied(staged_path):
             raise Reject("REJECT_PATH", f"staged path denied: {staged_path!r}")
-        if scope and not is_in_scope(staged_path, scope):
+        if not is_in_scope(staged_path, scope):
             raise Reject(
                 "REJECT_PATH",
                 f"staged path outside capability.scope: {staged_path!r}",
             )
     # Re-validate declared paths against the same predicates so a
     # path-only bypass that skips deny.check_extra still rejects.
+    # Absolute/escape declared paths are denied here too (defense in
+    # depth; generic validation already rejected them before this
+    # handler, but a direct handler call must still fail closed).
     for declared in args.get("paths", []) or []:
         if not isinstance(declared, str):
             continue
+        if _is_absolute_or_escape(declared):
+            raise Reject(
+                "REJECT_PATH",
+                f"commit path is absolute/escaped, denied: {declared!r}",
+            )
         if is_commit_denied(declared):
             raise Reject("REJECT_PATH", f"commit path denied: {declared!r}")
-        if scope and not is_in_scope(declared, scope):
+        if not is_in_scope(declared, scope):
             raise Reject(
                 "REJECT_PATH",
                 f"commit path outside capability.scope: {declared!r}",

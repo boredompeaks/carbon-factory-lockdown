@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import fnmatch
 
-from ..core.validate import Reject
+from ..core.validate import Reject, is_traversal_or_absolute
 
 _GIT_PATH_TOOLS = frozenset({"git.read_file", "git.log", "git.state", "evidence.hash", "static.scan"})
 
@@ -198,21 +198,43 @@ def check_commit_paths(server, args: dict) -> None:
     validation runs later in handlers.execute; this check rejects
     declared paths that already match deny/test-infra/scope globs so
     F-05/F-07 have a deterministic REJECT_PATH before any git spawn.
+    Deny and scope are absolute: absolute/escape paths are denied and
+    scope is mandatory. A missing capability or empty scope fails
+    closed — it never silently skips the scope allowlist.
     """
     capability = get_capability(server)
-    scope = capability.get("scope") if isinstance(capability, dict) else None
+    if not isinstance(capability, dict):
+        # Fail-closed scope: no bound capability means no allowlist,
+        # so any declared path is outside scope. (Handler enforces
+        # the same rule on the live staged set.)
+        if args.get("paths"):
+            raise Reject(
+                "REJECT_PRECONDITION",
+                "git.commit requires a bound capability (no silent scope skip)",
+            )
+        # No declared paths: the handler still requires a capability
+        # and a non-empty staged set, so this hook does not need to
+        # reject here. Declared-path checks below (absolute/deny)
+        # still apply below when paths is empty via the handler.
+        scope = None
+    else:
+        scope = capability.get("scope")
+        if not scope:
+            if args.get("paths"):
+                raise Reject(
+                    "REJECT_PRECONDITION",
+                    "git.commit requires a non-empty capability.scope (no silent scope skip)",
+                )
     for item in args.get("paths", []) or []:
         if not isinstance(item, str):
             continue
         if item.startswith("-"):
             raise Reject("REJECT_PATH", f"commit path denied: {item!r}")
+        if is_traversal_or_absolute("git.commit", "paths", item):
+            raise Reject("REJECT_PATH", f"commit path denied (absolute/escape): {item!r}")
         if is_commit_denied(item):
             raise Reject("REJECT_PATH", f"commit path denied: {item!r}")
-        # Scope allowlist when capability is bound (evil-staged
-        # declared-path variant). Without a bound capability there is
-        # no allowlist to enforce here; the handler enforces denies
-        # on the live staged diff.
-        if scope and not is_in_scope(item, scope):
+        if not is_in_scope(item, scope):
             raise Reject("REJECT_PATH", f"commit path outside capability.scope: {item!r}")
 
 

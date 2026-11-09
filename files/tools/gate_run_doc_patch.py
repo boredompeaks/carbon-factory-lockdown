@@ -227,9 +227,15 @@ def check_doc_scope(data: dict) -> list[dict]:
 
     Returns:
         One ``{"class": "DOC_PATH_VIOLATION", ...}`` finding per offending
-        path, in input order; ``[]`` when every path is allowed. Empty input
-        passes vacuously. Pure function: no I/O, no globals mutated.
+        path, in input order; ``[]`` when every path is allowed. An
+        explicitly empty ``paths: []`` passes vacuously (documented
+        empty-diff case), but a missing paths/diff_paths/files key is
+        DOC_PATH_VIOLATION (missing evidence, fail-closed). Pure
+        function: no I/O, no globals mutated.
     """
+    # Fail-closed on missing evidence: {} (no paths key at all) fails.
+    if "paths" not in data and "diff_paths" not in data and "files" not in data:
+        return [finding(DOC_REJECT_CODE, "paths", "paths evidence is missing")]
     paths = _extract_paths(data)
     allowed = _as_str_list(data.get("allowed_path_globs")) or list(
         DOC_ALLOWED_PATH_GLOBS

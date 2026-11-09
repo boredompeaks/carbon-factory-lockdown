@@ -99,7 +99,9 @@ def gate_impl_digest() -> str:
     for rel in CHECK_BODY_FILES:
         path = ROOT / rel
         if not path.is_file():
-            continue
+            # Missing check body is a tool error (fail-closed), never a
+            # silent skip that would seal a digest without the body.
+            raise RuntimeError(f"gate check body missing: {rel} (fail closed)")
         files.append(
             {
                 "path": rel,
@@ -107,6 +109,8 @@ def gate_impl_digest() -> str:
             }
         )
     fixtures = ROOT / "tools" / "fixtures"
+    if not fixtures.is_dir():
+        raise RuntimeError(f"gate fixtures directory missing: {fixtures} (fail closed)")
     for base, dirs, names in os.walk(fixtures):
         dirs[:] = sorted(name for name in dirs if name != "__pycache__")
         for name in sorted(names):
@@ -136,20 +140,21 @@ def gate_impl_digest() -> str:
     # 6C-4 MCP server seal: the whole files/tools/mcp tree plus the K1 probe
     # client. Skips __pycache__/*.pyc like the fixtures walk above.
     mcp_root = harness_root / "files" / "tools" / "mcp"
-    if mcp_root.is_dir():
-        for base, dirs, names in os.walk(mcp_root):
-            dirs[:] = sorted(name for name in dirs if name != "__pycache__")
-            for name in sorted(names):
-                if name.endswith(".pyc"):
-                    continue
-                path = Path(base) / name
-                rel = path.relative_to(harness_root).as_posix()
-                files.append(
-                    {
-                        "path": rel,
-                        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                    }
-                )
+    if not mcp_root.is_dir():
+        raise RuntimeError(f"MCP server tree missing: {mcp_root} (fail closed)")
+    for base, dirs, names in os.walk(mcp_root):
+        dirs[:] = sorted(name for name in dirs if name != "__pycache__")
+        for name in sorted(names):
+            if name.endswith(".pyc"):
+                continue
+            path = Path(base) / name
+            rel = path.relative_to(harness_root).as_posix()
+            files.append(
+                {
+                    "path": rel,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+            )
     for rel in ("files/docker/k1/probe_client.py",):
         path = harness_root / rel
         if not path.is_file():
@@ -479,8 +484,14 @@ def build(repo: Path, manifest: dict, gate: dict) -> dict:
     total = len(bad)
     effective_total = total + len(tombstones)
     effective_declared = len(entries) + len(tombstones)
+    # Zero controls fails closed: an empty manifest/control list can
+    # never seal as PASS.
+    zero_controls = (len(entries) == 0 or total == 0 or len(controls) == 0)
+    if zero_controls and not errors:
+        errors.append("zero controls: no controls resolved from the manifest")
     ok = (
-        matched
+        not zero_controls
+        and matched
         and len(rejected) == total
         and effective_total >= known_bad_min
         and effective_declared >= total_min
@@ -498,9 +509,10 @@ def build(repo: Path, manifest: dict, gate: dict) -> dict:
         "controls_rejected": len(rejected),
         "controls_declared": effective_declared,
         "known_bad_min": known_bad_min,
-        "all_rejected": matched and len(rejected) == total,
+        "all_rejected": matched and len(rejected) == total and not zero_controls,
         "result": "PASS" if ok else "FAIL",
-        "state": "PASS",
+        # state must reflect the computed result, never a hard-coded PASS.
+        "state": "PASS" if ok else "FAIL",
         "superseded_by": None,
         "controls": controls,
         "engine": "none",
@@ -528,10 +540,26 @@ def verify(
     if record.get("prev_hash") != previous_hash(path.parent, before=path):
         problems.append("prev_hash does not match the previous record")
 
+    # Digest/seal checks apply to EVERY record — SUPERSEDED included.
+    # A superseded record is a historical link, but its policy/impl/
+    # control-set digests must still agree with the live tree at the
+    # verified newest record; skipping them was a silent-skip that
+    # let tampered superseded records pass.
+    _digest_checks: list[tuple[str, object]] = []
+    if record.get("sig_status") != "unsigned_local":
+        problems.append("sig_status is not unsigned_local")
+    if record.get("policy_digest") != policy_digest():
+        problems.append("policy_digest differs from the live policies tree")
+    if record.get("gate_impl_digest") != gate_impl_digest():
+        problems.append("gate_impl_digest differs from the live tools tree")
+    if record.get("control_set_sha") != control_set_sha(manifest):
+        problems.append("control_set_sha differs from the resolved manifest")
+    if record.get("gate_sha") != gate_sha(repo, gate):
+        problems.append("gate_sha differs from git log over the gate paths")
+
     if record.get("state") == "SUPERSEDED":
-        # A superseded record is a historical link only. Its policy/impl hashes
-        # are expected to be stale; only chain integrity and a verified newest
-        # record matter.
+        # SUPERSEDED additionally requires chain integrity to the
+        # verified newest record. Digests above already apply.
         target_name = record.get("superseded_by")
         if not isinstance(target_name, str) or not target_name:
             problems.append("superseded_by is not a file name")
@@ -563,18 +591,15 @@ def verify(
                             + "; ".join(nested["problems"])
                         )
     else:
-        if record.get("sig_status") != "unsigned_local":
-            problems.append("sig_status is not unsigned_local")
-        if record.get("policy_digest") != policy_digest():
-            problems.append("policy_digest differs from the live policies tree")
-        if record.get("gate_impl_digest") != gate_impl_digest():
-            problems.append("gate_impl_digest differs from the live tools tree")
-        if record.get("control_set_sha") != control_set_sha(manifest):
-            problems.append("control_set_sha differs from the resolved manifest")
-        if record.get("gate_sha") != gate_sha(repo, gate):
-            problems.append("gate_sha differs from git log over the gate paths")
         controls = list(record.get("controls") or [])
+        # Zero controls fails closed (a body-less record is not PASS).
+        if len(controls) == 0:
+            problems.append("zero controls in record")
+        if record.get("controls") is None:
+            problems.append("controls missing in record")
         bad = [item for item in controls if item.get("expected_outcome") == "FAIL"]
+        if len(bad) == 0:
+            problems.append("zero known-bad controls in record")
         rejected = [item for item in bad if item.get("rejected") is True]
         if record.get("controls_total") != len(bad):
             problems.append("controls_total does not match the known-bad controls")
@@ -732,7 +757,10 @@ def main(argv: list[str] | None = None) -> int:
                     "exit_code": 0 if record["result"] == "PASS" else 1,
                 }
             else:
-                result = record
+                # exit_code must reflect the computed result, not
+                # default to 0. A FAIL record returns 1.
+                result = dict(record)
+                result["exit_code"] = 0 if record.get("result") == "PASS" else 1
     except Exception as exc:  # noqa: BLE001 - CLI boundary
         print(
             json.dumps(

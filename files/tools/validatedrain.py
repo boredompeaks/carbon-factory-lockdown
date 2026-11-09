@@ -155,6 +155,10 @@ def run(drain_dir: Path, repo: Path) -> tuple[list[str], int, dict[str, int]]:
     per_stage: dict[str, int] = {"R1": 0, "R2": 0, "R3": 0, "R4": 0, "R5": 0, "addendum": 0}
     stage_of = {"R1-confirm.json": "R1", "R2-exploit-spec.json": "R2", "R3-red.json": "R3"}
     for name in RECORD_NAMES:
+        # Counters increment attempted: each expected R1-R3 file is
+        # counted even when missing/invalid, so records_checked
+        # reflects attempts, not just successes.
+        per_stage[stage_of[name]] += 1
         path = drain_dir / name
         if not path.is_file():
             problems.append(f"{name}: missing")
@@ -165,9 +169,14 @@ def run(drain_dir: Path, repo: Path) -> tuple[list[str], int, dict[str, int]]:
             problems.append(f"{name}: invalid JSON: {exc}")
             continue
         records[name] = record
-        per_stage[stage_of[name]] += 1
         validate_schema(record, schema, name, problems)
 
+    # Chain requires 3: R1->R2->R3 must all be present; fewer fails
+    # closed with an explicit chain-incomplete problem (not a skip).
+    if len(records) != len(RECORD_NAMES):
+        problems.append(
+            f"chain requires {len(RECORD_NAMES)} records; found {len(records)}"
+        )
     if len(records) == len(RECORD_NAMES):
         expected_prev = ZERO_HASH
         for name in RECORD_NAMES:
@@ -259,6 +268,11 @@ def run(drain_dir: Path, repo: Path) -> tuple[list[str], int, dict[str, int]]:
                             )
             else:
                 problems.append("capability.json: base missing (cannot verify tree via git)")
+            # Capability tree is mandatory: a missing tree field fails
+            # closed instead of silently skipping the head-tree
+            # comparison.
+            if not (isinstance(_cap_tree, str) and _cap_tree):
+                problems.append("capability.json: tree missing (cannot verify tree via git)")
             if isinstance(_cap_head, str) and _cap_head:
                 _head_tree = _git_tree(repo, _cap_head)
                 if _head_tree is None:
@@ -330,20 +344,20 @@ def run(drain_dir: Path, repo: Path) -> tuple[list[str], int, dict[str, int]]:
     # R4/R5 (policies/drain.json exit_when): fail closed; structural guard
     # check (guard file bytes in repo) so removal/skip reopens R1.
     # R4-audit.json, the addendum and every R5-*.json are part of the counted
-    # canonical hash/schema lineage: each present file that parses counts in
-    # per_stage and must recompute its record_hash and pass schema checks.
+    # canonical hash/schema lineage. Counters increment attempted: the
+    # expected R4 and addendum files are counted even when missing/invalid.
     try: _cap = load_json(capability_path)
     except (OSError, json.JSONDecodeError): _cap = {}
     _guard = _cap.get("guard_ref") or {} if isinstance(_cap.get("guard_ref"), dict) else {}
     _node, _gsha = str(_guard.get("node_id") or ""), str(_guard.get("sha256") or "")
     if not _node or not _gsha: problems.append("R4/R5: capability guard_ref missing (Q-GUARD absent)")
     _vp = drain_dir / R4_NAME; _vd = None
+    per_stage["R4"] += 1
     if not _vp.is_file(): problems.append("R4-audit.json: missing (verdict fields absent)")
     else:
         try: _vd = load_json(_vp)
         except json.JSONDecodeError as exc: problems.append(f"R4-audit.json: invalid JSON: {exc}")
         else:
-            per_stage["R4"] += 1
             if _vd.get("record_hash") != record_hash(_vd):
                 problems.append("R4-audit.json: record_hash does not recompute")
             _verdict_schema = load_json(ROOT / "policies" / "schemas" / "auditor-verdict.json")
@@ -353,11 +367,14 @@ def run(drain_dir: Path, repo: Path) -> tuple[list[str], int, dict[str, int]]:
             _vd_core = {k: v for k, v in _vd.items() if k != "audit_extension"}
             validate_schema(_vd_core, _verdict_schema, "R4-audit.json", problems)
     _ap = drain_dir / ADDENDUM_NAME
-    if _ap.is_file():
+    # Addendum is required: a missing addendum fails closed (not optional).
+    per_stage["addendum"] += 1
+    if not _ap.is_file():
+        problems.append("R4-audit-addendum.json: missing (required)")
+    else:
         try: _ad = load_json(_ap)
         except json.JSONDecodeError as exc: problems.append(f"R4-audit-addendum.json: invalid JSON: {exc}")
         else:
-            per_stage["addendum"] += 1
             if _ad.get("record_hash") != record_hash(_ad):
                 problems.append("R4-audit-addendum.json: record_hash does not recompute")
             if _ad.get("schema") != "R4-audit-addendum/1":

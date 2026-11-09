@@ -22,6 +22,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib
+import importlib.util
 import json
 import time
 from pathlib import Path
@@ -184,14 +185,38 @@ class Server:
                     raise Reject("REJECT_PRECONDITION",
                                  "pr.watch requires a prior pr.open for this pr")
         # Lazy family hooks (present from their 6B commits onward).
+        # Fail-closed: a ModuleNotFoundError caused by a missing inner
+        # dependency, or by a hook module that exists on disk but fails
+        # to import, is a REJECT_PRECONDITION — never a silent pass.
+        # The optional families_extra hatch may legitimately be absent;
+        # only that exact absence is tolerated.
         try:
             extra = importlib.import_module("files.tools.mcp.families_extra")
             checker = getattr(extra, "check_extra", None)
             if callable(checker):
                 checker(self, tool, role, args)
-        except ModuleNotFoundError:
-            pass
+        except ModuleNotFoundError as e:
+            if e.name != "files.tools.mcp.families_extra":
+                raise Reject(
+                    "REJECT_PRECONDITION",
+                    f"family hook dependency missing: {e}",
+                ) from e
+            # Exact absence of the optional hatch is tolerated; any file
+            # present on disk that fails to import is fail-closed below
+            # via importlib.util.find_spec.
+            spec = None
+            try:
+                spec = importlib.util.find_spec("files.tools.mcp.families_extra")
+            except Exception:
+                spec = None
+            if spec is not None:
+                raise Reject(
+                    "REJECT_PRECONDITION",
+                    "family hook families_extra exists but failed to import",
+                ) from e
         # Hatch for family packages: try each families' check_extra.
+        # Fail-closed: any ModuleNotFoundError for a required family
+        # module rejects instead of silently skipping its deny/policy.
         for mod_name in (
             "files.tools.mcp.git.deny",
             "files.tools.mcp.checks.policy",
@@ -205,8 +230,11 @@ class Server:
                 checker = getattr(mod, "check_extra", None)
                 if callable(checker):
                     checker(self, tool, role, args)
-            except ModuleNotFoundError:
-                continue
+            except ModuleNotFoundError as e:
+                raise Reject(
+                    "REJECT_PRECONDITION",
+                    f"required family module {mod_name!r} unavailable: {e}",
+                ) from e
 
     def _execute(self, tool: str, role: str, args: dict) -> dict:
         """Stub execution: deterministic echo + handler delegation."""
@@ -223,7 +251,10 @@ class Server:
         if tool == "pr.watch":
             self._watched.add((args.get("pr"), args.get("head")))
             return {"pr": args.get("pr"), "head": args.get("head"), "watching": True}
-        # Delegate to family handlers when present.
+        # Delegate to family handlers when present. Fail-closed: a
+        # required handler module that cannot be imported rejects, and
+        # a tool with no handler rejects instead of returning a generic
+        # stub-ok.
         for mod_name in (
             "files.tools.mcp.git.handlers",
             "files.tools.mcp.checks.handlers",
@@ -239,13 +270,15 @@ class Server:
                     out = executor(self, tool, role, args)
                     if out is not None:
                         return out
-            except ModuleNotFoundError:
-                continue
-        # Generic sealed stub: proves the tool path is wired. No real
-        # side effects happen in 6B-0 beyond the precondition state.
-        return {"tool": tool, "args_sha256": hashlib.sha256(
-            json.dumps(args, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest(),
-            "stub": True, "ts": int(time.time())}
+            except ModuleNotFoundError as e:
+                raise Reject(
+                    "REJECT_PRECONDITION",
+                    f"required handler module {mod_name!r} unavailable: {e}",
+                ) from e
+        raise Reject(
+            "REJECT_PRECONDITION",
+            f"no handler for tool {tool!r}; refusing to return generic stub",
+        )
 
     # -- controls runner (CI / verifier helper) ---------------------------
 
