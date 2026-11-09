@@ -70,22 +70,6 @@ opencode.json
 **/*crouton-alpha*
 .opencode/agents/crouton-alpha.md
 
-# Runtime artifacts excluded from tracking (phase7 final)
-*.png
-files.zip
-commits.txt
-commits2.txt
-commits_raw.json
-NLP_mini_project.ipynb
-*-snapshot.yml
-boredompeaks-snapshot.yml
-/audit_report.md
-/findings.md
-pristine-review/
-audit-scratch/
-phase6/out/6C-6/
-phase6/out/phase7-confirm/
-
 # coding-ethos generated runtime output
 .claude/settings.local.json
 .coding-ethos/cache/

@@ -3,8 +3,8 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-09T14:32:54Z",
-  "file_count": 269,
+  "created_at": "2026-11-09T15:06:38Z",
+  "file_count": 268,
   "files": [
     {
       "path": "agent:files/BASEMIND-INDEX.md",
@@ -21,10 +21,6 @@
     {
       "path": "agent:files/K1-CONTAINER-PLAN.md",
       "sha256": "6357683eef78875d246f9ebe3b22701998f6f277c4770cf14e87e7782efcd4d7"
-    },
-    {
-      "path": "agent:files/UBUNTU-BOOTSTRAP.md",
-      "sha256": "b61c2c261263e4cb0f136f3d6b49d4833832dc40de415e01b1335c65e21efa04"
     },
     {
       "path": "agent:files/auditor.md",
@@ -768,7 +764,7 @@
     },
     {
       "path": "policy:files/policies/redaction.json",
-      "sha256": "2bf2d4d8dfaf2f549d17755fd4b9442d6c1793bf8ead4a852144426891d59fb7"
+      "sha256": "a4c31530c11e558c0a7a64847f82551bd86d25b8876f1e092f377248f397b6db"
     },
     {
       "path": "policy:files/policies/reuse.json",
@@ -1084,20 +1080,22 @@
     }
   ],
   "digests": {
-    "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
+    "policy_digest": "3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4"
   },
   "gate_control": {
-    "record": "0020-901f7c7d9e41.json",
-    "record_hash": "ae7c2ad85d4998b9d433bed92b039d5c108a70583e76868440a9b699251bae7d",
-    "gate_sha": "901f7c7d9e41eb116f15a4072cfaca7df604c1f6",
+    "record": "0021-9c21b04f52f4.json",
+    "record_hash": "c4f13835e5370c9de92bdb99f6af85b3816009e57d8b07dd3f52719b273312a8",
+    "gate_sha": "9c21b04f52f4172ec0b18c70b082e0bd71142e8c",
     "policy_digest": "a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "3ce279431b9f88820b5ce397332c678a8a90834b86b47f69271620a79d6a95b4",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "policy_digest: live 3f8e7235186cffb99aa1d49454f6ca4542877f82d3bd032653814cbaa66056c0 != record a6ced7bc89fa3b7662c085a0fcdd1130ecaf2fdda03af34d5c650ccf945c7bb6"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1189,5 +1187,5 @@
       ]
     }
   },
-  "manifest_sha": "8c8b2070883f1457c9a2d62680eb684c161d5359b25b86493b7d781254941426"
+  "manifest_sha": "45643b55f9b99391602b3307ba90fd4b17ad316c67231ea662e7d55169254b56"
 }

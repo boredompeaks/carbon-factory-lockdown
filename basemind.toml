@@ -1,8 +1,8 @@
-﻿# basemind configuration â€” https://github.com/Goldziher/basemind
+# basemind configuration  https://github.com/Goldziher/basemind
 # Lives at the repo root, or under `.config/` (`.config/basemind.toml` / `.config/basemind/
 # config.toml`), and is meant to be committed. The index (blobs + Fjall) is derived state
 # kept in the machine-global cache under ~/.local/share/basemind/ (override BASEMIND_DATA_HOME),
-# keyed by workspace and wiped on schema bumps â€” nothing is written into the repo, so there is
+# keyed by workspace and wiped on schema bumps  nothing is written into the repo, so there is
 # nothing to gitignore. Never put durable config in the cache.
 # Every value below is the built-in default; uncomment and edit only what you want to change.
 "$schema" = "v1"
@@ -14,7 +14,7 @@
 # glob characters (`src`, `docs/api`) matches that path and everything beneath it, like .gitignore.
 # include = ["**/*"]
 # Extra exclude globs, ADDED ON TOP of the always-on floor (node_modules, target, dist, build, out,
-# vendor, coverage, venv, .venv, __pycache__, .git, .basemind, bazel-*, .idea, .DS_Store, â€¦). Same
+# vendor, coverage, venv, .venv, __pycache__, .git, .basemind, bazel-*, .idea, .DS_Store, ). Same
 # syntax as include: `generated` excludes every directory of that name; exclude beats include.
 # The floor also drops credentials and key material so no secret becomes searchable: .env and
 # .env.* (which includes .env.example), .aws, .ssh, .gnupg, .npmrc, .pypirc, .netrc,
@@ -31,7 +31,7 @@ exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "*
 # Honor .gitignore / .git/info/exclude while walking. Leave on unless you deliberately want
 # ignored files indexed.
 # respect_gitignore = true
-# Follow symlinks during the walk. Off by default â€” symlinks often escape the repo (e.g. Bazel's
+# Follow symlinks during the walk. Off by default  symlinks often escape the repo (e.g. Bazel's
 # bazel-* convenience symlinks). Turn on for repos that symlink real source into place. Ignored in
 # this file unless the operator sets BASEMIND_ALLOW_FOLLOW_SYMLINKS=1 in the environment.
 # follow_symlinks = false
@@ -87,14 +87,14 @@ exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "*
 [documents]
 # Document RAG tier (PDF / Office / HTML / email / images). Requires a `documents` build.
 # enabled = true
-# Embed documents for semantic search. ON by default â€” embeddings pay off on real prose / OCR.
+# Embed documents for semantic search. ON by default  embeddings pay off on real prose / OCR.
 # embed = true
 # Embedding model preset. Changing it forces a FULL RE-EMBED of the corpus (time + CPU): every
 # document is re-encoded at the new model's dimension.
-#   fast        â€” smallest / fastest, lowest quality
-#   balanced    â€” default; 768-dim, good quality/cost tradeoff
-#   quality     â€” larger model, best English quality, slower
-#   multilingualâ€” multilingual model for non-English corpora
+#   fast         smallest / fastest, lowest quality
+#   balanced     default; 768-dim, good quality/cost tradeoff
+#   quality      larger model, best English quality, slower
+#   multilingual multilingual model for non-English corpora
 # embedding_preset = "balanced"
 # Globs scoping which non-code files are indexed as documents. Empty include = everything that
 # passes [scan]; exclude applies to document indexing itself and beats include.
@@ -109,7 +109,7 @@ exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "*
 # removes the vectors of newly ineligible documents on the next scan.
 # embed_include = []
 # embed_exclude = []
-# Route archives (.zip/.tar/.jar/â€¦) into the recursive archive extractor. Off by default so one
+# Route archives (.zip/.tar/.jar/) into the recursive archive extractor. Off by default so one
 # archive can't explode into thousands of embeds. True binaries are always skipped. In the shared
 # daemon this also needs BASEMIND_DAEMON_ALLOW_EXTRACT_ARCHIVES=1 in the daemon's environment.
 # extract_archives = false
@@ -117,8 +117,8 @@ exclude = ["**/.env*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/secrets/**", "*
 [code_search]
 # Semantic code-search tier. Requires a `code-search` build.
 # enabled = true
-# Embed source code for VECTOR search. OFF by default â€” local embeddings on code aren't worth the
-# cost (code is embedded with a general English model, and NLâ†’symbol is already served by the BM25
+# Embed source code for VECTOR search. OFF by default  local embeddings on code aren't worth the
+# cost (code is embedded with a general English model, and NLsymbol is already served by the BM25
 # keyword lane over the same text). Chunking + BM25 keyword search work regardless. Turn on only if
 # you specifically want vector search over code (downloads an ONNX model, re-embeds on preset change).
 # embed = false
