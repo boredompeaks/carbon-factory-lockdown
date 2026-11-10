@@ -7,11 +7,15 @@ permissions:
   - { action: "*", resource: "*", effect: deny }
   - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
   - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
-  - { action: tool, resource: "check.run", effect: allow }
-  - { action: tool, resource: "code.write", effect: allow }
-  - { action: tool, resource: "drain.validate", effect: allow }
-  - { action: tool, resource: "gate.control", effect: allow }
-  - { action: tool, resource: "harness.verify", effect: allow }
+  - { action: tool, resource: "carbon_compliance_check_run", effect: allow }
+  - { action: tool, resource: "carbon_compliance_code_write", effect: allow }
+  - { action: tool, resource: "carbon_compliance_drain_validate", effect: allow }
+  - { action: tool, resource: "carbon_compliance_gate_control", effect: allow }
+  - { action: tool, resource: "carbon_compliance_harness_verify", effect: allow }
+  - { action: tool, resource: "basemind_*_graph", effect: allow }
+  - { action: tool, resource: "basemind_*_code", effect: allow }
+  - { action: tool, resource: "basemind_*_memory", effect: allow }
+  - { action: tool, resource: "basemind_*_web", effect: allow }
   - { action: edit, resource: "**", effect: allow }
   - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }

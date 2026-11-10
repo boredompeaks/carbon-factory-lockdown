@@ -38,16 +38,20 @@ permissions:
   - { action: "*", resource: "*", effect: deny }
   - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
   - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
-  - { action: tool, resource: "check.run", effect: allow }
-  - { action: tool, resource: "code.write", effect: allow }
-  - { action: tool, resource: "docker.ensure", effect: allow }
-  - { action: tool, resource: "evidence.hash", effect: allow }
-  - { action: tool, resource: "git.commit", effect: allow }
-  - { action: tool, resource: "git.diff", effect: allow }
-  - { action: tool, resource: "git.log", effect: allow }
-  - { action: tool, resource: "git.state", effect: allow }
-  - { action: tool, resource: "git.status", effect: allow }
-  - { action: tool, resource: "repro.run", effect: allow }
+  - { action: tool, resource: "carbon_builder_check_run", effect: allow }
+  - { action: tool, resource: "carbon_builder_code_write", effect: allow }
+  - { action: tool, resource: "carbon_builder_docker_ensure", effect: allow }
+  - { action: tool, resource: "carbon_builder_evidence_hash", effect: allow }
+  - { action: tool, resource: "carbon_builder_git_commit", effect: allow }
+  - { action: tool, resource: "carbon_builder_git_diff", effect: allow }
+  - { action: tool, resource: "carbon_builder_git_log", effect: allow }
+  - { action: tool, resource: "carbon_builder_git_state", effect: allow }
+  - { action: tool, resource: "carbon_builder_git_status", effect: allow }
+  - { action: tool, resource: "carbon_builder_repro_run", effect: allow }
+  - { action: tool, resource: "basemind_*_graph", effect: allow }
+  - { action: tool, resource: "basemind_*_code", effect: allow }
+  - { action: tool, resource: "basemind_*_memory", effect: allow }
+  - { action: tool, resource: "basemind_*_web", effect: allow }
   - { action: edit, resource: "**", effect: allow }
   - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }

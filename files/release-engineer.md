@@ -37,19 +37,23 @@ permissions:
   - { action: "*", resource: "*", effect: deny }
   - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
   - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
-  - { action: tool, resource: "drain.validate", effect: allow }
-  - { action: tool, resource: "git.diff", effect: allow }
-  - { action: tool, resource: "git.log", effect: allow }
-  - { action: tool, resource: "git.push_ref", effect: allow }
-  - { action: tool, resource: "git.state", effect: allow }
-  - { action: tool, resource: "git.status", effect: allow }
-  - { action: tool, resource: "ledger.append", effect: allow }
-  - { action: tool, resource: "pr.merge", effect: allow }
-  - { action: tool, resource: "pr.open", effect: allow }
-  - { action: tool, resource: "pr.watch", effect: allow }
-  - { action: tool, resource: "worktrees.list", effect: allow }
-  - { action: tool, resource: "worktrees.reconcile", effect: allow }
-  - { action: tool, resource: "worktrees.sync", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_drain_validate", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_git_diff", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_git_log", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_git_push_ref", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_git_state", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_git_status", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_ledger_append", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_pr_merge", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_pr_open", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_pr_watch", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_worktrees_list", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_worktrees_reconcile", effect: allow }
+  - { action: tool, resource: "carbon_release_engineer_worktrees_sync", effect: allow }
+  - { action: tool, resource: "basemind_*_graph", effect: allow }
+  - { action: tool, resource: "basemind_*_code", effect: allow }
+  - { action: tool, resource: "basemind_*_memory", effect: allow }
+  - { action: tool, resource: "basemind_*_web", effect: allow }
   - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }

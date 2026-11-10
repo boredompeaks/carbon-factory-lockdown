@@ -3,12 +3,12 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-10T03:53:12Z",
+  "created_at": "2026-11-10T04:20:19Z",
   "file_count": 275,
   "files": [
     {
       "path": "agent:files/BASEMIND-INDEX.md",
-      "sha256": "e2afd316b8b99ceee34020aa7f26ef43cbc51ee07470b88e32b1ffcd90c7805e"
+      "sha256": "badc042b071722c33dfa1a0fb4f444c7eccc35602b8f617fc3fd15458cf192cc"
     },
     {
       "path": "agent:files/CHANGELOG-PHASE1-PHASE2-2026-11-07.md",
@@ -28,31 +28,31 @@
     },
     {
       "path": "agent:files/auditor.md",
-      "sha256": "5da68da57d6c32f670e0e6b4ebc017d7a48a6f86de4191ce2493253b9c2bfa23"
+      "sha256": "4c1c12c0f9758c299a2616561539bf9cbc7fb117a6c780915279855a64e008b4"
     },
     {
       "path": "agent:files/builder.md",
-      "sha256": "6e00e7a67c4c49ee408895e3d397875f8fc321093b1572f801e6982a5ae023bf"
+      "sha256": "aaa581209f050cb617f5b6f2c92d1a019d4f8a2b4d22c870f2bfe6af2e563e09"
     },
     {
       "path": "agent:files/compliance.md",
-      "sha256": "1f087b01a1b6034edc5c863415de69f9d1ef96e19c2d3d2a3704122bad7761af"
+      "sha256": "31faa782ae89da0ea1efacd481a8d08ac24bf6a4e195d9074e4fb2414dba95a2"
     },
     {
       "path": "agent:files/crouton-alpha.md",
-      "sha256": "f51a80d8c33f684077c72ec7d0bb8a218b217cc00e1a7d8cf7323cd555bc7069"
+      "sha256": "c0f791cd2e90b2cdcbd1a2ed5c35a617b06d1310708359a064af4568e2fa87f5"
     },
     {
       "path": "agent:files/hacker.md",
-      "sha256": "8c7b284f539710020da1d9752a28fcadde2c8a866d6a8f490c2403b2d1525de3"
+      "sha256": "48bafbd8053f4ecaeb884b5f1d3cb1f8be8033742316fa54f430413c354f01de"
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "5c715966c616e81bebb3098a05e709e020a94728fb73274d1c626b22836eb0b2"
+      "sha256": "d6c6aaf5caf74e33c76cb4696edf6116c1821ddfabf5fa5a40cd089284fe4c58"
     },
     {
       "path": "agent:files/release-engineer.md",
-      "sha256": "a28b8211e09c15a30b1785367c07dcafcf382ec94cc74e3e07f465333d19cab5"
+      "sha256": "a1c9f3acbae148a3412b6b84e63ed5d2b0968154539d45632f44d2dcee16e64f"
     },
     {
       "path": "docker:files/docker/k1/Dockerfile",
@@ -160,7 +160,7 @@
     },
     {
       "path": "files/tools/mcp/gen_perms.py",
-      "sha256": "b7a5c53fa020c1bfb9e0f76aab1a6be37ed70b214556c71edd588f3fdaded54e"
+      "sha256": "186863dd950f71a641930e01e630ce104f047b45c6720ac8ed71a0a2f76a87fd"
     },
     {
       "path": "files/tools/mcp/git/__init__.py",
@@ -656,7 +656,7 @@
     },
     {
       "path": "harness:.opencode/lib/authz-core.js",
-      "sha256": "ab23c9cf8646cb20eb4c502168f830ef27530a12bbe9b74d14611a8242f810a8"
+      "sha256": "483a961656120532edfd2a30160e1f0a13833e5b77c17a14af6ffad8bb368ecf"
     },
     {
       "path": "harness:.opencode/package-lock.json",
@@ -680,31 +680,31 @@
     },
     {
       "path": "installed_agent:.opencode/agents/auditor.md",
-      "sha256": "5da68da57d6c32f670e0e6b4ebc017d7a48a6f86de4191ce2493253b9c2bfa23"
+      "sha256": "4c1c12c0f9758c299a2616561539bf9cbc7fb117a6c780915279855a64e008b4"
     },
     {
       "path": "installed_agent:.opencode/agents/builder.md",
-      "sha256": "6e00e7a67c4c49ee408895e3d397875f8fc321093b1572f801e6982a5ae023bf"
+      "sha256": "aaa581209f050cb617f5b6f2c92d1a019d4f8a2b4d22c870f2bfe6af2e563e09"
     },
     {
       "path": "installed_agent:.opencode/agents/compliance.md",
-      "sha256": "1f087b01a1b6034edc5c863415de69f9d1ef96e19c2d3d2a3704122bad7761af"
+      "sha256": "31faa782ae89da0ea1efacd481a8d08ac24bf6a4e195d9074e4fb2414dba95a2"
     },
     {
       "path": "installed_agent:.opencode/agents/crouton-alpha.md",
-      "sha256": "f51a80d8c33f684077c72ec7d0bb8a218b217cc00e1a7d8cf7323cd555bc7069"
+      "sha256": "c0f791cd2e90b2cdcbd1a2ed5c35a617b06d1310708359a064af4568e2fa87f5"
     },
     {
       "path": "installed_agent:.opencode/agents/hacker.md",
-      "sha256": "8c7b284f539710020da1d9752a28fcadde2c8a866d6a8f490c2403b2d1525de3"
+      "sha256": "48bafbd8053f4ecaeb884b5f1d3cb1f8be8033742316fa54f430413c354f01de"
     },
     {
       "path": "installed_agent:.opencode/agents/orchestrator.md",
-      "sha256": "5c715966c616e81bebb3098a05e709e020a94728fb73274d1c626b22836eb0b2"
+      "sha256": "d6c6aaf5caf74e33c76cb4696edf6116c1821ddfabf5fa5a40cd089284fe4c58"
     },
     {
       "path": "installed_agent:.opencode/agents/release-engineer.md",
-      "sha256": "a28b8211e09c15a30b1785367c07dcafcf382ec94cc74e3e07f465333d19cab5"
+      "sha256": "a1c9f3acbae148a3412b6b84e63ed5d2b0968154539d45632f44d2dcee16e64f"
     },
     {
       "path": "policy:files/policies/assert-rules.json",
@@ -936,7 +936,7 @@
     },
     {
       "path": "script:scripts/check_harness_config.py",
-      "sha256": "1655b3167deb46bd0689655ba9481d5843e0718ec08a5ee02b3275b00f1004b1"
+      "sha256": "97ee9f468542872ff14a86d26469146ed93740023a5c4794d037f632d758429d"
     },
     {
       "path": "script:scripts/config_controls.py",
@@ -1110,18 +1110,20 @@
   "digests": {
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "22b48fb4ffe7c86f53d0327f0002a7b35349f6e885241500dba4a64f5f60d63a"
+    "gate_impl_digest": "eeb1e1e7f0d3f3ef92ef5387f2c8c3f64a73fd99b4543ffba0a2fa1dfc222621"
   },
   "gate_control": {
-    "record": "0029-7462c6cd85f3.json",
-    "record_hash": "9f4ae889c84c00fcaeeab8bd995c3bd6bca67d437e8a1a24c03033076f3a1b82",
-    "gate_sha": "7462c6cd85f3f661040869f720d5699a48746dd7",
+    "record": "0030-9c808e9d9282.json",
+    "record_hash": "ab0536e20e40b14915860ab2a41447b0353b8fd583c2b04c17bf4252860d51aa",
+    "gate_sha": "9c808e9d9282b375a801814b44e799299340b401",
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "22b48fb4ffe7c86f53d0327f0002a7b35349f6e885241500dba4a64f5f60d63a",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "gate_impl_digest: live eeb1e1e7f0d3f3ef92ef5387f2c8c3f64a73fd99b4543ffba0a2fa1dfc222621 != record 22b48fb4ffe7c86f53d0327f0002a7b35349f6e885241500dba4a64f5f60d63a"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1215,5 +1217,5 @@
       ]
     }
   },
-  "manifest_sha": "57911d356271f7046be76e8a0b67a1f0041074debdfb91243a4d26852f567083"
+  "manifest_sha": "c3b9c041ab1a85891ec6f3144e52d71c4cf124eeb2e0d36413dcfda9dc722be4"
 }

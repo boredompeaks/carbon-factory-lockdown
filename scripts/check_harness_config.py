@@ -209,7 +209,7 @@ def inv3(agents: dict) -> tuple[bool, str]:
     hacker_perms = (hacker.get("permissions") if isinstance(hacker, dict) else hacker) or []
     if "__parse_error__" not in hacker and "hacker" in agents:
         has_tool = any(
-            isinstance(p, dict) and p.get("action") == "tool" and p.get("resource") == "scratch.write" and p.get("effect") == "allow"
+            isinstance(p, dict) and p.get("action") == "tool" and _canon_tool_resource(p.get("resource")) == "scratch.write" and p.get("effect") == "allow"
             for p in hacker_perms
         )
         if not has_tool:
@@ -233,6 +233,18 @@ def inv4(agents: dict) -> tuple[bool, str]:
             if not found:
                 bad.append(f"{role}: missing {action} deny")
     return (not bad), "; ".join(bad)
+
+
+def _canon_tool_resource(resource: str) -> str:
+    """Canonical V2 MCP action -> bare tool name.
+
+    OpenCode exposes ``<server>_<tool>`` with unsupported characters normalized
+    to ``_`` (e.g. ``carbon_orchestrator_git_state``). Strip the role server
+    prefix and restore the registry's dotted tool name.
+    """
+    text = str(resource or "")
+    text = re.sub(r"^carbon[-_][a-z0-9-]+[._]", "", text)
+    return text.replace("_", ".")
 
 
 def inv5(registry: dict, matrix_rows: list) -> tuple[bool, str]:
@@ -790,7 +802,7 @@ if not any(
     for rule in auditor_rules
 ):
     k1_missing.append("skill k1-sandbox")
-_k1_tools = {r.get("resource") for r in auditor_rules if r.get("action") == "tool" and r.get("effect") == "allow"}
+_k1_tools = {_canon_tool_resource(r.get("resource")) for r in auditor_rules if r.get("action") == "tool" and r.get("effect") == "allow"}
 _k1_tool_ok = {"k1.up", "k1.down", "k1.exec", "k1.status"} <= _k1_tools
 check(bool(not k1_missing or _k1_tool_ok), "auditor can run K1 lifecycle", ", ".join(k1_missing) + f" tools={sorted(_k1_tools & {'k1.up','k1.down','k1.exec','k1.status'})}")
 

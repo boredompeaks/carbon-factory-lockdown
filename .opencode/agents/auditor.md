@@ -46,25 +46,29 @@ permissions:
   - { action: "*", resource: "*", effect: deny }
   - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
   - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
-  - { action: tool, resource: "acceptance.materialize", effect: allow }
-  - { action: tool, resource: "check.run", effect: allow }
-  - { action: tool, resource: "docker.ensure", effect: allow }
-  - { action: tool, resource: "drain.validate", effect: allow }
-  - { action: tool, resource: "evidence.hash", effect: allow }
-  - { action: tool, resource: "gate.control", effect: allow }
-  - { action: tool, resource: "git.diff", effect: allow }
-  - { action: tool, resource: "git.log", effect: allow }
-  - { action: tool, resource: "git.push_ref", effect: allow }
-  - { action: tool, resource: "git.read_file", effect: allow }
-  - { action: tool, resource: "git.state", effect: allow }
-  - { action: tool, resource: "git.status", effect: allow }
-  - { action: tool, resource: "k1.down", effect: allow }
-  - { action: tool, resource: "k1.exec", effect: allow }
-  - { action: tool, resource: "k1.status", effect: allow }
-  - { action: tool, resource: "k1.up", effect: allow }
-  - { action: tool, resource: "ledger.append", effect: allow }
-  - { action: tool, resource: "repro.run", effect: allow }
-  - { action: tool, resource: "scratch.write", effect: allow }
+  - { action: tool, resource: "carbon_auditor_acceptance_materialize", effect: allow }
+  - { action: tool, resource: "carbon_auditor_check_run", effect: allow }
+  - { action: tool, resource: "carbon_auditor_docker_ensure", effect: allow }
+  - { action: tool, resource: "carbon_auditor_drain_validate", effect: allow }
+  - { action: tool, resource: "carbon_auditor_evidence_hash", effect: allow }
+  - { action: tool, resource: "carbon_auditor_gate_control", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_diff", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_log", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_push_ref", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_read_file", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_state", effect: allow }
+  - { action: tool, resource: "carbon_auditor_git_status", effect: allow }
+  - { action: tool, resource: "carbon_auditor_k1_down", effect: allow }
+  - { action: tool, resource: "carbon_auditor_k1_exec", effect: allow }
+  - { action: tool, resource: "carbon_auditor_k1_status", effect: allow }
+  - { action: tool, resource: "carbon_auditor_k1_up", effect: allow }
+  - { action: tool, resource: "carbon_auditor_ledger_append", effect: allow }
+  - { action: tool, resource: "carbon_auditor_repro_run", effect: allow }
+  - { action: tool, resource: "carbon_auditor_scratch_write", effect: allow }
+  - { action: tool, resource: "basemind_*_graph", effect: allow }
+  - { action: tool, resource: "basemind_*_code", effect: allow }
+  - { action: tool, resource: "basemind_*_memory", effect: allow }
+  - { action: tool, resource: "basemind_*_web", effect: allow }
   - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }

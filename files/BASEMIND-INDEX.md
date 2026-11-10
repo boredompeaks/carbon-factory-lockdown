@@ -50,13 +50,16 @@ permission wall (`read`/`grep`/`glob` deny on `**/policy-manifest.json`) and
 through `basemind_git` being unavailable (see below). Do not treat basemind
 search results as a policy source.
 
-## `basemind_git` is revoked (history bypasses excludes)
+## `basemind_git` is orchestrator-only (history bypasses excludes)
 
-`basemind_git` is **not available** for v1 for every role. Basemind git reads
-history without `basemind.toml` excludes, so it leaks excluded files (a
-deleted `.env` or a secret that has since been removed from HEAD is still
-reachable via history). History and diff questions must go through carbon
-`git.*` instead (`git.state`, `git.status`, `git.log`, `git.diff`,
+`basemind_git` is **available to the orchestrator only** (read-only history,
+blame, and diff across the three lanes) so it can reconstruct what changed on a
+tree when the change is not recorded in a plan. Basemind git reads history
+without `basemind.toml` excludes, so it leaks excluded files (a deleted `.env`
+or a secret that has since been removed from HEAD is still reachable via
+history). Never treat its output as policy evidence or as proof that a path is
+readable at HEAD; history and diff questions for other roles must go through
+carbon `git.*` (`git.state`, `git.status`, `git.log`, `git.diff`,
 `git.read_file`), which enforce the same path denies. `basemind_shell` is
 `ask` only, `basemind_admin` / `basemind_agents` are never granted — see each
 agent's Tool surface; this document adds no grant.

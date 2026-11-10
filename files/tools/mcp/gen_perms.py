@@ -7,7 +7,16 @@ OpenCode ordered rules (last match wins).
 
 Emission contract (spec 6C-1a):
   * blanket deny first: { action: "*", resource: "*", effect: deny }
-  * tool allows: one allow per registry tool the role may call (sorted)
+  * tool allows: one allow per registry tool the role may call (sorted),
+    emitted as the OpenCode V2 MCP resource name
+    `carbon_<role>_<tool>` (role `-` -> `_`, tool `.` -> `_`); e.g.
+    `git.state` for orchestrator -> `carbon_orchestrator_git_state`
+  * basemind allows: wildcard grants after the carbon allows. The
+    orchestrator additionally gets `basemind_*_git` and
+    `basemind_*_workspace`; every role gets `basemind_*_graph`,
+    `basemind_*_code`, `basemind_*_memory`, `basemind_*_web`.
+    `basemind_*_admin`, `basemind_*_agents`, and `basemind_*_shell` are
+    never granted (the blanket deny keeps them closed).
   * read allows: read/grep/glob allow on "**" (reads stay broad; denies
     below win on the same actions because they come later)
   * wall denies (read + grep + glob for each):
@@ -174,8 +183,37 @@ READ_ALLOW_PATTERNS: tuple[str, ...] = ("**",)  # read/grep/glob each
 
 COMPLIANCE_SCOPED_WRITE = "backend/docs/compliance/*"
 
+# Basemind wildcard grants. Order is fixed (part of the idempotent output).
+# The orchestrator is the only role with indexed history/workspace reach;
+# admin/agents/shell are never emitted and stay denied by the blanket rule.
+BASEMIND_GRANTS_DEFAULT: tuple[str, ...] = (
+    "basemind_*_graph",
+    "basemind_*_code",
+    "basemind_*_memory",
+    "basemind_*_web",
+)
+BASEMIND_GRANTS_ORCHESTRATOR: tuple[str, ...] = (
+    "basemind_*_git",
+    "basemind_*_graph",
+    "basemind_*_workspace",
+    "basemind_*_code",
+    "basemind_*_memory",
+    "basemind_*_web",
+)
+
 # Wall actions emitted for every pattern (read + grep + glob).
 WALL_ACTIONS: tuple[str, ...] = ("read", "grep", "glob")
+
+
+def carbon_tool_name(role: str, tool: str) -> str:
+    """OpenCode V2 MCP action: server prefix + normalized role/tool segments."""
+    return f"carbon_{role.replace('-', '_')}_{tool.replace('.', '_')}"
+
+
+def basemind_grants(role: str) -> tuple[str, ...]:
+    if role == "orchestrator":
+        return BASEMIND_GRANTS_ORCHESTRATOR
+    return BASEMIND_GRANTS_DEFAULT
 
 
 # --- loading ------------------------------------------------------------
@@ -293,9 +331,15 @@ def render_role(role: str, tools: set[str]) -> list[str]:
     lines.append("permissions:")
     # 1. blanket deny
     lines.append('  - { action: "*", resource: "*", effect: deny }')
-    # 2. tool allows (sorted)
+    # 2. tool allows (sorted), as server-prefixed MCP action names
     for tool in sorted(tools):
-        lines.append(f'  - {{ action: tool, resource: "{tool}", effect: allow }}')
+        lines.append(
+            f'  - {{ action: tool, resource: "{carbon_tool_name(role, tool)}", '
+            "effect: allow }"
+        )
+    # 2b. basemind wildcard grants (after carbon allows)
+    for grant in basemind_grants(role):
+        lines.append(f'  - {{ action: tool, resource: "{grant}", effect: allow }}')
     # 3. read allows (broad; walls below win)
     for action in ("read", "grep", "glob"):
         for pat in READ_ALLOW_PATTERNS:
@@ -382,11 +426,25 @@ def validate(text: str, roles: list[str], tools_by_role: dict[str, set[str]]) ->
             for ln in blk
             if _rule_has_action(ln, "tool") and "allow" in ln
         )
-        if tools_out != sorted(tools_by_role.get(role, set())):
+        expected_tools = sorted(
+            [
+                carbon_tool_name(role, tool)
+                for tool in tools_by_role.get(role, set())
+            ]
+            + list(basemind_grants(role))
+        )
+        if tools_out != expected_tools:
             problems.append(
-                f"{role}: tool allows {tools_out} != projection "
-                f"{sorted(tools_by_role.get(role, set()))}"
+                f"{role}: tool allows {tools_out} != projection {expected_tools}"
             )
+        # No forbidden basemind surface, no bare (unprefixed) carbon tool.
+        for bad in ("basemind_*_admin", "basemind_*_agents", "basemind_*_shell"):
+            if bad in tools_out:
+                problems.append(f"{role}: forbidden basemind grant {bad}")
+        for res in tools_out:
+            if res.startswith(("carbon_", "basemind_")):
+                continue
+            problems.append(f"{role}: unprefixed tool resource {res}")
         # read allow broad
         if not any(_rule_has_action(ln, "read") and '"**"' in ln and "allow" in ln for ln in blk):
             problems.append(f"{role}: missing read ** allow")

@@ -48,15 +48,21 @@ permissions:
   - { action: skill, resource: "hacker-*", effect: deny }
   - { action: skill, resource: "dispatch", effect: allow }
   - { action: question, resource: "*", effect: allow }
-  - { action: tool, resource: "drain.validate", effect: allow }
-  - { action: tool, resource: "gate.control", effect: allow }
-  - { action: tool, resource: "git.diff", effect: allow }
-  - { action: tool, resource: "git.log", effect: allow }
-  - { action: tool, resource: "git.state", effect: allow }
-  - { action: tool, resource: "git.status", effect: allow }
-  - { action: tool, resource: "harness.verify", effect: allow }
-  - { action: tool, resource: "ledger.append", effect: allow }
-  - { action: tool, resource: "worktrees.list", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_drain_validate", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_gate_control", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_git_diff", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_git_log", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_git_state", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_git_status", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_harness_verify", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_ledger_append", effect: allow }
+  - { action: tool, resource: "carbon_orchestrator_worktrees_list", effect: allow }
+  - { action: tool, resource: "basemind_*_git", effect: allow }
+  - { action: tool, resource: "basemind_*_graph", effect: allow }
+  - { action: tool, resource: "basemind_*_workspace", effect: allow }
+  - { action: tool, resource: "basemind_*_code", effect: allow }
+  - { action: tool, resource: "basemind_*_memory", effect: allow }
+  - { action: tool, resource: "basemind_*_web", effect: allow }
   - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
@@ -275,7 +281,7 @@ permissions:
 - Use `drain.validate` to verify a drain stage in verify mode before advancing the lineage.
 - Use `harness.verify` to verify `harness_config` or `policy_manifest` before routing forward.
 - Use `gate.control` in `verify` mode only to check gate/drain/manifest state; never `run`.
-- `basemind_git` is NOT available for v1 (revoked: basemind git reads history without basemind.toml excludes, so it leaks excluded files); use carbon `git.*` for history/diff questions instead.
+- `basemind_git` is available to the orchestrator (read-only history, blame, and diff across the three lanes) for problem-solving when a fix exists on a tree but not in a plan. It reads history without `basemind.toml` excludes, so never treat its output as policy evidence or as proof that a path is readable at HEAD. `basemind_admin`, `basemind_agents`, and `basemind_shell` remain unavailable.
 - Use `basemind_graph` for architecture questions instead of ad-hoc reading.
 - Use `basemind_workspace` for workspace and lane-structure questions.
 - Never use `basemind_git` in any mode (NOT available for v1; use carbon `git.*` for history/diff), `basemind_admin`, `basemind_agents`; `basemind_graph` modes `export|display|open`; `basemind_shell` except with explicit human approval (`ask`); any tool not listed for the role.

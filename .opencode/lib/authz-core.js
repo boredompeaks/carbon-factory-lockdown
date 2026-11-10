@@ -177,8 +177,35 @@ export function canonicalToolName(tool) {
   return normalizeTool(tool).replace(/[._]/g, "_");
 }
 
+// Server prefixes may use `-` or `_` (OpenCode V2 normalizes actions to
+// `carbon_orchestrator_git_state`). Carbon's role segment has no `_`, so the
+// tool boundary is unambiguous; Basemind adds an optional `lane[-_]<lane>`
+// segment, and a plain `basemind_git` server has no lane at all.
 export function stripServerPrefix(tool) {
-  return normalizeTool(tool).replace(/^carbon-[a-z0-9-]+[._]/, "");
+  return normalizeTool(tool)
+    .replace(/^carbon[-_][a-z0-9-]+[._]/, "")
+    .replace(/^basemind[-_](?:lane[-_][a-z0-9-]+[._])?/, "");
+}
+
+// Basemind is a read-only surface: these verbs are allowed without a lane
+// capability because the orchestrator sits at the workspace root.
+const BASEMIND_ALLOW = new Set(["git", "graph", "workspace", "code", "memory", "web"]);
+const BASEMIND_DENY = new Set(["admin", "agents", "shell"]);
+
+function basemindVerb(tool) {
+  const name = normalizeTool(tool);
+  if (!/^basemind[-_]/.test(name)) return null;
+  return canonicalToolName(stripServerPrefix(name));
+}
+
+export function isBasemindTool(tool) {
+  const verb = basemindVerb(tool);
+  return verb !== null && !BASEMIND_DENY.has(verb) && BASEMIND_ALLOW.has(verb);
+}
+
+export function isBasemindDenied(tool) {
+  const verb = basemindVerb(tool);
+  return verb !== null && BASEMIND_DENY.has(verb);
 }
 
 export function isCodeWrite(tool) {
@@ -721,6 +748,17 @@ export function createAuthz(options = {}) {
       return deny(`${name} is not available under native-tool authz`);
     }
     const registryTool = resolveRegistryTool(registry, name);
+
+    // Basemind tools are absent from registry.json; allow only the read-only
+    // verb surface. admin/agents/shell are denied explicitly, and no lane
+    // capability is required (the orchestrator is at the workspace root).
+    if (isBasemindDenied(name)) {
+      return deny(`basemind ${canonicalToolName(stripServerPrefix(name))} is not allowed`);
+    }
+    if (isBasemindTool(name)) {
+      return allow(`basemind read-only tool ${stripServerPrefix(name)}`);
+    }
+
     const nativeWrite = WRITE_TOOLS.has(name);
     const registryWrite = registryTool === "code_write";
 
