@@ -44,6 +44,8 @@ model: opencode-go/glm-5.3-flash#high
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
+  - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
   - { action: tool, resource: "acceptance.materialize", effect: allow }
   - { action: tool, resource: "check.run", effect: allow }
   - { action: tool, resource: "docker.ensure", effect: allow }

@@ -36,6 +36,8 @@ model: opencode-go/deepseek-v4.1-flash#max
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
+  - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
   - { action: tool, resource: "check.run", effect: allow }
   - { action: tool, resource: "code.write", effect: allow }
   - { action: tool, resource: "docker.ensure", effect: allow }

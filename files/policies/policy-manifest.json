@@ -3,7 +3,7 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-10T03:34:00Z",
+  "created_at": "2026-11-10T03:52:41Z",
   "file_count": 275,
   "files": [
     {
@@ -28,31 +28,31 @@
     },
     {
       "path": "agent:files/auditor.md",
-      "sha256": "0aeb30bf8732c02edfa437c93dc513586b01f1a5c2481788092dfe1ac455c1c9"
+      "sha256": "5da68da57d6c32f670e0e6b4ebc017d7a48a6f86de4191ce2493253b9c2bfa23"
     },
     {
       "path": "agent:files/builder.md",
-      "sha256": "151d9695f28dc38d19ac99550d702a989dd726f59dc00770c093169cb7ba1937"
+      "sha256": "6e00e7a67c4c49ee408895e3d397875f8fc321093b1572f801e6982a5ae023bf"
     },
     {
       "path": "agent:files/compliance.md",
-      "sha256": "d054761cfeaeaeff7e11ad53070dfdbbbb9d4df5e7fbb9bc12bf088ca43d8a31"
+      "sha256": "1f087b01a1b6034edc5c863415de69f9d1ef96e19c2d3d2a3704122bad7761af"
     },
     {
       "path": "agent:files/crouton-alpha.md",
-      "sha256": "5c6e89c5dfcbdc2ff94c796d17a53c59fd7404680a0a03cb81465f6553154543"
+      "sha256": "f51a80d8c33f684077c72ec7d0bb8a218b217cc00e1a7d8cf7323cd555bc7069"
     },
     {
       "path": "agent:files/hacker.md",
-      "sha256": "8b3bba44428926d3fcd54d6606dc1bfdf9117916f2cb21f128a1c536570743ff"
+      "sha256": "8c7b284f539710020da1d9752a28fcadde2c8a866d6a8f490c2403b2d1525de3"
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "c5b9cf4ce51b6542f42d1cc689abe982f3a625b3f003055eb10602432f3fe327"
+      "sha256": "5c715966c616e81bebb3098a05e709e020a94728fb73274d1c626b22836eb0b2"
     },
     {
       "path": "agent:files/release-engineer.md",
-      "sha256": "b428ed8e3eeff5f8ad20f6bbde79e8f4cee2b45edfc9f2dddb820ef1fc741abc"
+      "sha256": "a28b8211e09c15a30b1785367c07dcafcf382ec94cc74e3e07f465333d19cab5"
     },
     {
       "path": "docker:files/docker/k1/Dockerfile",
@@ -656,7 +656,7 @@
     },
     {
       "path": "harness:.opencode/lib/authz-core.js",
-      "sha256": "3910b382a512aaf4c332b141cabc762cde471efe4e0c59c695bf14106f53f592"
+      "sha256": "ab23c9cf8646cb20eb4c502168f830ef27530a12bbe9b74d14611a8242f810a8"
     },
     {
       "path": "harness:.opencode/package-lock.json",
@@ -680,31 +680,31 @@
     },
     {
       "path": "installed_agent:.opencode/agents/auditor.md",
-      "sha256": "0aeb30bf8732c02edfa437c93dc513586b01f1a5c2481788092dfe1ac455c1c9"
+      "sha256": "5da68da57d6c32f670e0e6b4ebc017d7a48a6f86de4191ce2493253b9c2bfa23"
     },
     {
       "path": "installed_agent:.opencode/agents/builder.md",
-      "sha256": "151d9695f28dc38d19ac99550d702a989dd726f59dc00770c093169cb7ba1937"
+      "sha256": "6e00e7a67c4c49ee408895e3d397875f8fc321093b1572f801e6982a5ae023bf"
     },
     {
       "path": "installed_agent:.opencode/agents/compliance.md",
-      "sha256": "d054761cfeaeaeff7e11ad53070dfdbbbb9d4df5e7fbb9bc12bf088ca43d8a31"
+      "sha256": "1f087b01a1b6034edc5c863415de69f9d1ef96e19c2d3d2a3704122bad7761af"
     },
     {
       "path": "installed_agent:.opencode/agents/crouton-alpha.md",
-      "sha256": "5c6e89c5dfcbdc2ff94c796d17a53c59fd7404680a0a03cb81465f6553154543"
+      "sha256": "f51a80d8c33f684077c72ec7d0bb8a218b217cc00e1a7d8cf7323cd555bc7069"
     },
     {
       "path": "installed_agent:.opencode/agents/hacker.md",
-      "sha256": "8b3bba44428926d3fcd54d6606dc1bfdf9117916f2cb21f128a1c536570743ff"
+      "sha256": "8c7b284f539710020da1d9752a28fcadde2c8a866d6a8f490c2403b2d1525de3"
     },
     {
       "path": "installed_agent:.opencode/agents/orchestrator.md",
-      "sha256": "c5b9cf4ce51b6542f42d1cc689abe982f3a625b3f003055eb10602432f3fe327"
+      "sha256": "5c715966c616e81bebb3098a05e709e020a94728fb73274d1c626b22836eb0b2"
     },
     {
       "path": "installed_agent:.opencode/agents/release-engineer.md",
-      "sha256": "b428ed8e3eeff5f8ad20f6bbde79e8f4cee2b45edfc9f2dddb820ef1fc741abc"
+      "sha256": "a28b8211e09c15a30b1785367c07dcafcf382ec94cc74e3e07f465333d19cab5"
     },
     {
       "path": "policy:files/policies/assert-rules.json",
@@ -1110,18 +1110,20 @@
   "digests": {
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "1bf4479575c2f3f6dccbc39809e90f1b679dc6dcde11f06a8e81d0f5df5d5ec3"
+    "gate_impl_digest": "22b48fb4ffe7c86f53d0327f0002a7b35349f6e885241500dba4a64f5f60d63a"
   },
   "gate_control": {
-    "record": "0027-5955654a6326.json",
-    "record_hash": "05b04963a6a7cb9136fd15e117e13f8d420e0f6772db6476dfe8020387ea340b",
-    "gate_sha": "5955654a63261692e547855b4852861abf3c6170",
+    "record": "0028-c3f85767266e.json",
+    "record_hash": "4f360301af0dddce4a4fed5fa9813d98d34de6cba82c90aa070c7e98e2c35175",
+    "gate_sha": "c3f85767266e01944009b494a94725008adfe7df",
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "1bf4479575c2f3f6dccbc39809e90f1b679dc6dcde11f06a8e81d0f5df5d5ec3",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "gate_impl_digest: live 22b48fb4ffe7c86f53d0327f0002a7b35349f6e885241500dba4a64f5f60d63a != record 1bf4479575c2f3f6dccbc39809e90f1b679dc6dcde11f06a8e81d0f5df5d5ec3"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1215,5 +1217,5 @@
       ]
     }
   },
-  "manifest_sha": "d5fb3dd270df0c69b3dd310e4604ca31ae466debd921f53045a68adaa4cc8f35"
+  "manifest_sha": "9c20cedde04cc68f0ef99af4e0e00b9adca9cec0aad3fb25f2e1e24eb0de7598"
 }

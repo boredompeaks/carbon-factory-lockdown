@@ -36,6 +36,8 @@ model: nous-direct/minimax/minimax-m3.1-flash#high
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
+  - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
   - { action: tool, resource: "check.run", effect: allow }
   - { action: tool, resource: "git.state", effect: allow }
   - { action: tool, resource: "hacker.probe", effect: allow }

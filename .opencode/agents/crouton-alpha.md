@@ -19,6 +19,8 @@ mode: subagent
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
+  - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
   - { action: tool, resource: "code.write", effect: allow }
   - { action: tool, resource: "git.state", effect: allow }
   - { action: edit, resource: "**", effect: allow }

@@ -9,8 +9,9 @@
 //   - writes require a live capability whose task_branch matches that lane;
 //   - every path is realpath'd; realpath failure denies;
 //   - the gated-call counter must persist, otherwise the call denies.
-//   - session_move may only target a worktree-map.json lane dir bound to this
-//     session by a live capability (F5);
+//   - session_move may only target a worktree-map.json lane dir; a session
+//     already in a lane needs a live capability, a session outside every lane
+//     may bootstrap into one (location only, never write) (F5);
 //   - Code Mode `execute` is orchestrator-only; nested tools are re-evaluated
 //     by this same decision table (F5).
 import fs from "node:fs";
@@ -72,8 +73,19 @@ const SENSITIVE_DIRS = new Set([
 
 export function defaultFactoryRoot() {
   if (process.env.CARBON_HARNESS) return path.resolve(process.env.CARBON_HARNESS);
-  // .opencode/lib/authz-core.js -> repo root
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+  // .opencode/lib/authz-core.js -> repo root. Resolve symlinks first: a
+  // workspace `.opencode` that links into the factory would otherwise root the
+  // factory at the link's parent (e.g. backend-worktrees) and every mapped
+  // lane, policy file and ledger lookup would miss. Fall back to the
+  // unresolved path when realpath fails so the failure stays fail-closed.
+  const modulePath = fileURLToPath(import.meta.url);
+  let real = modulePath;
+  try {
+    real = fs.realpathSync(modulePath);
+  } catch {
+    // keep the unresolved path
+  }
+  return path.resolve(path.dirname(real), "..", "..");
 }
 
 function readJson(file) {
@@ -318,6 +330,21 @@ export function loadWorktreeMap(factoryRoot) {
   return readJson(path.join(factoryRoot, "files", "policies", "worktree-map.json"));
 }
 
+// Distinct real parent dirs of the mapped lane dirs. In production every lane
+// lives under one workspace root (backend-worktrees), which is what the
+// orchestrator session uses as its cwd.
+export function workspaceRootsFromMap(map) {
+  const roots = new Set();
+  if (!map || typeof map !== "object") return [];
+  for (const dir of Object.values(map)) {
+    if (typeof dir !== "string" || !dir) continue;
+    const real = safeReal(dir);
+    if (!real) continue;
+    roots.add(path.dirname(real));
+  }
+  return [...roots];
+}
+
 // Registry allowlist: every accepted MCP tool must normalize to a name in
 // files/tools/mcp/registry.json. An absent/broken registry yields an empty
 // map, so all non-native tools deny.
@@ -342,9 +369,9 @@ export function resolveRegistryTool(registry, tool) {
 }
 
 // Reverse-map a session directory to its lane branch. Exactly one exact match
-// is required; zero or multiple matches return null.
-export function reverseLane(sessionDir, factoryRoot) {
-  const map = loadWorktreeMap(factoryRoot);
+// is required; zero or multiple matches return null. The map may be passed in
+// so createAuthz loads worktree-map.json only once.
+export function reverseLane(sessionDir, factoryRoot, map = loadWorktreeMap(factoryRoot)) {
   if (!map || typeof map !== "object") return null;
   const sessionReal = safeReal(sessionDir);
   if (!sessionReal) return null;
@@ -357,21 +384,36 @@ export function reverseLane(sessionDir, factoryRoot) {
   return matches.length === 1 ? matches[0] : null;
 }
 
-export function laneDirectory(lane, factoryRoot) {
-  const map = loadWorktreeMap(factoryRoot);
+export function laneDirectory(lane, factoryRoot, map = loadWorktreeMap(factoryRoot)) {
   if (!map || typeof lane !== "string") return null;
   const dir = map[lane];
   return typeof dir === "string" ? safeReal(dir) : null;
 }
 
-// F5: a session-move target must be an existing absolute directory whose
-// realpath is exactly one mapped lane dir. Relative input, any `..` segment,
-// symlinks that resolve elsewhere, files and unmapped dirs all return null.
-export function resolveSessionMoveDir(directory, factoryRoot) {
+// F5: a session-move target must be an existing mapped lane dir. Absolute
+// input must be an existing absolute directory whose realpath is exactly one
+// mapped lane dir (relative `..` segments, symlinks that resolve elsewhere,
+// files and unmapped dirs return null). Relative input is never path-resolved:
+// it is accepted only as an exact worktree-map key (e.g. "lane/a"), then the
+// same realpath / mapped-lane checks apply.
+export function resolveSessionMoveDir(directory, factoryRoot, map = loadWorktreeMap(factoryRoot)) {
   if (typeof directory !== "string" || !directory) return null;
-  if (!path.isAbsolute(directory)) return null;
-  if (directory.split(/[\\/]+/).some((segment) => segment === "..")) return null;
-  const real = safeReal(directory);
+  let target = directory;
+  if (!path.isAbsolute(target)) {
+    if (target.includes("\\")) return null;
+    const segments = target.split("/");
+    if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+      return null;
+    }
+    if (!map || typeof map !== "object") return null;
+    if (!Object.prototype.hasOwnProperty.call(map, target)) return null;
+    const mapped = laneDirectory(target, factoryRoot, map);
+    if (!mapped) return null;
+    target = mapped;
+  } else if (target.split(/[\\/]+/).some((segment) => segment === "..")) {
+    return null;
+  }
+  const real = safeReal(target);
   if (!real) return null;
   let stat;
   try {
@@ -380,7 +422,7 @@ export function resolveSessionMoveDir(directory, factoryRoot) {
     return null;
   }
   if (!stat.isDirectory()) return null;
-  const lane = reverseLane(real, factoryRoot);
+  const lane = reverseLane(real, factoryRoot, map);
   return lane ? { lane, dir: real } : null;
 }
 
@@ -545,6 +587,10 @@ export function createAuthz(options = {}) {
   };
   const now = options.now ?? (() => Date.now());
   const registry = loadRegistryTools(factoryRoot);
+  // worktree-map.json is read once per authz instance. The mapped lanes also
+  // give the workspace roots the orchestrator session runs from.
+  const worktreeMap = loadWorktreeMap(factoryRoot);
+  const workspaceRoots = workspaceRootsFromMap(worktreeMap);
 
   async function consumeBudget(cap) {
     const limit = cap?.budget?.tool_calls;
@@ -605,13 +651,19 @@ export function createAuthz(options = {}) {
     if (!resolved) return deny("read path missing");
     const real = safeReal(resolved);
     if (!real) return deny(`realpath failed for ${inputPath}`);
-    const filesRoot = safeReal(path.join(factoryRoot, "files"));
-    const inLane = laneDir ? inside(laneDir, real) : false;
-    const inFiles = filesRoot ? inside(filesRoot, real) : false;
-    if (!inLane && !inFiles) return deny(`read outside allowlist: ${inputPath}`);
-    const rel = inLane
-      ? toPosix(path.relative(laneDir, real))
-      : toPosix(path.relative(filesRoot, real));
+    // Read allowlist, most specific first so rel stays lane-relative:
+    //   1. the session's own lane;
+    //   2. every workspace root (read-only view across lanes, for the
+    //      orchestrator session sitting at the workspace root);
+    //   3. the factory root itself, so requests/**, phase6-7/** and
+    //      files/policies/** are readable. isSensitive still applies.
+    const candidates = [];
+    if (laneDir) candidates.push(laneDir);
+    for (const root of workspaceRoots) candidates.push(root);
+    candidates.push(safeReal(factoryRoot) ?? factoryRoot);
+    const matched = candidates.find((root) => inside(root, real));
+    if (!matched) return deny(`read outside allowlist: ${inputPath}`);
+    const rel = toPosix(path.relative(matched, real));
     if (isSensitive(rel)) return deny(`sensitive read: ${inputPath}`);
     const hardlink = hardlinkDenied(real);
     if (hardlink) return deny(`sensitive read: ${hardlink} (${inputPath})`);
@@ -622,28 +674,34 @@ export function createAuthz(options = {}) {
     const name = normalizeTool(tool);
     if (!name) return deny("missing tool name");
 
-    const lane = reverseLane(sessionDir, factoryRoot);
-    const laneDir = lane ? laneDirectory(lane, factoryRoot) : null;
+    const lane = reverseLane(sessionDir, factoryRoot, worktreeMap);
+    const laneDir = lane ? laneDirectory(lane, factoryRoot, worktreeMap) : null;
 
-    // F5: a subagent may move its own session, but only into a lane dir from
-    // worktree-map.json and only while a live capability binds this session to
-    // that lane. The capability's role is therefore always a lane-mapped role.
+    // F5: a session may move into a lane dir from worktree-map.json. A session
+    // that already holds a live capability keeps its binding and may move
+    // again; a session already in a lane with no capability may not. A session
+    // that is not in any lane yet (orchestrator bootstrap from the workspace
+    // root, or a fresh child of a lane) may move into a mapped lane without a
+    // capability: this grants location only, since every write still requires
+    // a live capability for the target lane.
     if (isSessionMoveTool(name)) {
       const keyError = validateInputKeys("opencode_session_move", input);
       if (keyError) return deny(keyError);
-      const target = resolveSessionMoveDir(input?.directory, factoryRoot);
+      const target = resolveSessionMoveDir(input?.directory, factoryRoot, worktreeMap);
       if (!target) return deny(`session move target is not a mapped lane: ${input?.directory}`);
-      const moveCap = selectCapability({
-        factoryRoot,
-        lane: target.lane,
-        sessionID,
-        now: now(),
-      });
-      if (!moveCap) return deny(`no unexpired capability for lane ${target.lane}`);
-      if (typeof moveCap.role !== "string" || !moveCap.role) {
-        return deny("capability role unknown");
+      const boundCap =
+        (lane ? selectCapability({ factoryRoot, lane, sessionID, now: now() }) : null) ??
+        selectCapability({ factoryRoot, lane: target.lane, sessionID, now: now() });
+      if (boundCap) {
+        if (typeof boundCap.role !== "string" || !boundCap.role) {
+          return deny("capability role unknown");
+        }
+        return allow(`session move to lane ${target.lane} for role ${boundCap.role}`);
       }
-      return allow(`session move to lane ${target.lane} for role ${moveCap.role}`);
+      if (lane) {
+        return deny(`no unexpired capability for lane ${lane} (move needs one)`);
+      }
+      return allow(`session move to lane ${target.lane} (bootstrap; writes need a capability)`);
     }
 
     // F5: Code Mode `execute` is orchestrator-only. Nested tool calls re-enter
