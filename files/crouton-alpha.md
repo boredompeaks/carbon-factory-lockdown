@@ -21,6 +21,8 @@ permissions:
   - { action: "*", resource: "*", effect: deny }
   - { action: tool, resource: "code.write", effect: allow }
   - { action: tool, resource: "git.state", effect: allow }
+  - { action: edit, resource: "**", effect: allow }
+  - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }

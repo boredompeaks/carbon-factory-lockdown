@@ -37,6 +37,7 @@ from pathlib import Path
 
 from ..core.redact import cache_key
 from ..core.validate import Reject
+from ..git.lane import resolve_repo_root
 
 _GATE_RUN_CHECKS = frozenset({
     "SCOPE",
@@ -106,7 +107,10 @@ def _policies_dir() -> Path:
     return _tools_dir().parent / "policies"
 
 
-def _repo_root() -> Path:
+def _repo_root(lane: str | None = None) -> Path:
+    """Repo inputs root: the lane worktree when supplied, else factory."""
+    if lane is not None:
+        return resolve_repo_root(lane)
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -618,11 +622,11 @@ def _tool_argv(check_id: str, repo: Path, args: dict) -> tuple[list[str], str | 
     raise Reject("REJECT_PRECONDITION", f"unsupported tool check: {check_id}")
 
 
-def _execute_tool_check(check_id: str, args: dict, base_result: dict) -> dict:
+def _execute_tool_check(check_id: str, args: dict, base_result: dict, lane: str | None = None) -> dict:
     tool_path = _tools_dir() / _TOOL_FILES[check_id]
     if not tool_path.is_file():
         raise Reject("REJECT_PRECONDITION", "tool missing")
-    repo = _repo_root()
+    repo = _repo_root(lane)
     argv, tmp_diff = _tool_argv(check_id, repo, args)
     try:
         try:
@@ -689,6 +693,7 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
     check_id = str(args.get("check_id") or "")
     tree = str(args.get("tree") or "")
     engine = str(args.get("engine") or "")
+    lane = args.get("lane")
     check_impl_sha = hashlib.sha256(check_id.encode("utf-8")).hexdigest()
     key = cache_key(tree, check_id, check_impl_sha[:16], engine)
     where = "sandbox" if role == "builder" else "git-object-id" if role == "auditor" else "k1-network"
@@ -697,6 +702,8 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
 
     if not check_id:
         raise Reject("REJECT_PRECONDITION", "check_id missing; refusing to fabricate PASS")
+    # Fail closed before any tool/gate spawn on an unknown or missing lane.
+    resolve_repo_root(lane)
     # 9 local tool checks (argv-only, 180s, JSON envelope).
     if check_id in _TOOL_CHECKS:
         base_result: dict = {
@@ -710,13 +717,13 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
             "cache_key": key,
             "pinned": pinned,
         }
-        return _execute_tool_check(check_id, args, base_result)
+        return _execute_tool_check(check_id, args, base_result, lane)
     if check_id not in _GATE_RUN_CHECKS:
         raise Reject("REJECT_PRECONDITION", f"check {check_id!r} has no gate_run implementation in this harness")
     gate_run_path = _gate_run_path()
     if not gate_run_path.is_file():
         raise Reject("REJECT_PRECONDITION", f"gate_run implementation missing at {gate_run_path}; REJECT_PRECONDITION")
-    repo = _repo_root()
+    repo = _repo_root(lane)
     # Runtime checks raise Reject here when their runtime is absent.
     evidence = _build_evidence(check_id, args, repo)
     # Carry provenance args the registry permits.

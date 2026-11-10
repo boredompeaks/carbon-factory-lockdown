@@ -10,6 +10,8 @@ permissions:
   - { action: tool, resource: "drain.validate", effect: allow }
   - { action: tool, resource: "gate.control", effect: allow }
   - { action: tool, resource: "harness.verify", effect: allow }
+  - { action: edit, resource: "**", effect: allow }
+  - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }

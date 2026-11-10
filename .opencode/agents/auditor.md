@@ -63,6 +63,7 @@ permissions:
   - { action: tool, resource: "ledger.append", effect: allow }
   - { action: tool, resource: "repro.run", effect: allow }
   - { action: tool, resource: "scratch.write", effect: allow }
+  - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }

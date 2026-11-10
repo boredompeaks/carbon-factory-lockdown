@@ -15,6 +15,43 @@ ledger.append({ record_type: "dispatch"|"capability", record: { /* typed dispatc
 ```
 `serves:` orchestrator dispatch (builder, auditor, hacker, release-engineer, compliance). On the lane path, dispatch one builder per permanent lane in parallel (lane/a, lane/b) and dispatch release-engineer exactly once at the section boundary. This skill is for the orchestrator only. The auditor does not use this skill: its only hacker path is `hacker_dispatch(capability_id)`, which accepts a `capability_id` and nothing else — never a free-form prompt or model override.
 
+`capability mint:` required before every lane spawn, because a builder writes only under a live capability. Order is fixed: mint, then spawn; never spawn first and mint on return.
+1. Read the lane's live head and tree and the plan's allowance. Do not reuse values from an earlier message.
+2. `ledger.append` exactly one `capability` record with role `orchestrator` and `expected_prev_hash` = the capability tip. `task_branch` is the lane id as keyed in `policies/worktree-map.json`. `scope` is `backend/**` or `backend/docs/**` as the lane plan declares. Set `role` = `builder`, `native_tools` = `["edit","write","patch"]`, `expires_at` = mint time + 6h, and `budget` = the plan allowance plus `tasks` = 6.
+3. Spawn the child with a prompt whose FIRST step is `opencode_session_move` targeting that lane's directory from `policies/worktree-map.json`; the child then works only there. Pass `capability_id` in the prompt; the child never mints.
+
+Payload shape (the ledger seal adds `record_hash`; `prev_hash` is the chain envelope). Budget values are examples; substitute the plan's integers and the live shas:
+```json
+{
+  "schema": "capability/1",
+  "capability_id": "cap_<8-64 of [A-Za-z0-9_-]>",
+  "parent_capability_id": null,
+  "lineage_id": "<lineage_id>",
+  "base": "<base sha, 40 or 64 hex>",
+  "head": "<lane head sha, 40 or 64 hex>",
+  "tree": "<lane tree sha, 40 or 64 hex>",
+  "scope": ["backend/**"],
+  "tier": "high",
+  "hacker_variant": "high",
+  "budget": { "wall_clock_s": 21600, "tool_calls": 400, "tokens": 250000, "tasks": 6 },
+  "acceptance_test_refs": ["<ref from the task input>"],
+  "acceptance_author_family": "<provider family from policies/models.json>",
+  "characterization_tests": [],
+  "architecture_allow": [],
+  "guard_delta": [],
+  "allowed_test_removals": [],
+  "task_kind": "FEATURE",
+  "task_branch": "lane/a",
+  "output_schema_ref": "policies/schemas/builder-result.json",
+  "policy_digest": "<64 hex>",
+  "sig_status": "unsigned_local",
+  "role": "builder",
+  "native_tools": ["edit", "write", "patch"],
+  "expires_at": "<mint time + 6h, ISO-8601 UTC>"
+}
+```
+`budget.tool_calls` is the plan's allowance. The orchestrator enforces `budget.tasks`; the proxy enforces `budget.tool_calls` and `expires_at`. Re-mint at every train/section boundary: every 6 hours or every 6 tasks, whichever comes first, with `parent_capability_id` = the previous `capability_id` and fresh head, tree, and `expires_at`. If no capability exists or it has expired, the proxy denies writes: do not retry blindly and do not widen scope; re-read state and re-mint.
+
 `args:`
 - `subagent.agent` (required) — target agent id. Only `mode: subagent` or `mode: all` agents resolve; the orchestrator's permission list allows `builder`, `auditor`, `hacker`, `release-engineer`, `compliance` and denies `*`.
 - `subagent.description` (required) — short label shown in the parent session.
@@ -38,3 +75,5 @@ subagent({ agent: "compliance", description: "dispatch probe", prompt: "Reply wi
 # => { sessionID: "<id>", state: "completed", ... final text: OK }
 ```
 `verified:` 2026-11-08, tool names per registry (`subagent`, `ledger.append`); permission action `subagent`, resource = target agent id.
+
+`contract note:` `subagent` is a harness-namespace action, not an MCP registry tool. The dispatch contract is pinned to the gate SHA (newest gate-control record) and the registry SHA (`files/tools/mcp/registry.json`).

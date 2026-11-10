@@ -63,6 +63,8 @@ HARNESS_FILES = (
     "opencode.json",
     ".agt/policy.json",
     ".opencode/plugins/agt.js",
+    ".opencode/plugins/authz.js",
+    ".opencode/lib/authz-core.js",
     ".opencode/package.json",
     ".opencode/package-lock.json",
 )

@@ -48,6 +48,7 @@ permissions:
   - { action: tool, resource: "worktrees.list", effect: allow }
   - { action: tool, resource: "worktrees.reconcile", effect: allow }
   - { action: tool, resource: "worktrees.sync", effect: allow }
+  - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }

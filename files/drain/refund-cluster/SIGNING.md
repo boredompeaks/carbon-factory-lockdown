@@ -121,3 +121,19 @@ record may verify PASS. The dispatch gate-control ref is
 - `gate_control.py --verify 0008` = FAIL (exit 1, `policy_digest`/`gate_impl_digest`/`control_set_sha` differ from live); `--verify-chain` = FAIL (chain_size 8, newest 0008); `validatedrain.py` = FAIL (exit 1).
 - Live digests `policy_digest f66f3264…`, `gate_impl_digest 3d27ef10…`, `control_set_sha 4a87aa83…` differ from `0008` (`c8471186…` / `224cbf99…` / `971f1fda…`).
 - `0008` (`3722fb89…`) remains the newest seal; its seal-time PASS above is historical only. **No new PASS is claimed beyond `0008`** until a re-seal + verify passes and is recorded in an addendum.
+## auto-seal 0023-c33efa8aae87.json 2026-11-09T18:42:59Z
+- record: 0023-c33efa8aae87.json
+- gate_sha: c33efa8aae87bd9cbc6ea42bc822765d74526e9e
+- policy_digest: cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3
+- control_set_sha: 4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011
+- gate_impl_digest: df41dac826c4f480b2db7eb9ae295fdd315919453ca545067ed05bf73e6e9728
+- record_hash: af5c43ad27a5db6d8920dff727862a508cf944167140cdc5e4117a629b6beb48
+- result: PASS
+## auto-seal 0024-404bd9e7c707.json 2026-11-09T18:44:05Z
+- record: 0024-404bd9e7c707.json
+- gate_sha: 404bd9e7c707734cff0a30bfb71db51c35dde742
+- policy_digest: cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3
+- control_set_sha: 4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011
+- gate_impl_digest: df41dac826c4f480b2db7eb9ae295fdd315919453ca545067ed05bf73e6e9728
+- record_hash: b364abc7a9bed79526d6176cbaba1692be10d32b778433fbd64afb57ec940c1e
+- result: PASS

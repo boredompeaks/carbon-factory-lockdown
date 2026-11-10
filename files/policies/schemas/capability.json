@@ -187,6 +187,41 @@
     "record_hash": {
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "native_tools": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "edit",
+          "write",
+          "patch"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "orchestrator",
+        "builder",
+        "auditor",
+        "hacker",
+        "hacker-high",
+        "hacker-max",
+        "release-engineer",
+        "compliance",
+        "crouton-alpha",
+        "design-research"
+      ]
     }
   },
   "allOf": [
@@ -320,6 +355,11 @@
         "tokens": {
           "type": "integer",
           "minimum": 1
+        },
+        "tasks": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional. Maximum number of tasks (builder dispatches) this capability covers before it must be re-minted at a train/section boundary. Enforced by the orchestrator; the proxy enforces tool_calls and expires_at only."
         }
       }
     },

@@ -21,6 +21,11 @@
           "fields"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "fields": {
           "type": "array",
           "items": {
@@ -95,6 +100,11 @@
           "ref"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "ref": {
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",
@@ -146,6 +156,11 @@
         "properties": {},
         "required": [],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "ref": {
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",
@@ -210,6 +225,11 @@
           "head"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "base": {
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",
@@ -266,6 +286,11 @@
           "path"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "rev": {
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",
@@ -323,6 +348,11 @@
           "tree"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "message": {
           "type": "string",
           "pattern": "^(?!-)[^\\r\\n]{1,500}$",
@@ -390,6 +420,11 @@
           "expected_head"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "ref": {
           "type": "string",
           "pattern": "^refs/heads/(?!-)[A-Za-z0-9_][A-Za-z0-9_./-]{0,200}$",
@@ -600,6 +635,11 @@
           "engine"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "check_id": {
           "type": "string",
           "enum": [
@@ -1672,6 +1712,11 @@
           "path"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "rev": {
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",

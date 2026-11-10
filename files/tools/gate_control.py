@@ -50,6 +50,9 @@ CHECK_BODY_FILES = (
     # The AGT OpenCode adapter body (single plugin artifact) lives outside
     # files/; the path is relative to this tools root.
     "../.opencode/plugins/agt.js",
+    # Native-tool authz plugin (F1): wiring + pure decision core.
+    "../.opencode/plugins/authz.js",
+    "../.opencode/lib/authz-core.js",
 )
 FIXTURE_EXCLUDES = {
     "tools/fixtures/authz_control/control-matrix.json",

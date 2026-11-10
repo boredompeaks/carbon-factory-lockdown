@@ -55,6 +55,7 @@ permissions:
   - { action: tool, resource: "harness.verify", effect: allow }
   - { action: tool, resource: "ledger.append", effect: allow }
   - { action: tool, resource: "worktrees.list", effect: allow }
+  - { action: opencode_session_move, resource: "*", effect: allow }
   - { action: read, resource: "**", effect: allow }
   - { action: grep, resource: "**", effect: allow }
   - { action: glob, resource: "**", effect: allow }
@@ -320,6 +321,79 @@ invocation; one release-engineer invocation is one cycle.
 Non-lane work may use a task/<task_id> branch in worktree-map.json#spec-comp; the permanent lane
 path always uses lane/a or lane/b.
 
+# Lane capability lifecycle
+
+A lane builder may write only under a live capability minted for that lane.
+Mint before every spawn; never spawn first and mint on return. The proxy reads
+capability records from quality/ledger/dispatch/<task_id>/ and denies
+edit/write/patch when no record matches the lane, the head/tree, the scope, or
+expires_at.
+
+To mint, in this order:
+1. Read the lane's live head and tree and the plan's allowance (R2, R4).
+2. Append exactly one `capability` record via `ledger.append` with role
+   orchestrator and expected_prev_hash set to the capability tip. task_branch
+   is the lane id exactly as keyed in policies/worktree-map.json. scope is
+   backend/** or backend/docs/** as the lane plan declares. head and tree are
+   that lane's values. It is one record per lane per spawn.
+3. Spawn the builder with an instruction whose first step is a call to
+   opencode_session_move targeting that lane's directory from
+   policies/worktree-map.json, then to work only in that directory. The prompt
+   carries capability_id; the child never mints a capability.
+
+Payload shape below. The ledger seal adds record_hash; prev_hash is the chain
+envelope. Values shown for budget are examples; substitute the plan's integers
+and the live shas.
+
+```json
+{
+  "schema": "capability/1",
+  "capability_id": "cap_<8-64 of [A-Za-z0-9_-]>",
+  "parent_capability_id": null,
+  "lineage_id": "<lineage_id>",
+  "base": "<base sha, 40 or 64 hex>",
+  "head": "<lane head sha, 40 or 64 hex>",
+  "tree": "<lane tree sha, 40 or 64 hex>",
+  "scope": ["backend/**"],
+  "tier": "high",
+  "hacker_variant": "high",
+  "budget": {
+    "wall_clock_s": 21600,
+    "tool_calls": 400,
+    "tokens": 250000,
+    "tasks": 6
+  },
+  "acceptance_test_refs": ["<ref from the task input>"],
+  "acceptance_author_family": "<provider family from policies/models.json>",
+  "characterization_tests": [],
+  "architecture_allow": [],
+  "guard_delta": [],
+  "allowed_test_removals": [],
+  "task_kind": "FEATURE",
+  "task_branch": "lane/a",
+  "output_schema_ref": "policies/schemas/builder-result.json",
+  "policy_digest": "<64 hex>",
+  "sig_status": "unsigned_local",
+  "role": "builder",
+  "native_tools": ["edit", "write", "patch"],
+  "expires_at": "<mint time + 6h, ISO-8601 UTC>"
+}
+```
+
+budget.tool_calls is the plan's allowance. budget.tasks is the task count the
+orchestrator enforces (6 per mint); the proxy enforces tool_calls and
+expires_at, not the task count.
+
+Re-mint at every train/section boundary: every 6 hours or every 6 tasks,
+whichever comes first. A re-mint is a new capability with
+parent_capability_id set to the previous capability_id, fresh head and tree, a
+fresh expires_at of mint time plus 6 hours, and the remaining allowance.
+
+If a write is denied because no capability exists or the record has expired,
+do not retry the write and do not widen scope. Re-read state, mint a new
+capability, and resume. A capability denial is not a tool fault and does not
+justify a re-dispatch under R5.
+
 # Operating rules
 
 R1. Every decision is a predicate result. A decision names the predicate ids it
@@ -430,7 +504,8 @@ stated.
    scope, tier, hacker_variant, budget, acceptance_test_refs,
    acceptance_author_family, characterization_tests, allowed_test_removals,
    architecture_allow, guard_delta, drain_cluster_id, drain_stage, task_kind,
-   task_branch, output_schema_ref.
+   task_branch, output_schema_ref, role, native_tools, expires_at, and
+   budget {wall_clock_s, tool_calls, tokens, tasks}.
    `acceptance_author_family` is the provider family of the actor that authored
    the acceptance refs (policies/models.json). `characterization_tests` is a list
    of {ref, reason}; an entry with an empty reason is invalid.
@@ -448,7 +523,8 @@ stated.
    capability. For each rule that matches, dispatch compliance or
    design-research first, and treat its sealed result as a required input
    to step 6. A compliance FAIL result yields HALT.
-6. Build. Evaluate P-HEAD, then dispatch builder with the sealed capability.
+6. Build. Evaluate P-HEAD, then mint the lane capability (Lane capability
+   lifecycle) and dispatch builder with the sealed capability.
    On the lane path, dispatch one builder per lane in parallel; each works only
    in its lane worktree. On return evaluate P-SIG. A builder result of type
    BLOCKED yields HALT BUILDER_BLOCKED. A result of type REFUSED yields HALT

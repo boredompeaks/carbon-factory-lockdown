@@ -30,6 +30,10 @@ POLICY_ENV = "AGT_OPENCODE_POLICY_PATH"
 PACKAGE = "@microsoft/agent-governance-opencode"
 PIN = "5.0.0"
 ADAPTER_FILE = Path(".opencode") / "plugins" / "agt.js"
+# The AGT adapter is mandatory; these additional plugins are explicitly
+# authorized. Anything else is rejected so the plugin array fails closed.
+PLUGINS_DIR = Path(".opencode") / "plugins"
+ALLOWED_PLUGINS = ("agt.js", "authz.js")
 REQUIRED_ALLOWED_TOOLS = [
     "read",
     "glob",
@@ -177,35 +181,42 @@ def check(root: Path, env: dict[str, str] | None = None) -> list[dict]:
             finding("opencode.json:plugins", f"plugins is not an array: {plugins!r}")
         )
     else:
-        if len(plugins) != 1:
-            findings.append(
-                finding(
-                    "opencode.json:plugins",
-                    f"array length {len(plugins)} != 1: {plugins!r}",
+        allowed = {normalized(root / PLUGINS_DIR / name) for name in ALLOWED_PLUGINS}
+        present: set[str] = set()
+        for index, entry in enumerate(plugins):
+            target = plugin_target(entry)
+            if target is None:
+                findings.append(
+                    finding(
+                        "opencode.json:plugins",
+                        f"entry {index} is not a string or {{package}} object: {entry!r}",
+                    )
                 )
-            )
-        target = plugin_target(plugins[0]) if len(plugins) == 1 else None
-        if target is None:
-            findings.append(
-                finding(
-                    "opencode.json:plugins",
-                    f"entry is not a string or {{package}} object: {plugins!r}",
-                )
-            )
-        else:
+                continue
             target_path = Path(target)
             if not target_path.is_absolute():
                 target_path = root / target_path
-            allowed = {normalized(root / ADAPTER_FILE)}
             actual = normalized(target_path)
             if actual not in allowed:
                 findings.append(
                     finding(
                         "opencode.json:plugins",
-                        f"entry {target!r} resolves to {str(target_path.resolve())!r}, "
-                        f"not the in-repo adapter {str((root / ADAPTER_FILE).resolve())!r}",
+                        f"entry {index} {target!r} resolves to "
+                        f"{str(target_path.resolve())!r}, not an authorized plugin "
+                        f"{sorted(allowed)!r}",
                     )
                 )
+                continue
+            present.add(actual)
+        adapter = normalized(root / ADAPTER_FILE)
+        if adapter not in present:
+            findings.append(
+                finding(
+                    "opencode.json:plugins",
+                    f"mandatory AGT adapter {str((root / ADAPTER_FILE).resolve())!r} "
+                    f"is not listed: {plugins!r}",
+                )
+            )
 
     package_path = root / ".opencode" / "package.json"
     try:
