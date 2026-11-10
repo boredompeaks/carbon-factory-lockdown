@@ -21,7 +21,8 @@ cwd = repo via -C, 30s timeout via _timeout):
   git.log    -> log -n <limit> --format=%H%x09%an%x09%aI%x09%s
                 [<ref>] [-- <path>]
   git.diff   -> diff --no-ext-diff --no-textconv <base> <head>
-                [-- <path>]
+                [-- <path>]; name_only=true -> diff --name-only
+                <base>..<head> and paths only (no blob content)
   git.read_file -> cat-file blob <rev>:<path>
   git.push_ref  -> rev-parse <ref> must equal expected_head, then
                    push --porcelain origin <ref>:<ref>
@@ -31,7 +32,8 @@ cwd = repo via -C, 30s timeout via _timeout):
 
 An optional `lane` arg resolves through
 files/policies/worktree-map.json (lane/a, lane/b, spec-comp) for every
-git/check/code.write target; omitted lane means the factory root.
+git/check/code.write target; omitted lane means the factory root unless
+``CARBON_WORKSPACE`` is set, in which case it is REJECT_AMBIGUOUS_LANE.
 
 Every real result carries executed:true and
 evidence:{argv, exit_code, stdout_sha256}. Non-zero exit maps to
@@ -40,6 +42,7 @@ Reject("REJECT_PRECONDITION") with the stderr tail.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -48,7 +51,12 @@ from pathlib import Path
 from ..core.validate import Reject, is_traversal_or_absolute
 
 from .deny import check_code_write, get_capability, is_commit_denied, is_denied_path, is_in_scope
-from .lane import LANE_PATTERN, is_lane_name, resolve_repo_root
+from .lane import (
+    LANE_PATTERN,
+    factory_root,
+    is_lane_name,
+    resolve_required_lane,
+)
 
 _LANE_RE = re.compile(LANE_PATTERN)
 
@@ -84,7 +92,7 @@ def _repo_cwd(lane: str | None = None) -> str:
     repo-relative path filters (ls-tree/log/diff -- <path> with
     files/... paths) resolve correctly under `git -C <cwd>`.
     """
-    return str(resolve_repo_root(lane))
+    return str(resolve_required_lane(lane, factory_root()))
 
 
 def _git_exe(server) -> str:
@@ -195,8 +203,8 @@ def _repo_root(server, lane: str | None = None) -> Path:
     A supplied lane resolves through worktree-map.json; otherwise the
     factory toplevel is used (backward compatible).
     """
-    if lane is not None:
-        return resolve_repo_root(lane)
+    if lane is not None or os.environ.get("CARBON_WORKSPACE"):
+        return resolve_required_lane(lane, factory_root())
     try:
         proc = _run_git(server, ["rev-parse", "--show-toplevel"])
         if proc.returncode == 0 and (proc.stdout or "").strip():
@@ -295,7 +303,7 @@ def _execute_commit(server, args: dict) -> dict:
         raise Reject("REJECT_PATTERN", "message must not start with a dash")
 
     # 0) Fail closed on an unknown/missing lane before any git spawn.
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
 
     # 1) HEAD / tree / branch binding (scope/deny absolute). A bound
     # capability is mandatory: without one there is no scope allowlist,
@@ -426,7 +434,7 @@ def _execute_state(server, args: dict) -> dict:
     rev = args.get("rev")
     path = args.get("path")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     if path is not None:
         if not isinstance(path, str):
             raise Reject("REJECT_ARG", "path must be a string")
@@ -510,7 +518,7 @@ def _execute_state(server, args: dict) -> dict:
 def _execute_status(server, args: dict) -> dict:
     ref = args.get("ref")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     subargv = ["status", "--porcelain=v2", "--branch"]
     proc = _run_checked(server, subargv, lane)
     raw = proc.stdout or ""
@@ -585,7 +593,7 @@ def _execute_log(server, args: dict) -> dict:
     ref = args.get("ref")
     path = args.get("path")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     if path is not None:
         if not isinstance(path, str):
             raise Reject("REJECT_ARG", "path must be a string")
@@ -630,9 +638,12 @@ def _execute_diff(server, args: dict) -> dict:
     head = args.get("head")
     path = args.get("path")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    name_only = args.get("name_only", False)
+    resolve_required_lane(lane, factory_root())
     if not isinstance(base, str) or not isinstance(head, str):
         raise Reject("REJECT_ARG", "git.diff requires base and head")
+    if not isinstance(name_only, bool):
+        raise Reject("REJECT_ARG", "name_only must be a boolean")
     if path is not None:
         if not isinstance(path, str):
             raise Reject("REJECT_ARG", "path must be a string")
@@ -640,6 +651,32 @@ def _execute_diff(server, args: dict) -> dict:
             raise Reject("REJECT_PATH", f"path: non-normalized or out-of-tree path")
         if is_denied_path(path):
             raise Reject("REJECT_PATH", f"path denied: {path!r}")
+    if name_only:
+        # Paths only: no blob content is read, so content redaction is
+        # intentionally skipped (there is nothing to redact).
+        subargv = ["diff", "--name-only", f"{base}..{head}"]
+        if path is not None:
+            subargv.extend(["--", path])
+        proc = _run_checked(server, subargv, lane)
+        evidence = _evidence_entry(server, subargv, proc, lane)
+        paths = [
+            line.strip()
+            for line in (proc.stdout or "").splitlines()
+            if line.strip()
+        ]
+        result: dict = {
+            "tool": "git.diff",
+            "base": base,
+            "head": head,
+            "name_only": True,
+            "paths": paths,
+            "count": len(paths),
+            "executed": True,
+            "evidence": evidence,
+        }
+        if path is not None:
+            result["path"] = path
+        return result
     subargv = ["diff", "--no-ext-diff", "--no-textconv", base, head]
     if path is not None:
         subargv.extend(["--", path])
@@ -659,7 +696,7 @@ def _execute_read_file(server, args: dict) -> dict:
     rev = args.get("rev")
     path = args.get("path")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     if not isinstance(rev, str) or not isinstance(path, str):
         raise Reject("REJECT_ARG", "git.read_file requires rev and path")
     if is_traversal_or_absolute("git.read_file", "path", path):
@@ -688,7 +725,7 @@ def _execute_evidence_hash(server, args: dict) -> dict:
     rev = args.get("rev")
     path = args.get("path")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     if not isinstance(rev, str) or not re.fullmatch(r"[a-f0-9]{40}", rev):
         raise Reject("REJECT_ARG", f"rev must be 40-hex: {rev!r}")
     if not isinstance(path, str) or not path:
@@ -734,7 +771,7 @@ def _execute_push_ref(server, args: dict) -> dict:
     ref = args.get("ref")
     expected_head = args.get("expected_head")
     lane = args.get("lane")
-    resolve_repo_root(lane)
+    resolve_required_lane(lane, factory_root())
     if not isinstance(ref, str) or not isinstance(expected_head, str):
         raise Reject("REJECT_ARG", "git.push_ref requires ref and expected_head")
     if not ref.startswith("refs/heads/"):

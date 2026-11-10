@@ -29,7 +29,8 @@ Resolution rules:
 
 Workspace mode (``--workspace <dir>``) emits ``<dir>/opencode.json`` for a
 session root: absolute plugin/carbon paths pinned to this harness, absolute
-``cwd``, ``CARBON_HARNESS`` for the authz plugin, and one ``basemind-*``
+``cwd``, ``CARBON_HARNESS`` for the authz plugin, and ``CARBON_WORKSPACE``
+(the absolute session root) on every carbon stanza, and one ``basemind-*``
 server per lane in ``files/policies/worktree-map.json`` rooted at that lane's
 absolute path. Globally-provided servers (playwright/chrome-devtools/context7)
 are intentionally not duplicated.
@@ -240,7 +241,11 @@ def build_workspace_config(workspace: Path) -> tuple[dict, list[str]]:
             "cwd": str(workspace),
             "disabled": False,
             "codemode": False,
-            "environment": {"CARBON_ROLE": role, "CARBON_HARNESS": str(factory)},
+            "environment": {
+                "CARBON_ROLE": role,
+                "CARBON_HARNESS": str(factory),
+                "CARBON_WORKSPACE": str(workspace),
+            },
             "timeout": dict(CARBON_TIMEOUT),
         }
 

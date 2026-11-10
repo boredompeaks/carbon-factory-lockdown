@@ -7,6 +7,9 @@ OpenCode ordered rules (last match wins).
 
 Emission contract (spec 6C-1a):
   * blanket deny first: { action: "*", resource: "*", effect: deny }
+  * orchestrator only: one execute allow on "*" directly after the blanket
+    deny, so the root Code Mode execute path runs; nested tool calls still
+    re-check their own rules. No other role receives execute.
   * tool allows: one allow per registry tool the role may call (sorted),
     emitted as the OpenCode V2 MCP resource name
     `carbon_<role>_<tool>` (role `-` -> `_`, tool `.` -> `_`); e.g.
@@ -331,6 +334,9 @@ def render_role(role: str, tools: set[str]) -> list[str]:
     lines.append("permissions:")
     # 1. blanket deny
     lines.append('  - { action: "*", resource: "*", effect: deny }')
+    # 1b. orchestrator-only Code Mode execute path (nested tools re-check)
+    if role == "orchestrator":
+        lines.append('  - { action: execute, resource: "*", effect: allow }')
     # 2. tool allows (sorted), as server-prefixed MCP action names
     for tool in sorted(tools):
         lines.append(
@@ -420,6 +426,20 @@ def validate(text: str, roles: list[str], tools_by_role: dict[str, set[str]]) ->
         blanket = [ln for ln in blk if _rule_has_action(ln, '"*"') and "deny" in ln]
         if len(blanket) != 1:
             problems.append(f"{role}: blanket deny count={len(blanket)} (want 1)")
+        # execute allow is orchestrator-only (root Code Mode path).
+        exec_allows = [
+            ln for ln in blk if _rule_has_action(ln, "execute") and "allow" in ln
+        ]
+        if role == "orchestrator":
+            if len(exec_allows) != 1 or '"*"' not in exec_allows[0]:
+                problems.append(
+                    f"orchestrator: execute allow count={len(exec_allows)} "
+                    '(want 1 on "*")'
+                )
+        elif exec_allows:
+            problems.append(
+                f"{role}: execute allow forbidden ({len(exec_allows)} lines)"
+            )
         # tool allows == projection
         tools_out = sorted(
             ln.split('resource: "')[1].split('"')[0]

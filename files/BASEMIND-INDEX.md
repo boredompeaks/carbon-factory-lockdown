@@ -60,9 +60,11 @@ or a secret that has since been removed from HEAD is still reachable via
 history). Never treat its output as policy evidence or as proof that a path is
 readable at HEAD; history and diff questions for other roles must go through
 carbon `git.*` (`git.state`, `git.status`, `git.log`, `git.diff`,
-`git.read_file`), which enforce the same path denies. `basemind_shell` is
-`ask` only, `basemind_admin` / `basemind_agents` are never granted — see each
-agent's Tool surface; this document adds no grant.
+`git.read_file`), which enforce the same path denies.
+
+Valid `basemind_git` modes: `status|recent|touching|by_path|churn|diff|diff_outline|blame|blame_symbol|symbol_history|search|show`. `diff` requires `path`; the other modes take their documented ref/path arguments. The `admin|agents|shell` surfaces stay denied:
+`basemind_admin` / `basemind_agents` are never granted, and `basemind_shell`
+stays `ask` only — see each agent's Tool surface; this document adds no grant.
 
 ## Scan statistics (2026-11-09)
 

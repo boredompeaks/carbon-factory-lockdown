@@ -37,7 +37,7 @@ from pathlib import Path
 
 from ..core.redact import cache_key
 from ..core.validate import Reject
-from ..git.lane import resolve_repo_root
+from ..git.lane import resolve_required_lane
 
 _GATE_RUN_CHECKS = frozenset({
     "SCOPE",
@@ -108,9 +108,13 @@ def _policies_dir() -> Path:
 
 
 def _repo_root(lane: str | None = None) -> Path:
-    """Repo inputs root: the lane worktree when supplied, else factory."""
-    if lane is not None:
-        return resolve_repo_root(lane)
+    """Repo inputs root: the lane worktree when supplied, else factory.
+
+    In a workspace session (``CARBON_WORKSPACE`` set) an omitted lane is
+    ambiguous and fails closed instead of silently using the factory.
+    """
+    if lane is not None or os.environ.get("CARBON_WORKSPACE"):
+        return resolve_required_lane(lane, _harness_root())
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -703,7 +707,8 @@ def execute(server, tool: str, role: str, args: dict) -> dict | None:
     if not check_id:
         raise Reject("REJECT_PRECONDITION", "check_id missing; refusing to fabricate PASS")
     # Fail closed before any tool/gate spawn on an unknown or missing lane.
-    resolve_repo_root(lane)
+    # A workspace session must name its lane explicitly.
+    resolve_required_lane(lane, _harness_root())
     # 9 local tool checks (argv-only, 180s, JSON envelope).
     if check_id in _TOOL_CHECKS:
         base_result: dict = {

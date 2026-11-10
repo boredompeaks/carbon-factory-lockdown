@@ -42,6 +42,7 @@ from pathlib import Path
 
 from ..core import platform as _platform
 from ..core.validate import Reject
+from ..git.lane import resolve_required_lane
 from .leases import _TTL_SECONDS, k1_run_dir, reap_expired_leases
 
 _TIMEOUT = 180
@@ -140,7 +141,19 @@ def _child_env() -> dict[str, str]:
     return env
 
 
-def _run(argv: list[str], timeout: int = _TIMEOUT) -> subprocess.CompletedProcess:
+def _repo_cwd(lane: str | None = None) -> Path:
+    """Factory or lane repo root (no implicit fallback in a workspace)."""
+    return resolve_required_lane(lane, _HARNESS_ROOT)
+
+
+def _run(
+    argv: list[str],
+    timeout: int = _TIMEOUT,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess:
+    child_env = _child_env()
+    if env:
+        child_env.update(env)
     try:
         return subprocess.run(
             argv,
@@ -150,7 +163,7 @@ def _run(argv: list[str], timeout: int = _TIMEOUT) -> subprocess.CompletedProces
             encoding="utf-8",
             errors="replace",
             timeout=timeout,
-            env=_child_env(),
+            env=child_env,
             cwd=str(_HARNESS_ROOT),
         )
     except FileNotFoundError as exc:
@@ -495,13 +508,12 @@ def _up_native(server, tool: str, args: dict) -> dict:
     run_id = _check_run_id(str(args.get("run_id", "")))
     base = _check_sha(str(args.get("base", "")), "base")
     head = _check_sha(str(args.get("head", "")), "head")
+    lane = args.get("lane")
     docker = _docker()
     git = _platform.git_binary()
-    # Discover the worktree (mirror k1_up.ps1: git rev-parse --show-toplevel).
-    repo = _HARNESS_ROOT
-    disc = _try_run([git, "-C", str(_HARNESS_ROOT), "rev-parse", "--show-toplevel"], timeout=30)
-    if disc is not None and disc.returncode == 0 and (disc.stdout or "").strip():
-        repo = Path(disc.stdout.strip())
+    # A lane targets that lane's worktree; no lane targets the factory unless
+    # a workspace session makes the omission ambiguous (fail closed there).
+    repo = _repo_cwd(lane)
     if not repo.is_dir():
         raise Reject("REJECT_PRECONDITION", f"repository not found: {repo}")
     for sha in (base, head):
@@ -636,15 +648,24 @@ def _up_native(server, tool: str, args: dict) -> dict:
         "app_id": _container_id(docker, app),
         "pg_id": _container_id(docker, pg),
     }
+    if lane is not None:
+        lease["lane"] = lane
     _leases(server)[run_id] = lease
-    return {
+    evidence = _evidence(app_run_argv, app_run_proc)
+    evidence["repo"] = str(repo)
+    if lane is not None:
+        evidence["lane"] = lane
+    result = {
         "tool": tool, "run_id": run_id, "base": base, "head": head,
         "executed": True, "lease": True, "ttl_seconds": _TTL_SECONDS,
         "app": app, "pg": pg, "net": net,
         "app_id": lease["app_id"], "pg_id": lease["pg_id"],
         "stdout": _trunc(out), "stderr": "",
-        "evidence": _evidence(app_run_argv, app_run_proc),
+        "evidence": evidence,
     }
+    if lane is not None:
+        result["lane"] = lane
+    return result
 
 
 def _copy_artifacts_native(docker: str, app: str, run_dir: Path) -> tuple[str, str]:
@@ -815,7 +836,204 @@ def _down_native(server, tool: str, args: dict) -> dict:
     }
 
 
+_K1_SERVICES = ("app", "pg")
+
+
+def _compose_file() -> Path:
+    path = _HARNESS_ROOT / "files" / "docker" / "k1" / "compose.yaml"
+    if not path.is_file():
+        raise Reject(
+            "REJECT_PRECONDITION",
+            f"runtime unavailable: compose file missing: {path}",
+        )
+    return path
+
+
+def _services_arg(args: dict) -> list[str]:
+    raw = args.get("services")
+    if raw is None:
+        return list(_K1_SERVICES)
+    if not isinstance(raw, list):
+        raise Reject("REJECT_ARG", "services must be an array")
+    services: list[str] = []
+    for item in raw:
+        if not isinstance(item, str):
+            raise Reject("REJECT_ARG", "services items must be strings")
+        if item not in _K1_SERVICES:
+            raise Reject(
+                "REJECT_ENUM",
+                f"service {item!r} not in {list(_K1_SERVICES)!r}",
+            )
+        if item not in services:
+            services.append(item)
+    if not services:
+        raise Reject("REJECT_ARG", "services must not be empty")
+    return services
+
+
+def _wait_health_arg(args: dict) -> int:
+    """wait_health is an integer 0..600 seconds; absent/None -> 0."""
+    value = args.get("wait_health")
+    if value is None:
+        return 0
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise Reject("REJECT_ARG", "wait_health must be an integer 0..600 seconds")
+    if not 0 <= value <= 600:
+        raise Reject("REJECT_ARG", "wait_health must be within 0..600 seconds")
+    return value
+
+
+def _ensure_start(server, tool: str, args: dict) -> dict:
+    """Start the K1 compose services; never pull/build, fail closed preflight."""
+    services = _services_arg(args)
+    wait_seconds = _wait_health_arg(args)
+    lane = args.get("lane")
+    repo = _repo_cwd(lane) if lane is not None else None
+    compose = _compose_file()
+    docker = _docker()
+
+    info_argv = [docker, "info"]
+    info = _run(info_argv, timeout=60)
+    if info.returncode != 0:
+        detail = _trunc((info.stderr or info.stdout or "").strip(), 500)
+        raise Reject(
+            "REJECT_PRECONDITION",
+            f"docker engine not ready (exit {info.returncode}): {detail}; "
+            "run docker.ensure action=ensure first",
+        )
+
+    password = os.environ.get("POSTGRES_PASSWORD") or os.environ.get("K1_POSTGRES_PASSWORD")
+    if not isinstance(password, str) or not password.strip():
+        raise Reject(
+            "REJECT_PRECONDITION",
+            "runtime unavailable: POSTGRES_PASSWORD missing; "
+            "refusing to start K1 compose without a password",
+        )
+
+    refs: list[str] = []
+    if "app" in services:
+        refs.append(_app_image_ref())
+    if "pg" in services:
+        refs.append(_pg_image_ref())
+    missing: list[str] = []
+    for ref in refs:
+        insp = _try_run([docker, "image", "inspect", ref], timeout=30)
+        if insp is None or insp.returncode != 0:
+            missing.append(ref)
+    if missing:
+        raise Reject(
+            "REJECT_PRECONDITION",
+            "k1 compose start: refused: IMAGE_MISSING: "
+            f"{', '.join(missing)} not present locally (not pulling, not building)",
+        )
+
+    argv = [docker, "compose", "-f", str(compose), "up", "-d", "--no-build", "--pull", "never"]
+    if wait_seconds > 0:
+        argv.extend(["--wait", "--wait-timeout", str(wait_seconds)])
+    argv.extend(services)
+    env = {"POSTGRES_PASSWORD": password}
+    if repo is not None:
+        env["K1_BASE"] = str(repo)
+        env["K1_HEAD"] = str(repo)
+    proc = _run(argv, timeout=300, env=env)
+    if proc.returncode != 0:
+        detail = _trunc((proc.stderr or proc.stdout or "").strip(), 1000)
+        raise Reject(
+            "REJECT_PRECONDITION",
+            f"docker compose up failed (exit {proc.returncode}): {detail}",
+        )
+    evidence = _evidence(argv, proc)
+    evidence["repo"] = str(repo) if repo is not None else str(_HARNESS_ROOT)
+    if lane is not None:
+        evidence["lane"] = lane
+    result: dict = {
+        "tool": tool,
+        "action": "start",
+        "executed": True,
+        "started": True,
+        "services": services,
+        "wait_health": wait_seconds,
+        "compose": str(compose),
+        "stdout": _trunc(proc.stdout or ""),
+        "stderr": _trunc(proc.stderr or ""),
+        "evidence": evidence,
+    }
+    if lane is not None:
+        result["lane"] = lane
+    return result
+
+
+def _ensure_health(server, tool: str, args: dict) -> dict:
+    """Report engine + K1 compose container health; never starts anything."""
+    services = _services_arg(args)
+    docker = _docker()
+    info_argv = [docker, "info"]
+    info = _run(info_argv, timeout=60)
+    engine_ready = info.returncode == 0
+
+    ps_argv = [
+        docker, "ps", "-a",
+        "--filter", "label=com.docker.compose.project=k1",
+        "--format", "{{.Names}}\t{{.State}}\t{{.Status}}",
+    ]
+    ps_proc = _run(ps_argv, timeout=60)
+    observed: dict[str, dict] = {}
+    for line in (ps_proc.stdout or "").splitlines():
+        parts = line.split("\t")
+        if len(parts) < 2:
+            continue
+        name, state = parts[0].strip(), parts[1].strip()
+        status = parts[2].strip() if len(parts) > 2 else ""
+        if not name:
+            continue
+        svc = name
+        for known in _K1_SERVICES:
+            if name in (known, f"k1-{known}", f"k1-{known}-1") or name.startswith(f"k1-{known}-"):
+                svc = known
+                break
+        observed[svc] = {
+            "container": name,
+            "state": state,
+            "running": state.lower() == "running",
+            "status": status,
+        }
+    entries = {
+        svc: observed.get(svc, {
+            "container": None, "state": "missing", "running": False, "status": "not found",
+        })
+        for svc in services
+    }
+    unhealthy = any("unhealthy" in e["status"].lower() for e in entries.values())
+    running = bool(entries) and all(e["running"] for e in entries.values())
+    healthy = engine_ready and running and not unhealthy
+    info_entry = _evidence(info_argv, info)
+    evidence = dict(info_entry)
+    evidence["commands"] = [info_entry, _evidence(ps_argv, ps_proc)]
+    return {
+        "tool": tool,
+        "action": "health",
+        "executed": True,
+        "started": False,
+        "engine_ready": engine_ready,
+        "healthy": healthy,
+        "services": entries,
+        "stdout": _trunc((info.stdout or "") + (ps_proc.stdout or "")),
+        "stderr": _trunc((info.stderr or "") + (ps_proc.stderr or "")),
+        "evidence": evidence,
+    }
+
+
 def _ensure(server, tool: str, args: dict) -> dict:
+    action = args.get("action", "ensure")
+    if not isinstance(action, str) or action not in ("ensure", "start", "health"):
+        raise Reject(
+            "REJECT_ENUM",
+            f"action {action!r} not in docker.ensure allowlist",
+        )
+    if action == "start":
+        return _ensure_start(server, tool, args)
+    if action == "health":
+        return _ensure_health(server, tool, args)
     if _use_native():
         return _ensure_native(server, tool, args)
     script = _script("ensure_docker.ps1")
@@ -836,6 +1054,10 @@ def _ensure(server, tool: str, args: dict) -> dict:
 
 
 def _up(server, tool: str, args: dict) -> dict:
+    lane = args.get("lane")
+    # Fail closed on an unknown lane (and on an ambiguous workspace session)
+    # before any runtime work, on both the native and script paths.
+    repo = _repo_cwd(lane)
     if _use_native():
         return _up_native(server, tool, args)
     run_id = _check_run_id(str(args.get("run_id", "")))
@@ -845,6 +1067,8 @@ def _up(server, tool: str, args: dict) -> dict:
     ps = _powershell()
     argv = [ps, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script),
             "-RunId", run_id, "-Base", base, "-Head", head]
+    if lane is not None:
+        argv.extend(["-Repo", str(repo)])
     proc = _run(argv)
     if proc.returncode != 0:
         detail = _trunc((proc.stderr or proc.stdout or "").strip(), 1000)
@@ -870,15 +1094,24 @@ def _up(server, tool: str, args: dict) -> dict:
         "app_id": _container_id(docker, app),
         "pg_id": _container_id(docker, pg),
     }
+    if lane is not None:
+        lease["lane"] = lane
     _leases(server)[run_id] = lease
-    return {
+    evidence = _evidence(argv, proc)
+    evidence["repo"] = str(repo)
+    if lane is not None:
+        evidence["lane"] = lane
+    result = {
         "tool": tool, "run_id": run_id, "base": base, "head": head,
         "executed": True, "lease": True, "ttl_seconds": _TTL_SECONDS,
         "app": app, "pg": pg, "net": net,
         "app_id": lease["app_id"], "pg_id": lease["pg_id"],
         "stdout": _trunc(out), "stderr": _trunc(proc.stderr or ""),
-        "evidence": _evidence(argv, proc),
+        "evidence": evidence,
     }
+    if lane is not None:
+        result["lane"] = lane
+    return result
 
 
 def _status(server, tool: str, args: dict) -> dict:

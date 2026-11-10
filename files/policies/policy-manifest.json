@@ -3,12 +3,12 @@
   "version": 2,
   "owner_only": true,
   "read_deny_rule": "**/policy-manifest.json",
-  "created_at": "2026-11-10T04:20:53Z",
-  "file_count": 275,
+  "created_at": "2026-11-10T05:40:13Z",
+  "file_count": 277,
   "files": [
     {
       "path": "agent:files/BASEMIND-INDEX.md",
-      "sha256": "badc042b071722c33dfa1a0fb4f444c7eccc35602b8f617fc3fd15458cf192cc"
+      "sha256": "c1ad102fc0abc84865dc9d80b127487b4baac76b5c3ccde70f7291f79d151032"
     },
     {
       "path": "agent:files/CHANGELOG-PHASE1-PHASE2-2026-11-07.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "agent:files/orchestrator.md",
-      "sha256": "d6c6aaf5caf74e33c76cb4696edf6116c1821ddfabf5fa5a40cd089284fe4c58"
+      "sha256": "e94006c844bc2c5ff8e85a47b3fe42273fc2006e03d073b95230190f11d6421f"
     },
     {
       "path": "agent:files/release-engineer.md",
@@ -112,7 +112,7 @@
     },
     {
       "path": "files/tools/mcp/checks/handlers.py",
-      "sha256": "0db3853dedd869c8cbc0e0eecf37a66251c1da572c764c3baf5112c9bd0bc48a"
+      "sha256": "8814f6342a634f65753133d8c64d8f582c856ef751f0fc18589c61e6bb939816"
     },
     {
       "path": "files/tools/mcp/checks/policy.py",
@@ -140,7 +140,7 @@
     },
     {
       "path": "files/tools/mcp/core/redact.py",
-      "sha256": "c9a821ba020804911a4a54a00370b513b2c916a5567a7a16ec53769e012902e7"
+      "sha256": "ceda24d77795c293af8dd036e0dbe4e699a4195a99dbe5536ddfd1ca4edd1aa0"
     },
     {
       "path": "files/tools/mcp/core/server.py",
@@ -159,8 +159,16 @@
       "sha256": "10c7f9d02ec3a2ba7a379930e663c7abc985915590f886171b20a8c7ac04cc4b"
     },
     {
+      "path": "files/tools/mcp/factory/__init__.py",
+      "sha256": "0c2bb6b71edf68623e54023d254fac23b1a3197a8110d9851256f3698cd6840e"
+    },
+    {
+      "path": "files/tools/mcp/factory/doctor.py",
+      "sha256": "7c9e8ff6ee44f5ae9053e7e988bfb3a8cd458612472f85d942e7115de5aa378d"
+    },
+    {
       "path": "files/tools/mcp/gen_perms.py",
-      "sha256": "186863dd950f71a641930e01e630ce104f047b45c6720ac8ed71a0a2f76a87fd"
+      "sha256": "72ff412c3f2c910ff3ae7ce6de3bcb57600d4cd538ce14719648e5f3f0a6bee7"
     },
     {
       "path": "files/tools/mcp/git/__init__.py",
@@ -172,11 +180,11 @@
     },
     {
       "path": "files/tools/mcp/git/handlers.py",
-      "sha256": "833586d61b59049a40a3a1fb592d91616ded4319f1a5dde7dbebf232d73cd211"
+      "sha256": "23c56d965f2c686cfb774fe4483c9d294ede5a81755ce80653eca983ae83c810"
     },
     {
       "path": "files/tools/mcp/git/lane.py",
-      "sha256": "c6ab8960fd074eb854be9aa381fa0badf2a31486b2ad173be4c64039fc134361"
+      "sha256": "1ab245ec45dd3a62ed819c5f3c37ae6e29233a95eff6fca38c19a544642d3f90"
     },
     {
       "path": "files/tools/mcp/hacker/__init__.py",
@@ -196,7 +204,7 @@
     },
     {
       "path": "files/tools/mcp/k1/handlers.py",
-      "sha256": "9490d93ac92acb5dc37d7dee5a1d81f61ae7e9eb36f4df63dbb81d6d5ec507ec"
+      "sha256": "e15c362e56528dca59beff991eed44d814f767781b26730de06866f4bb38e653"
     },
     {
       "path": "files/tools/mcp/k1/leases.py",
@@ -212,7 +220,7 @@
     },
     {
       "path": "files/tools/mcp/ledger/handlers.py",
-      "sha256": "37449ec488f846871fa150cbf3c9f96cfa0b0ac073eacdbd5c9fbab5bf202a8f"
+      "sha256": "1d6608e9b64a5eb983ee9bb6a76de1c982febdf74f7ede7b43911a0cf996384e"
     },
     {
       "path": "files/tools/mcp/ledger/store.py",
@@ -220,7 +228,7 @@
     },
     {
       "path": "files/tools/mcp/registry.json",
-      "sha256": "03e56eb7d6dca24778f2ad1f0e76a60c8e9e124f3e60440c3b614bad8f948756"
+      "sha256": "871e45f6b4774cff6d3de3a2772b5cfc10d597800cdc338c216e6c3235ca3625"
     },
     {
       "path": "files/tools/mcp/registry.schema.json",
@@ -656,7 +664,7 @@
     },
     {
       "path": "harness:.opencode/lib/authz-core.js",
-      "sha256": "483a961656120532edfd2a30160e1f0a13833e5b77c17a14af6ffad8bb368ecf"
+      "sha256": "408077a3d8cb4f122ed922c744547082ed750d814521d06ba7f7d98680abcaaa"
     },
     {
       "path": "harness:.opencode/package-lock.json",
@@ -700,7 +708,7 @@
     },
     {
       "path": "installed_agent:.opencode/agents/orchestrator.md",
-      "sha256": "d6c6aaf5caf74e33c76cb4696edf6116c1821ddfabf5fa5a40cd089284fe4c58"
+      "sha256": "e94006c844bc2c5ff8e85a47b3fe42273fc2006e03d073b95230190f11d6421f"
     },
     {
       "path": "installed_agent:.opencode/agents/release-engineer.md",
@@ -952,7 +960,7 @@
     },
     {
       "path": "script:scripts/gen_opencode_config.py",
-      "sha256": "b36fbb581a5a92ed41a7da6596c66b537dbbf5f613ee91c0c2e8278f823bb2bd"
+      "sha256": "59ee8a40f7bb72589475a1c7b6f473b7f1b2a7cadc3b93e66832490be635ca4f"
     },
     {
       "path": "script:scripts/generate_policies.py",
@@ -984,7 +992,7 @@
     },
     {
       "path": "skill:.opencode/skills/dispatch/SKILL.md",
-      "sha256": "d7cd3a048ee3f1991e558e5d8f9348e53308aa0bc1ef1215800cc0fcd387fb0d"
+      "sha256": "172cfdeccf906400bd30f39e365e74fce79ccbfd81ec4cac3bfe90e5fcdd96f4"
     },
     {
       "path": "skill:.opencode/skills/django-test/SKILL.md",
@@ -1110,18 +1118,20 @@
   "digests": {
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
-    "gate_impl_digest": "eeb1e1e7f0d3f3ef92ef5387f2c8c3f64a73fd99b4543ffba0a2fa1dfc222621"
+    "gate_impl_digest": "af4a1369981aa8f462f88b3515d4bfffbca0ca443f1b503fcddd1cdc050e504b"
   },
   "gate_control": {
-    "record": "0031-3d8eb3cf2323.json",
-    "record_hash": "e12fc34b89897f62806efc7962007ba8cd228794a008707204caa0726e5507a5",
-    "gate_sha": "3d8eb3cf23231aa0b54ad5e33829f76b35c7d182",
+    "record": "0032-e702c011ccfc.json",
+    "record_hash": "5ede26ed65bcbfc1db8ae9d9881acfc7a4c968049c30a170778994d3042cc1a6",
+    "gate_sha": "e702c011ccfcdce63265b3c16d6b59cd3c9e1e8e",
     "policy_digest": "cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3",
     "control_set_sha": "4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011",
     "gate_impl_digest": "eeb1e1e7f0d3f3ef92ef5387f2c8c3f64a73fd99b4543ffba0a2fa1dfc222621",
     "result": "PASS"
   },
-  "drift": [],
+  "drift": [
+    "gate_impl_digest: live af4a1369981aa8f462f88b3515d4bfffbca0ca443f1b503fcddd1cdc050e504b != record eeb1e1e7f0d3f3ef92ef5387f2c8c3f64a73fd99b4543ffba0a2fa1dfc222621"
+  ],
   "dependencies": {
     "policy_digest": {
       "covers": [
@@ -1215,5 +1225,5 @@
       ]
     }
   },
-  "manifest_sha": "d0afffbb534127bdbc39d4488caac6a4fd21d90ee999461985c6613c0350cb3c"
+  "manifest_sha": "dcc3083c06effabc4b4f3b2dd2a870bcaddf5a9cd9ff08334cf12f9c5124a401"
 }

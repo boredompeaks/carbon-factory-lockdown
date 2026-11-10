@@ -16,6 +16,7 @@
 //     by this same decision table (F5).
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const WRITE_TOOLS = new Set(["edit", "write", "patch"]);
@@ -70,6 +71,14 @@ const SENSITIVE_DIRS = new Set([
   "hacker-scratch",
   "audit-scratch",
 ]);
+
+// Debug reads are a narrow exception to the `.opencode` deny: source files in
+// the plugin and authz-core directories are readable by the oversight roles.
+const DEBUG_READ_ROLES = new Set(["orchestrator", "auditor", "compliance"]);
+
+function isDebugSourceRel(rel) {
+  return /^\.opencode\/(?:plugins|lib)\/[^/]+\.js$/.test(toPosix(rel));
+}
 
 export function defaultFactoryRoot() {
   if (process.env.CARBON_HARNESS) return path.resolve(process.env.CARBON_HARNESS);
@@ -179,19 +188,40 @@ export function canonicalToolName(tool) {
 
 // Server prefixes may use `-` or `_` (OpenCode V2 normalizes actions to
 // `carbon_orchestrator_git_state`). Carbon's role segment has no `_`, so the
-// tool boundary is unambiguous; Basemind adds an optional `lane[-_]<lane>`
-// segment, and a plain `basemind_git` server has no lane at all.
+// tool boundary is unambiguous; Basemind adds a server segment that may be a
+// lane (`lane_a`, `lane-a`) or an explicit server such as `spec-comp`, and a
+// plain `basemind_git` server has no server segment at all.
+const BASEMIND_ALLOW = new Set(["git", "graph", "workspace", "code", "memory", "web"]);
+const BASEMIND_DENY = new Set(["admin", "agents", "shell"]);
+const BASEMIND_VERBS = new Set([...BASEMIND_ALLOW, ...BASEMIND_DENY]);
+
+// After `basemind[-_]`, the tool suffix starts at the first segment that is a
+// known Basemind verb. This covers `spec-comp_git`, `lane_a_graph`,
+// `lane-a_web`, and the no-server form `git` (where the first segment is the
+// verb). Unknown server shapes are left untouched so they still fail closed.
+function stripBasemindPrefix(rest) {
+  if (!rest) return rest;
+  const parts = rest.split("_");
+  if (BASEMIND_VERBS.has(parts[0].split(".")[0])) return rest;
+  for (let i = 1; i < parts.length; i += 1) {
+    if (BASEMIND_VERBS.has(parts[i].split(".")[0])) return parts.slice(i).join("_");
+  }
+  return rest;
+}
+
 export function stripServerPrefix(tool) {
-  return normalizeTool(tool)
-    .replace(/^carbon[-_][a-z0-9-]+[._]/, "")
-    .replace(/^basemind[-_](?:lane[-_][a-z0-9-]+[._])?/, "");
+  const name = normalizeTool(tool);
+  if (/^carbon[-_]/.test(name)) {
+    return name.replace(/^carbon[-_][a-z0-9-]+[._]/, "");
+  }
+  if (/^basemind[-_]/.test(name)) {
+    return stripBasemindPrefix(name.replace(/^basemind[-_]/, ""));
+  }
+  return name;
 }
 
 // Basemind is a read-only surface: these verbs are allowed without a lane
 // capability because the orchestrator sits at the workspace root.
-const BASEMIND_ALLOW = new Set(["git", "graph", "workspace", "code", "memory", "web"]);
-const BASEMIND_DENY = new Set(["admin", "agents", "shell"]);
-
 function basemindVerb(tool) {
   const name = normalizeTool(tool);
   if (!/^basemind[-_]/.test(name)) return null;
@@ -619,6 +649,81 @@ export function createAuthz(options = {}) {
   const worktreeMap = loadWorktreeMap(factoryRoot);
   const workspaceRoots = workspaceRootsFromMap(worktreeMap);
 
+  // F6: a session whose directory is exactly a workspace root (the parent of
+  // the mapped lanes, never a lane itself) holds a session-bound root
+  // capability. It lives only in plugin storage: no capability ledger write,
+  // no task_branch, and selectCapability requires task_branch === lane, so a
+  // root capability can never authorize a lane write. It grants exactly the
+  // root actions `execute`, `skill`, and `subagent` for orchestrator.
+  const ROOT_CAP_TTL_MS = 3600_000;
+  const ROOT_CAP_ACTIONS = ["execute", "skill", "subagent"];
+
+  function rootCapabilityID(sessionID) {
+    return "cap_root_" + createHash("sha256").update(String(sessionID)).digest("hex");
+  }
+
+  function isWorkspaceRootDir(sessionDir) {
+    const real = safeReal(sessionDir);
+    if (!real) return false;
+    return workspaceRoots.some((root) => safeReal(root) === real);
+  }
+
+  function liveRootCap(record, capabilityID, sessionID, timestamp) {
+    if (!record || typeof record !== "object" || Array.isArray(record)) return false;
+    if (record.capability_id !== capabilityID) return false;
+    if (record.session_id !== sessionID) return false;
+    if (record.role !== "orchestrator" || record.kind !== "root") return false;
+    if (record.task_branch !== null) return false;
+    if (!Array.isArray(record.actions)) return false;
+    if (!ROOT_CAP_ACTIONS.every((action) => record.actions.includes(action))) return false;
+    const expires = Date.parse(record.expires_at);
+    return Number.isFinite(expires) && expires > timestamp;
+  }
+
+  async function loadRootCap(sessionID, sessionDir) {
+    if (typeof sessionID !== "string" || !sessionID) {
+      return { error: "root capability requires a session id" };
+    }
+    if (!isWorkspaceRootDir(sessionDir)) return { cap: null };
+    const capabilityID = rootCapabilityID(sessionID);
+    const key = `authz:rootcap:${sessionID}`;
+    const timestamp = now();
+    let cached;
+    try {
+      cached = await storage.get(key);
+    } catch (err) {
+      return { error: `root capability read failed: ${err?.message ?? err}` };
+    }
+    if (liveRootCap(cached, capabilityID, sessionID, timestamp)) return { cap: cached };
+    const cap = {
+      capability_id: capabilityID,
+      session_id: sessionID,
+      role: "orchestrator",
+      kind: "root",
+      task_branch: null,
+      scope: [],
+      native_tools: [],
+      actions: [...ROOT_CAP_ACTIONS],
+      expires_at: new Date(timestamp + ROOT_CAP_TTL_MS).toISOString(),
+      budget: { tool_calls: 50 },
+    };
+    try {
+      await storage.set(key, cap);
+    } catch (err) {
+      return { error: `root capability persist failed: ${err?.message ?? err}` };
+    }
+    return { cap };
+  }
+
+  function rootCapAllows(cap, action) {
+    return (
+      cap?.kind === "root" &&
+      cap?.role === "orchestrator" &&
+      Array.isArray(cap.actions) &&
+      cap.actions.includes(action)
+    );
+  }
+
   async function consumeBudget(cap) {
     const limit = cap?.budget?.tool_calls;
     if (!Number.isInteger(limit) || limit < 1) return deny("invalid capability budget");
@@ -673,7 +778,7 @@ export function createAuthz(options = {}) {
     return null;
   }
 
-  function checkReadPath(sessionDir, laneDir, inputPath) {
+  function checkReadPath(sessionDir, laneDir, inputPath, role, { allowDebug = false } = {}) {
     const resolved = resolveInputPath(sessionDir, inputPath);
     if (!resolved) return deny("read path missing");
     const real = safeReal(resolved);
@@ -691,7 +796,11 @@ export function createAuthz(options = {}) {
     const matched = candidates.find((root) => inside(root, real));
     if (!matched) return deny(`read outside allowlist: ${inputPath}`);
     const rel = toPosix(path.relative(matched, real));
-    if (isSensitive(rel)) return deny(`sensitive read: ${inputPath}`);
+    if (isSensitive(rel)) {
+      const debugAllowed =
+        allowDebug && isDebugSourceRel(rel) && DEBUG_READ_ROLES.has(String(role ?? ""));
+      if (!debugAllowed) return deny(`sensitive read: ${inputPath}`);
+    }
     const hardlink = hardlinkDenied(real);
     if (hardlink) return deny(`sensitive read: ${hardlink} (${inputPath})`);
     return null;
@@ -731,11 +840,22 @@ export function createAuthz(options = {}) {
       return allow(`session move to lane ${target.lane} (bootstrap; writes need a capability)`);
     }
 
-    // F5: Code Mode `execute` is orchestrator-only. Nested tool calls re-enter
-    // this decision table with their own input, so nothing is granted here that
-    // the same session could not already do directly.
+    // F5/F6: Code Mode `execute` is orchestrator-only. At the workspace root
+    // the session-bound root capability supplies orchestrator. Nested tool
+    // calls re-enter this decision table with their own input, so nothing is
+    // granted here that the same session could not already do directly.
     if (name === "execute") {
-      if (!lane || !laneDir) return deny("execute requires a mapped-lane session");
+      if (!lane || !laneDir) {
+        const rootState = await loadRootCap(sessionID, sessionDir);
+        if (rootState.error) return deny(rootState.error);
+        if (!rootState.cap) return deny("execute requires a mapped-lane session");
+        if (!rootCapAllows(rootState.cap, "execute")) {
+          return deny("root capability does not grant execute");
+        }
+        return allow(
+          "execute allowed at workspace root for orchestrator (root capability); nested tools re-checked",
+        );
+      }
       const cap = selectCapability({ factoryRoot, lane, sessionID, now: now() });
       if (!cap) return deny(`no unexpired capability for lane ${lane}`);
       if (cap.role !== "orchestrator") {
@@ -762,7 +882,7 @@ export function createAuthz(options = {}) {
     const nativeWrite = WRITE_TOOLS.has(name);
     const registryWrite = registryTool === "code_write";
 
-    const cap = lane
+    let cap = lane
       ? selectCapability({ factoryRoot, lane, sessionID, now: now() })
       : null;
 
@@ -809,6 +929,15 @@ export function createAuthz(options = {}) {
       return budget ?? allow(`${name} inside lane and scope`);
     }
 
+    // Debug-read role is the lane capability role when this session is in a
+    // lane, or the root capability role at a workspace root. Missing/expired
+    // capabilities leave role null, so `.opencode` debug reads stay denied.
+    let readRole = typeof cap?.role === "string" ? cap.role : null;
+    if (!readRole && !lane) {
+      const rootState = await loadRootCap(sessionID, sessionDir);
+      if (!rootState.error) readRole = rootState.cap?.role ?? null;
+    }
+
     if (READ_TOOLS.has(name) || name === "list") {
       if (name === "read") {
         const keyError = validateInputKeys(name, input);
@@ -819,7 +948,9 @@ export function createAuthz(options = {}) {
       const roots = fields.paths.length > 0 ? fields.paths : name === "list" ? ["."] : [];
       if (roots.length === 0) return deny(`${name} path missing`);
       for (const root of roots) {
-        const bad = checkReadPath(sessionDir, laneDir, root);
+        const bad = checkReadPath(sessionDir, laneDir, root, readRole, {
+          allowDebug: name === "read",
+        });
         if (bad) return bad;
       }
       return allow(`${name} inside allowlist`);
@@ -832,7 +963,9 @@ export function createAuthz(options = {}) {
       if (fields.error) return deny(fields.error);
       const roots = fields.paths.length > 0 ? fields.paths : ["."];
       for (const root of roots) {
-        const bad = checkReadPath(sessionDir, laneDir, root);
+        const bad = checkReadPath(sessionDir, laneDir, root, readRole, {
+          allowDebug: name === "grep",
+        });
         if (bad) return bad;
       }
       return allow(`${name} root inside allowlist`);
@@ -841,29 +974,47 @@ export function createAuthz(options = {}) {
     if (name === "skill") {
       const keyError = validateInputKeys(name, input);
       if (keyError) return deny(keyError);
+      if (!cap && !lane) {
+        const rootState = await loadRootCap(sessionID, sessionDir);
+        if (rootState.error) return deny(rootState.error);
+        cap = rootState.cap;
+      }
       if (!cap) return deny("no unexpired capability for skill use");
       if (typeof cap.role !== "string" || !cap.role) return deny("capability role unknown");
+      if (cap.kind === "root" && !rootCapAllows(cap, "skill")) {
+        return deny("root capability does not grant skill");
+      }
       const skillID = input?.id;
       if (typeof skillID !== "string" || !skillID) return deny("skill id missing");
       if (!skillAllowed(factoryRoot, cap.role, skillID)) {
         return deny(`skill ${skillID} not allowed for role ${cap.role}`);
       }
-      return allow(`skill ${skillID} allowed for ${cap.role}`);
+      const audit = cap.kind === "root" ? " (root capability at workspace root)" : "";
+      return allow(`skill ${skillID} allowed for ${cap.role}${audit}`);
     }
 
     if (name === "subagent") {
       const keyError = validateInputKeys(name, input);
       if (keyError) return deny(keyError);
+      if (!cap && !lane) {
+        const rootState = await loadRootCap(sessionID, sessionDir);
+        if (rootState.error) return deny(rootState.error);
+        cap = rootState.cap;
+      }
       if (!cap) return deny("no unexpired capability for subagent use");
       if (cap.role !== "orchestrator") {
         return deny(`subagent requires orchestrator, role is ${cap.role ?? "unknown"}`);
+      }
+      if (cap.kind === "root" && !rootCapAllows(cap, "subagent")) {
+        return deny("root capability does not grant subagent");
       }
       const target = input?.agent;
       if (typeof target !== "string" || !target) return deny("subagent target missing");
       if (!subagentAllowed(factoryRoot, target)) {
         return deny(`subagent target ${target} not allowed by INV-7`);
       }
-      return allow(`subagent ${target} allowed by INV-7`);
+      const audit = cap.kind === "root" ? " (root capability at workspace root)" : "";
+      return allow(`subagent ${target} allowed by INV-7${audit}`);
     }
 
     if (registryTool) {

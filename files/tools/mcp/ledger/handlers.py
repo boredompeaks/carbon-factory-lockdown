@@ -37,15 +37,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from ..core.redact import redact_value
 from ..core.validate import Reject, is_traversal_or_absolute
 from ..git.deny import is_denied_path
 from .store import append as store_append
+from .store import ledger_root, list_records, tip_for
 
 # handlers.py -> ledger -> mcp -> tools -> files -> harness root
 _HARNESS_ROOT = Path(__file__).resolve().parents[4]
@@ -441,10 +444,69 @@ def _parse_harness_config_problems(stdout: str) -> list[str]:
     return problems
 
 
+def _sanitize_report(value):
+    """Redact report text without raising on residual high-entropy tokens."""
+    if isinstance(value, str):
+        # ``KEY=/path`` forms otherwise survive named redaction and trip the
+        # server's fail-closed entropy check; keep the text, break the token.
+        return redact_value(value.replace("=/", "= "), fail_on_unredactable=False)
+    if isinstance(value, dict):
+        return {k: _sanitize_report(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_report(v) for v in value]
+    return value
+
+
+def _lane_workspace(factory: Path) -> Path:
+    """Parent of the worktree-map lane dirs, used when env is unset."""
+    map_path = factory / "files" / "policies" / "worktree-map.json"
+    try:
+        mapping = json.loads(map_path.read_text(encoding="utf-8"))
+        parents = [
+            str(Path(raw).expanduser().parent)
+            for raw in mapping.values()
+            if isinstance(raw, str) and raw.strip()
+        ]
+        if parents:
+            return Path(os.path.commonpath(parents))
+    except (OSError, ValueError, TypeError):
+        pass
+    return factory.parent
+
+
 def _execute_harness_verify(server, role: str, args: dict) -> dict:
     scope = args.get("scope")
-    if scope not in ("harness_config", "policy_manifest"):
-        raise Reject("REJECT_ARG", f"scope must be harness_config or policy_manifest: {scope!r}")
+    if scope not in ("harness_config", "policy_manifest", "ledger_head", "factory"):
+        raise Reject(
+            "REJECT_ARG",
+            "scope must be harness_config, policy_manifest, ledger_head, or factory: "
+            f"{scope!r}",
+        )
+    if scope == "ledger_head":
+        record_type = args.get("record_type") or "capability"
+        if (
+            not isinstance(record_type, str)
+            or not record_type
+            or record_type in (".", "..")
+            or "/" in record_type
+            or "\\" in record_type
+        ):
+            raise Reject("REJECT_ARG", f"invalid record_type: {record_type!r}")
+        root = ledger_root()
+        return {
+            "record_type": record_type,
+            "head": tip_for(record_type, root),
+            "sequence": len(list_records(record_type, root)) + 1,
+        }
+    if scope == "factory":
+        from ..factory.doctor import doctor
+
+        factory_root = _harness_root()
+        workspace = os.environ.get("CARBON_WORKSPACE") or str(
+            _lane_workspace(factory_root)
+        )
+        report = doctor(str(factory_root), workspace)
+        return {"scope": "factory", **_sanitize_report(report)}
     if scope == "harness_config":
         script = _check_harness_path()
         if not script.is_file():

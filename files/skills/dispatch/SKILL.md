@@ -52,6 +52,15 @@ Payload shape (the ledger seal adds `record_hash`; `prev_hash` is the chain enve
 ```
 `budget.tool_calls` is the plan's allowance. The orchestrator enforces `budget.tasks`; the proxy enforces `budget.tool_calls` and `expires_at`. Re-mint at every train/section boundary: every 6 hours or every 6 tasks, whichever comes first, with `parent_capability_id` = the previous `capability_id` and fresh head, tree, and `expires_at`. If no capability exists or it has expired, the proxy denies writes: do not retry blindly and do not widen scope; re-read state and re-mint.
 
+`startup sequence:` run before the first dispatch, in order, and stop at the first blocker:
+1. `harness.verify({ scope: "factory" })` — factory doctor; read `ok`, `blockers`, `facts` and clear the blockers before continuing.
+2. `worktrees.list()` then `git.state({ lane: "<lane>", fields: ["head", "tree", "branch", "clean"] })` — resolve the lane and its live HEADs; never reuse shas from an earlier message.
+3. `k1.up({ lane: "<lane>", run_id: "<id>", base: "<40-hex>", head: "<40-hex>" })` — lane-aware; the run mounts that lane's tree.
+4. `check.run({ lane: "<lane>", check_id: "BOOTTEST", tree: "<40-hex>", engine: "postgres" })`, then the same call with `check_id: "SUITE"` — per-lane evidence, never a factory-wide run.
+5. `docker.ensure({ action: "health" })` — re-confirm the engine before handing the lane to a builder.
+6. Root bootstrap: when the session starts at the workspace root, `execute` → `tools.opencode.session_move({ directory: "<lane path>" })` to enter `lane/a`, `lane/b`, or `spec-comp`; every write after the move needs a live capability (see `capability mint` above).
+7. Always pass `lane` explicitly to `git.*`, `check.run`, and `k1.up`; there is no implicit factory fallback in a workspace session.
+
 `args:`
 - `subagent.agent` (required) — target agent id. Only `mode: subagent` or `mode: all` agents resolve; the orchestrator's permission list allows `builder`, `auditor`, `hacker`, `release-engineer`, `compliance` and denies `*`.
 - `subagent.description` (required) — short label shown in the parent session.

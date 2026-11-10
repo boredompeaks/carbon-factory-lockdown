@@ -4,6 +4,11 @@ Order: secret patterns, then PII patterns, then high-entropy fallback
 with the 6A-4 fixture allowlist. Fail closed (raise) on unredactable
 residue when fail_on_unredactable is true.
 
+Git output rule: hex 32/40/64 object ids are allowed (40/64 standalone,
+32 only with index/From/labelled context); recognised git diff header
+lines may carry slash/filename path tokens. Random 32-char alphanumeric
+tokens and named secrets still redact or fail closed.
+
 Source of patterns: files/policies/redaction.json (version 2).
 The runner contract pinned there is implemented here.
 """
@@ -54,6 +59,33 @@ _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 _SHA_RE = re.compile(r"^[a-f0-9]{40,64}$")
 _ENTROPY_THRESHOLD = 4.5
 
+# Git output rules. Hex object ids: 40/64 are safe standalone; any 7-64 hex
+# is safe inside index/From/labelled context; bare 32-hex still fails closed.
+# Recognised git header lines may carry path tokens (slash + filename/ext).
+_HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
+_HEX_STANDALONE_LENGTHS = frozenset({40, 64})
+_GIT_HEX_CONTEXT_RE = re.compile(
+    r"(?i)(?:"
+    r"\bindex\s+[0-9a-f]{7,64}\.\.[0-9a-f]{7,64}\b"
+    r"|\bFrom\s+[0-9a-f]{7,64}\b"
+    r"|\b(?:commit|tree|parent|base|head|rev|sha|hash)\b[\"']?\s*(?::|=|\s)\s*[\"']?[0-9a-f]{7,64}\b"
+    r")"
+)
+_GIT_HEADER_RE = re.compile(
+    r"(?:^diff --git a/.* b/.*"
+    r"|^--- "
+    r"|^\+\+\+ "
+    r"|^rename from "
+    r"|^rename to "
+    r"|^index "
+    r"|^new file mode "
+    r"|^deleted file mode "
+    r"|^similarity index "
+    r"|^Binary files )"
+)
+_PATH_EXT_RE = re.compile(r"\.[A-Za-z0-9]{1,8}(?![A-Za-z0-9])")
+_PATH_BASENAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9._~@%+=-]*$")
+
 
 class UnredactableSecret(Exception):
     """Raised when residue cannot be safely redacted; no artifact is emitted."""
@@ -100,6 +132,33 @@ def _is_allowlisted(token: str) -> bool:
     return False
 
 
+def _is_git_hex_allowlisted(token: str, line: str, offset: int) -> bool:
+    """Allow pure hex object ids without opening the door to bare 32-hex."""
+    if not _HEX_RE.match(token):
+        return False
+    if len(token) in _HEX_STANDALONE_LENGTHS:
+        return True
+    if 7 <= len(token) <= 64:
+        for ctx in _GIT_HEX_CONTEXT_RE.finditer(line):
+            if ctx.start() <= offset < ctx.end():
+                return True
+    return False
+
+
+def _is_git_header_path_token(token: str, line: str, offset: int) -> bool:
+    """Allow path tokens on git header lines (never on content lines)."""
+    if "/" not in token or not _GIT_HEADER_RE.match(line):
+        return False
+    basename = token.rsplit("/", 1)[-1]
+    if not _PATH_BASENAME_RE.match(basename):
+        return False
+    # The extension is outside the token because '.' is not a token char.
+    if _PATH_EXT_RE.match(line[offset + len(token):]):
+        return True
+    # Header paths may also be extensionless files (Dockerfile, Makefile).
+    return len(basename) >= 2
+
+
 def _protect_allowlist(text: str) -> tuple[str, dict[str, str]]:
     """Replace allowlisted fixtures with placeholders before redaction."""
     protected: dict[str, str] = {}
@@ -137,7 +196,16 @@ def redact_text(text: str, *, fail_on_unredactable: bool = True) -> str:
     # High-entropy fallback over residue.
     for m in _ENTROPY_RE.finditer(out):
         token = m.group(0)
+        line_start = out.rfind("\n", 0, m.start()) + 1
+        line_end = out.find("\n", m.end())
+        if line_end < 0:
+            line_end = len(out)
+        line = out[line_start:line_end]
         if _is_allowlisted(token):
+            continue
+        if _is_git_hex_allowlisted(token, line, m.start() - line_start):
+            continue
+        if _is_git_header_path_token(token, line, m.start() - line_start):
             continue
         if _shannon(token) >= _ENTROPY_THRESHOLD:
             if fail_on_unredactable:

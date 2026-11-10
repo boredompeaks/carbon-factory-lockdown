@@ -239,6 +239,9 @@
           "type": "string",
           "pattern": "^[a-f0-9]{40}$",
           "maxLength": 40
+        },
+        "name_only": {
+          "type": "boolean"
         }
       },
       "exec_mode": "pure",
@@ -965,6 +968,11 @@
           "head"
         ],
         "additionalProperties": false,
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
         "run_id": {
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
@@ -1777,7 +1785,9 @@
           "type": "string",
           "enum": [
             "harness_config",
-            "policy_manifest"
+            "policy_manifest",
+            "factory",
+            "ledger_head"
           ]
         }
       },
@@ -2007,8 +2017,27 @@
         "action": {
           "type": "string",
           "enum": [
-            "ensure"
+            "ensure",
+            "start",
+            "health"
           ]
+        },
+        "lane": {
+          "type": "string",
+          "pattern": "^(lane/[a-z0-9_-]+|spec-comp)$",
+          "maxLength": 64
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8
+        },
+        "wait_health": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600
         }
       },
       "exec_mode": "pure",

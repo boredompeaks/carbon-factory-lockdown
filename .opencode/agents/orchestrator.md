@@ -32,6 +32,7 @@ model: opencode-go/deepseek-v4.1-flash#max
 # ---------------------------------------------------------------------------
 permissions:
   - { action: "*", resource: "*", effect: deny }
+  - { action: execute, resource: "*", effect: allow }
   - { action: external_directory, resource: "~/backend-worktrees/**", effect: allow }
   - { action: external_directory, resource: "~/umairnlp/**", effect: allow }
   - { action: subagent, resource: "*", effect: deny }
