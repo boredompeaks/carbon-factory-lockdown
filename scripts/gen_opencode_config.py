@@ -9,11 +9,15 @@ per machine. Run this script from the harness root::
     python scripts/gen_opencode_config.py --check   # exit 1 on drift (CI)
 
 Resolution rules:
-  * Python interpreter: ``sys.executable`` when it is a stable path
-    (absolute and an existing file), otherwise ``python3`` on POSIX /
-    ``python`` on Windows. A bare ``python`` breaks on Ubuntu >=22.04
-    (no ``python``, only ``python3``), so the generated config carries
-    the interpreter that exists on *this* host.
+  * Python interpreter: ``CARBON_PYTHON`` env when absolute and present
+    -> factory venv ``~/.local/share/factory-venv/bin/python`` when present
+    (POSIX only) -> ``sys.executable`` when it is a stable path (absolute
+    and an existing file) -> else ``python3`` on POSIX / ``python`` on
+    Windows. A bare ``python`` breaks on Ubuntu >=22.04 (no ``python``,
+    only ``python3``), so the generated config carries an interpreter that
+    exists on *this* host. Preferring the factory venv keeps ``--check``
+    byte-stable whether it is invoked by the venv or by system
+    ``python3`` (``verify_workspace.sh``).
   * ``basemind``: ``BASEMIND_BIN`` env -> ``shutil.which("basemind")``
     -> Windows default ``%LOCALAPPDATA%\\basemind\\bin\\basemind.exe``
     (only when that file exists). When nothing is found the server is
@@ -62,14 +66,28 @@ GLOBAL_SERVERS = ("playwright", "chrome-devtools", "context7")
 
 
 def resolve_python() -> str:
-    """Return the interpreter that exists on this host.
+    """Return the interpreter that generated configs must pin.
 
-    ``sys.executable`` counts as a stable path when it is absolute and an
-    existing file (covers Windows C:\\Python*\\python.exe and POSIX
-    /usr/bin/python3 / venv interpreters). Otherwise fall back to the
-    bare name that exists on that platform: ``python3`` on POSIX,
-    ``python`` on Windows.
+    Order (deterministic regardless of which Python runs the generator):
+
+    1. ``CARBON_PYTHON`` when it is absolute and an existing file.
+    2. The factory venv ``~/.local/share/factory-venv/bin/python`` when it
+       exists (POSIX only; absent paths are skipped, so Windows is
+       unaffected).
+    3. ``sys.executable`` when it is absolute and an existing file.
+    4. The bare name that exists on that platform: ``python3`` on POSIX,
+       ``python`` on Windows.
+
+    Pinning the factory venv keeps ``--check`` stable across callers
+    (factory venv vs. system ``python3`` in ``verify_workspace.sh``).
     """
+    env = os.environ.get("CARBON_PYTHON", "").strip()
+    if env and os.path.isabs(env) and os.path.isfile(env):
+        return env
+    if not sys.platform.startswith("win"):
+        venv = Path.home() / ".local" / "share" / "factory-venv" / "bin" / "python"
+        if venv.is_file():
+            return str(venv)
     exe = sys.executable or ""
     if exe and os.path.isabs(exe) and os.path.isfile(exe):
         return exe

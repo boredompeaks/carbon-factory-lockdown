@@ -137,3 +137,19 @@ record may verify PASS. The dispatch gate-control ref is
 - gate_impl_digest: df41dac826c4f480b2db7eb9ae295fdd315919453ca545067ed05bf73e6e9728
 - record_hash: b364abc7a9bed79526d6176cbaba1692be10d32b778433fbd64afb57ec940c1e
 - result: PASS
+## auto-seal 0025-efc2055bb2ef.json 2026-11-10T03:31:26Z
+- record: 0025-efc2055bb2ef.json
+- gate_sha: efc2055bb2ef2527eafcb8fb5ded6f6f833e42b2
+- policy_digest: cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3
+- control_set_sha: 4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011
+- gate_impl_digest: 1bf4479575c2f3f6dccbc39809e90f1b679dc6dcde11f06a8e81d0f5df5d5ec3
+- record_hash: 2f21898386e65842586d4bd76881dd6e9904123618b96a2f0b53a9a7b9cdc123
+- result: PASS
+## auto-seal 0026-a33935ea26bf.json 2026-11-10T03:31:56Z
+- record: 0026-a33935ea26bf.json
+- gate_sha: a33935ea26bfcc0ef5242e6c56c0c980c2be79c8
+- policy_digest: cfd6ef79571bbdb029d71cd08150521c01b1cec63d3318e509f9d83201d119c3
+- control_set_sha: 4a87aa8351251a9cc90ece53afd3f1d543cc9b989a138efc58ac224500166011
+- gate_impl_digest: 1bf4479575c2f3f6dccbc39809e90f1b679dc6dcde11f06a8e81d0f5df5d5ec3
+- record_hash: cd3e9121cff015f61a8d16a0c0c0bb713457e2707446cd57be677b9e16135d84
+- result: PASS
